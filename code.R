@@ -94,10 +94,41 @@ ggsave("E:/chapter1_data/important_mines.png", width = 10, height=4)
 
 important_mines %>% ggplot(aes(x=diff, y=count)) + geom_point()
 
-important_mines %>% subset(year > 2014) %>% ggplot(aes(x=diff, y=count)) + geom_point()
+important_mines %>% subset(year > 2014) %>% ggplot(aes(x=diff, y=count)) + geom_point() +geom_abline()
 important_mines %>% subset(year > 2014) %>% ggplot(aes(x=low, y=count)) + geom_point() + geom_abline()
 important_mines %>% subset(year > 2014) %>% ggplot(aes(x=high, y=count)) + geom_point() + geom_abline()
 
+ggsave("E:/chapter1_data/important_mines-test.png", width = 10, height=4)
 # Summary statistics mines and counts and temps
 
 dat3 %>% subset(year > 2014)%>% group_by(hibe) %>% mutate(total_bats = sum(count))
+
+table1 <- dat3 %>% pivot_wider(names_from = year, values_from = count)
+table1
+
+# PCA to show which mines are more similar to one another and the strength of the similarity
+test <- important_mines[, !(names(important_mines) %in% "ore")]
+
+
+pca_result <- prcomp(test, scale.=TRUE, na.rm=TRUE)
+
+str(test)
+
+
+
+
+
+
+
+
+
+# NMS step by step procedure - species matrix = response variable with rate of change with mines as x
+# environmental matrix has mines as x and explanatory variables as y
+#install.packages("vegan")
+library(vegan)
+
+# Shows which mines are in dataframe
+
+unique(important_mines$hibe)
+
+important_variables <- important_mines %>% mutate(orenum = as.numeric(ore))
