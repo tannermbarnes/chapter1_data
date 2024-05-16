@@ -3,7 +3,7 @@ library(tidyverse)
 #install.packages("readxl")
 library(readxl)
 #install.packages("lubridate")
-library(lubridate)
+#library(lubridate)
 dat <- read_excel("E:/chapter1_data/data.xlsx", sheet = "Sheet2")
 
 dat %>% names()
@@ -50,7 +50,7 @@ dat3 <- dat3 %>% subset(hibe != "Douglas Houghton Adit #1")
 
 dat3%>% ggplot(aes(x=year, y=count, group=hibe, color=hibe)) + geom_point(show.legend = FALSE)+geom_path(show.legend = FALSE) +
 scale_x_continuous(breaks = seq(1998, 2024, 4)) +
-scale_y_continuous(limits = c(0, 25000))
+scale_y_continuous(limits = c(0, 29000))
 
 
 
@@ -64,3 +64,40 @@ scale_y_continuous(limits = c(0, 5000))
 dat4
 
 ggsave("E:/chapter1_data/mines_under_5000_bats.png", width = 10, height=4)
+
+
+install.packages("ggforce")
+library(ggforce)
+
+dat3%>% ggplot(aes(x=year, y=count, group=hibe, color=hibe)) + geom_point(show.legend = FALSE)+geom_path(show.legend = TRUE) +
+scale_x_continuous(breaks = seq(1998, 2024, 4)) +
+facet_zoom(ylim = c(0, 5000))
+
+dat3 %>% subset(year > 2014) %>% ggplot(aes(x=diff, y=count)) + geom_point() + geom_abline()
+dat3 %>% subset(year > 2014) %>% ggplot(aes(x=low, y=count)) + geom_point() + geom_abline()
+dat3 %>% subset(year > 2014) %>% ggplot(aes(x=high, y=count)) + geom_point() + geom_abline()
+
+dat3 %>% mutate(avgtemp = ((low + high)/2)) %>% 
+subset(year > 2014) %>% ggplot(aes(x=avgtemp, y=count)) + geom_point() + geom_abline()
+
+ggsave("E:/chapter1_data/facet_zoom.png", width = 10, height=4)
+
+# Next we want to add the names of the mines that are recovering to the plot
+# Look up which mines we think they are and graph those to see
+important_mines <- dat3 %>% subset(hibe %in% c("Adventure Mine", "Belt Mine", "Delaware Mine", "Iron Mountain Iron Mine (Tourist Mine)", "Keel Ridge Shaft", "Mead Adit of Carp Lake Mine", "Norway Mine", "South Lake Mine", "Windsor Shaft #3", "Lafayette East Shaft", "Glen Adit #1"))
+
+important_mines %>% ggplot(aes(x=year, y=count, color=hibe)) + geom_line()
+
+#facet_zoom(ylim = c(0, 5000))
+
+ggsave("E:/chapter1_data/important_mines.png", width = 10, height=4)
+
+important_mines %>% ggplot(aes(x=diff, y=count)) + geom_point()
+
+important_mines %>% subset(year > 2014) %>% ggplot(aes(x=diff, y=count)) + geom_point()
+important_mines %>% subset(year > 2014) %>% ggplot(aes(x=low, y=count)) + geom_point() + geom_abline()
+important_mines %>% subset(year > 2014) %>% ggplot(aes(x=high, y=count)) + geom_point() + geom_abline()
+
+# Summary statistics mines and counts and temps
+
+dat3 %>% subset(year > 2014)%>% group_by(hibe) %>% mutate(total_bats = sum(count))
