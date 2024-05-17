@@ -153,10 +153,20 @@ file_path <- "E:/chapter1_data/species_recovery_with_beta.csv"
 write.csv(df_with_slopes, file_path, row.names = FALSE)
 
 # Model using slope as dependent (response) variable and the temp difference as independent (explantory) variable
-model <- lm(slope ~ temperaturedifferencec, data = df_with_slopes)
+# Pivot wider so one row per site
+df_wide <- df_with_slopes %>% 
+pivot_wider(names_from = year, values_from = count)
+
+model <- lm(slope ~ temperaturedifferencec, data = df_wide)
 summary(model)
 
-model1 <- lm(slope ~ temperaturedifferencec + highestinternaltempc + lowestinternaltempc, data = df_with_slopes)
+model1 <- lm(slope ~ temperaturedifferencec + lowestinternaltempc, data = df_wide)
 summary(model1)
+# Explantory variables not correlated
 
+
+install.packages("visreg")
+library(visreg)
+visreg(model)
+View(df_wide)
 
