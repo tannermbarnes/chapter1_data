@@ -1,6 +1,7 @@
 library(readxl)
 library(tidyverse)
 
+# Because the dates are in different formats, this function will be able to get them all in the correct format
 convert_excel_dates <-
 function(x){
     case_when(
@@ -9,7 +10,6 @@ function(x){
         TRUE ~ NA_Date_
     )
 }
-
 
 dat <- read_excel("E:/chapter1_data/data.xlsx", sheet = "bat survey data") %>% 
 select(site = `Name of Hibernaculum...1`, ore = `Ore or Rock`, passage_length = `Length of Open Passage (feet)`,
@@ -28,52 +28,33 @@ mutate(date = convert_excel_dates(date)) %>%
          month = month(date),
          day = day(date))
 
-file_path <- "E:/chapter1_data/dat1.csv"
-write.csv(dat1, file_path, row.names = FALSE)
+#file_path <- "E:/chapter1_data/dat1.csv"
+#write.csv(dat1, file_path, row.names = FALSE)
 
-# Separate temps into minimum and maximum temperatures
-df_separated <- dat %>%
-  # Save the original values for both columns
-  mutate(original_external_ta = external_ta, original_internal_ta = internal_ta) %>%
-  # Separate temperature ranges into min and max columns for external_ta
-  separate(external_ta, into = c("min_external_ta", "max_external_ta"), sep = "-", fill = "right", convert = TRUE) %>%
-  # Separate temperature ranges into min and max columns for internal_ta
-  separate(internal_ta, into = c("min_internal_ta", "max_internal_ta"), sep = "-", fill = "right", convert = TRUE) %>%
-  # Handle single value cases for external_ta
-  mutate(
-    min_external_ta = as.numeric(min_external_ta),
-    max_external_ta = as.numeric(max_external_ta),
-    min_external_ta = if_else(is.na(min_external_ta) & grepl("^\\d+$", original_external_ta), as.numeric(original_external_ta), min_external_ta),
-    max_external_ta = if_else(is.na(max_external_ta), min_external_ta, max_external_ta)
-  ) %>%
-  # Handle single value cases for internal_ta
-  mutate(
-    min_internal_ta = as.numeric(min_internal_ta),
-    max_internal_ta = as.numeric(max_internal_ta),
-    min_internal_ta = if_else(is.na(min_internal_ta) & grepl("^\\d+$", original_internal_ta), as.numeric(original_internal_ta), min_internal_ta),
-    max_internal_ta = if_else(is.na(max_internal_ta), min_internal_ta, max_internal_ta)
-  ) %>%
-  # Optionally, remove the temporary columns if no longer needed
-  select(-original_external_ta, -original_internal_ta)
+# Split the internal_ta column into minimum_internal_ta and maximum_internal_ta
+# Need to split the cells with temp data that looks like 45-48 into two columns then
+# Need to convert any values from farhenheit to celsius while leaving the ones in celsius 
 
-print(df_separated)
+separate_temps <- dat1 %>% 
+    separate(internal_ta, into = c("temp1", "temp2"), sep = "-", convert = TRUE) %>% 
+    mutate(temp1 = as.numeric(temp1), 
+            temp2 = as.numeric(temp2)) %>% 
+    mutate(temp1 = ifelse(temp1 > 15,
+                        ((temp1 - 32) * (5/9)),
+                        temp1),
+            temp2 = ifelse(temp2 > 15,
+                        ((temp2 - 32) * (5/9)),
+                        temp2))
 
-# Group by site and calculate the overall min and max temperatures for both external_ta and internal_ta
-df_with_extremes <- df_separated %>%
+
+# Group by site and calculate the minimum and maximum internal_ta values
+result <- separate_temps %>%
   group_by(site) %>%
-  summarize(
-    max_external_ta = if_else(all(is.na(max_external_ta)), NA_real_, max(max_external_ta, na.rm = TRUE)),
-    min_external_ta = if_else(all(is.na(min_external_ta)), NA_real_, min(min_external_ta, na.rm = TRUE)),
-    max_internal_ta = if_else(all(is.na(max_internal_ta)), NA_real_, max(max_internal_ta, na.rm = TRUE)),
-    min_internal_ta = if_else(all(is.na(min_internal_ta)), NA_real_, min(min_internal_ta, na.rm = TRUE)),
-    external_ta_diff = if_else(all(is.na(max_external_ta) | all(is.na(min_external_ta))), NA_real_, max_external_ta - min_external_ta),
-    internal_ta_diff = if_else(all(is.na(max_internal_ta) | all(is.na(min_internal_ta))), NA_real_, max_internal_ta - min_internal_ta)
-  )
-
-# Print the resulting dataframe
-print(df_with_extremes)
-
-# Join the temperature data back with other metadata
-dat <- left_join(dat, df_with_extremes, by="site")
+  mutate(minimum_internal_ta = min(temp1, na.rm = TRUE),
+        maximum_internal_ta = pmax(temp1, temp2, na.rm = TRUE)) %>% 
+    summarize(min = min(minimum_internal_ta, na.rm = TRUE), 
+                max = max(maximum_internal_ta, na.rm = TRUE))
 
 
+# left_join dataframe result onto other dataframe once you pivot that dataframe wider
+# pivot wider group_by(site) names_from(year) values_from(myotis_count) ???
