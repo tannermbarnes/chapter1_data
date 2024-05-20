@@ -53,8 +53,11 @@ result <- separate_temps %>%
   mutate(minimum_internal_ta = min(temp1, na.rm = TRUE),
         maximum_internal_ta = pmax(temp1, temp2, na.rm = TRUE)) %>% 
     summarize(min = min(minimum_internal_ta, na.rm = TRUE), 
-                max = max(maximum_internal_ta, na.rm = TRUE))
+                max = max(maximum_internal_ta, na.rm = TRUE)) %>% 
+    mutate(temp_diff = (max-min))
 
+print(result)
 
 # left_join dataframe result onto other dataframe once you pivot that dataframe wider
 # pivot wider group_by(site) names_from(year) values_from(myotis_count) ???
+
