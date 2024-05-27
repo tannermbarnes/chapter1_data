@@ -107,14 +107,16 @@ table1 <- dat3 %>% pivot_wider(names_from = year, values_from = count)
 table1
 
 # PCA to show which mines are more similar to one another and the strength of the similarity
-test <- important_mines[, !(names(important_mines) %in% "ore")]
+# Include the explantory variables 
+# Change the categorical variables to numbers 
+# Run a PCA
+
+test <- important_mines[, !(names(important_mines) %in% "ore")] %>% subset()
 
 
 pca_result <- prcomp(test, scale.=TRUE, na.rm=TRUE)
 
-str(test)
-
-
+head(dat1)
 
 
 

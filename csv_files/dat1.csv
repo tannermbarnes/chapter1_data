@@ -1,0 +1,596 @@
+"site","ore","passage_length","azimuth","entrance_height","entrance_width","levels","shafts","external_ta","internal_ta","internal_rh","date","disturbance","total_bats","estimate_or_count","myotis_count","myotis_identified","mylu","myse","epsu","pips","year","month","day"
+"Adventure Adit/ Rock Fall","Copper","306","27","4","6","1",0,NA,"43.9-44.5",NA,2010-03-02,"Low","1230","C","1227",0,NA,NA,2,"1",2010,3,2
+"Adventure Adit/ Rock Fall",NA,NA,NA,NA,NA,NA,NA,"40","46.4","93.5",2012-03-07,NA,"1277","C","1276",144,130,14,1,"0",2012,3,7
+"Adventure Adit/ Rock Fall",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-04-22,NA,"1157","c","1157",0,NA,NA,0,"0",2015,4,22
+"Adventure Adit/ Rock Fall",NA,NA,NA,NA,NA,NA,NA,NA,"44.6","93.3",2019-12-19,NA,"23",NA,"22",22,21,1,1,"0",2019,12,19
+"Adventure Adit/ Rock Fall",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-04-13,NA,"42",NA,"42",42,42,0,0,"0",2022,4,13
+"Adventure Adit/ Rock Fall",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-04-14,NA,"26",NA,"26",26,26,0,0,"0",2023,4,14
+"Adventure Mine","Copper","8829","165","6","5","2",1,NA,"38-48",NA,2009-02-13,"Low","8616","C","8330",0,NA,NA,281,"5",2009,2,13
+"Adventure Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2011-03-02,NA,"23870","C","23534",0,NA,NA,331,"5",2011,3,2
+"Adventure Mine",NA,NA,NA,NA,NA,NA,NA,"29","46.4","100",2012-03-08,NA,NA,NA,NA,206,189,17,NA,"2",2012,3,8
+"Adventure Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012-12-01,NA,"33145","C","32733",0,NA,NA,408,"4",2012,12,1
+"Adventure Mine",NA,NA,NA,NA,NA,NA,NA,NA,"46.4",NA,2016-02-22,NA,"20854","c","20373",1016,1003,3,453,"9",2016,2,22
+"Adventure Mine",NA,NA,NA,NA,NA,NA,NA,NA,"46.4","96.7",2019-12-20,NA,"1283",NA,"876",112,112,0,407,"0",2019,12,20
+"Adventure Mine",NA,NA,NA,NA,NA,NA,NA,NA,"-3.9to6.7(2nd level)",NA,2024-03-25,NA,"2110","c","1413",186,186,0,696,"1",2024,3,25
+"Adventure Shaft","Copper","330","330","8","20","1",1,NA,"44-45","100",2009-03-06,"Low","2523","C","2516",0,NA,NA,7,"0",2009,3,6
+"Agency Place Mine","Copper","54","180","3","4","1",0,"31.5","44.2",NA,2006-11-04,"Low","75","C","75",21,13,8,0,"0",2006,11,4
+"Agency Place Mine",NA,NA,NA,NA,NA,NA,NA,"23","39.200000000000003","92.4",2012-02-27,NA,"54","C","54",26,18,8,0,"0",2012,2,27
+"Agency Place Mine",NA,NA,NA,NA,NA,NA,NA,"24.8","39.200000000000003",NA,2015-12-28,NA,"8","c","8",8,7,1,0,"0",2015,12,28
+"Agency Place Mine",NA,NA,NA,NA,NA,NA,NA,"10",NA,NA,2017-12-28,NA,"0","e","0",0,0,0,0,"0",2017,12,28
+"Agency Place Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2020-01-17,NA,"3",NA,"3",3,3,0,0,"0",2020,1,17
+"Algonquin Adit #1","Copper","30","245","3","5","1",0,"16.899999999999999","33","88",1999-12-16,"Low","0","C","0",0,NA,NA,0,"0",1999,12,16
+"Algonquin Adit #2",NA,NA,NA,NA,NA,NA,NA,"17","33.799999999999997","100",2012-03-09,NA,"0","C","0",0,NA,NA,0,"0",2012,3,9
+"Algonquin Adit #2 (Mark's Adit)","Copper","70","145","3","5","1",0,NA,NA,NA,1999-12-27,"Low","0","C","0",0,NA,NA,0,"0",1999,12,27
+"Algonquin Adit #2 (Mark's Adit)",NA,NA,NA,NA,NA,NA,NA,"29.3","44.6","100",2011-12-21,NA,"83","C","83",0,NA,NA,0,"0",2011,12,21
+"Algonquin Adit #2 (Mark's Adit)",NA,NA,NA,NA,NA,NA,NA,"44","45.5","93.4",2018-12-16,NA,"5",NA,"5",5,5,0,0,"0",2018,12,16
+"Algonquin Adit #2 (Mark's Adit)",NA,NA,NA,NA,NA,NA,NA,NA,"3.8-3.9",NA,2024-02-01,NA,"9","c","9",9,9,0,0,"0",2024,2,1
+"Algonquin Adit #3","Copper","5","235","5","4","1",0,NA,NA,NA,1999-12-27,"Low","0","C","0",0,NA,NA,0,"0",1999,12,27
+"Algonquin Adit #4",NA,NA,NA,NA,NA,NA,NA,"29.3","31.1",NA,2011-12-21,NA,"0","C","0",0,NA,NA,0,"0",2011,12,21
+"Arch Cave","Limestone","8",NA,NA,NA,NA,0,NA,NA,NA,2010-03-16,"High","0","C","0",0,NA,NA,0,"0",2010,3,16
+"Aztec East Adit","Copper","64","80","5","7","1",NA,NA,"42.8","100",1998-03-10,"Medium","1","C","1",1,1,NA,0,"0",1998,3,10
+"Aztec East Adit",NA,NA,NA,NA,NA,NA,NA,"27","44.6","100",2011-12-22,NA,"1","C","1",0,NA,NA,0,"0",2011,12,22
+"Aztec East Adit",NA,NA,NA,NA,NA,NA,NA,NA,"43.7",NA,2017-12-29,NA,"0",NA,NA,NA,0,0,0,"0",2017,12,29
+"Aztec East Adit",NA,NA,NA,NA,NA,NA,NA,NA,"3.7",NA,2024-04-30,NA,"0",NA,NA,NA,NA,NA,NA,NA,2024,4,30
+"Aztec Mine","Copper","239","95","6","8","1",1,"19.100000000000001","33.6-36","88",1998-03-10,"Medium","11","C","11",11,2,9,0,"0",1998,3,10
+"Aztec Mine",NA,NA,NA,NA,NA,NA,NA,NA,"37.4","67",2001-01-20,NA,"7","C","2",0,NA,NA,5,"0",2001,1,20
+"Aztec Mine",NA,NA,NA,NA,NA,NA,NA,"25.7","35.6","87.7-91.7",2012-02-27,NA,"2","C","2",2,0,2,0,"0",2012,2,27
+"Aztec Mine",NA,NA,NA,NA,NA,NA,NA,NA,"32.9",NA,2017-12-29,NA,"1",NA,NA,NA,0,0,1,"0",2017,12,29
+"Aztec Mine",NA,NA,NA,NA,NA,NA,NA,NA,"2.6-4.5",NA,2024-04-30,NA,"0",NA,NA,NA,NA,NA,NA,NA,2024,4,30
+"Aztec New Opening","Copper",NA,"25",NA,NA,NA,NA,NA,NA,NA,2011-12-22,NA,"?",NA,NA,NA,NA,NA,0,"0",2011,12,22
+"Aztec New Opening",NA,NA,NA,NA,NA,NA,NA,NA,NA,"3.1",2024-04-30,NA,"0",NA,NA,NA,NA,NA,NA,NA,2024,4,30
+"Aztec Upper Drift","Copper","50","95","5","7","1",0,NA,"32","88",1998-03-10,"Medium","0","C","0",0,NA,NA,0,"0",1998,3,10
+"Aztec Upper Drift",NA,NA,NA,NA,NA,NA,NA,"25.7","35.6","91.4",2012-02-27,NA,"0","C","0",0,NA,NA,0,"0",2012,2,27
+"Aztec Upper Drift",NA,NA,NA,NA,NA,NA,NA,NA,"28.4",NA,2017-12-29,NA,"0",NA,NA,NA,0,0,0,"0",2017,12,29
+"Aztec Upper Drift",NA,NA,NA,NA,NA,NA,NA,NA,"3.7",NA,2024-04-30,NA,"0",NA,NA,NA,NA,NA,NA,NA,2024,4,30
+"B-95 (cave)","Dolomite","30",NA,NA,NA,NA,0,NA,NA,NA,2017-12-21,"Low","0",NA,"0",0,0,0,0,"0",2017,12,21
+"B-95 (cave)",NA,NA,NA,NA,NA,NA,NA,"29",NA,NA,2018-11-17,NA,"0",NA,"0",0,0,0,0,"0",2018,11,17
+"Bad Breath Cave","Limestone","?",NA,NA,NA,"1",0,NA,NA,NA,2010-03-20,"Low","0","E","0",0,NA,NA,0,"0",2010,3,20
+"Bate's Mine","Iron","75-100","NA",NA,NA,"0",1,NA,NA,NA,2005-03-03,"Low","0","C","0",0,NA,NA,0,"0",2005,3,3
+"Bear Cave","Tufa","200",NA,"1","2","1",0,NA,"48-50",NA,2005-12-20,"Low","52","C","19",0,NA,NA,1,"32",2005,12,20
+"Bear Cave",NA,NA,NA,NA,NA,NA,NA,"30-32","44-49","100",2013-03-18,NA,"29","C","4",2,1,1,0,"25",2013,3,18
+"Bear Cave",NA,NA,NA,NA,NA,NA,NA,NA,"37.4-48.2",NA,2014-02-17,NA,"23","C","5",2,0,2,0,"18",2014,2,17
+"Bear Cave",NA,NA,NA,NA,NA,NA,NA,NA,"45.5-46.7",NA,2015-03-20,NA,"20","c","1",1,0,1,0,"19",2015,3,20
+"Bear Cave",NA,NA,NA,NA,NA,NA,NA,"28","44.6-50",NA,2017-03-03,NA,"1","c","0",0,0,0,0,"1",2017,3,3
+"Bear Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-02-17,NA,"0",NA,"0",0,0,0,0,"0",2019,2,17
+"Beaten's Cave","Copper","215","60","4","3.5","1",0,"23.6","34.7-43.3","60",1998-01-15,"Medium","77","C","68",24,17,7,9,"0",1998,1,15
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-01,NA,"112","C","98",0,NA,NA,13,"1",2010,3,1
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,"23.9","46.4","80.8",2012-02-25,NA,"120","C","103",26,11,15,16,"1",2012,2,25
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-02-12,NA,"114","c","101",100,82,18,10,"3",2014,2,12
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2020-11-13,NA,"10",NA,"8",8,7,1,2,"0",2020,11,13
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-03-04,NA,"24",NA,"6",6,6,0,6,"0",2021,3,4
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-11-10,NA,"10",NA,"8",8,8,0,2,"0",2021,11,10
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-03-06,NA,"21",NA,"4",4,4,0,17,"0",2022,3,6
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-11-11,NA,"6",NA,"4",4,4,0,2,"0",2022,11,11
+"Beaten's Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-03-03,NA,"33",NA,"3",3,3,0,30,"0",2023,3,3
+"Beaver Boardman Adit","?","60",NA,NA,"15","1",0,NA,"40.6",NA,2019-11-25,NA,"0",NA,NA,NA,NA,NA,NA,NA,2019,11,25
+"Belt Mine","Copper",NA,NA,NA,NA,NA,NA,NA,"32.9-42.8",NA,2017-02-16,"Medium","1118","c","1083",1041,1039,2,34,"0",2017,2,16
+"Belt Mine",NA,NA,NA,NA,NA,NA,NA,"45","40.1-43.3","85.1-89.4",2018-12-16,NA,"1118",NA,"1093",899,897,2,25,"0",2018,12,16
+"Belt Mine",NA,NA,NA,NA,NA,NA,NA,"28","39.2-40.1","88.7-92.6",2020-01-18,NA,"597",NA,"568",556,556,0,27,"2",2020,1,18
+"Belt Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-03-16,"medium",NA,NA,"775",56,56,0,29,"0",2022,3,16
+"Belt Mine",NA,NA,NA,NA,NA,NA,NA,NA,"0.5",NA,2024-03-13,NA,"1017","c","972",127,127,0,43,"2",2024,3,13
+"Bumblebee Mine","Copper","2500","10","0.5","5","1",0,NA,"47-49",NA,2007-12-29,"Low","5192","C","5189",0,NA,NA,0,"3",2007,12,29
+"Bumblebee Mine",NA,NA,NA,NA,NA,NA,NA,NA,"49.2",NA,2016-02-23,NA,"813","c","812",812,812,0,1,"0",2016,2,23
+"Caledonia Mine Complex","Copper","2500","90","0","0",NA,NA,"27","41-45",">90",NA,"Medium","54407","C/E","54404",136,132,4,3,"0",NA,NA,NA
+"Caledonia Adit","Copper","50","40","10","15","1",0,"37.5","39.200000000000003","61",2010-03-03,"Low","0","C","0",0,NA,NA,0,"0",2010,3,3
+"Cave in the Woods","Limestone","25",NA,"5","25","1",0,NA,NA,NA,2010-03-16,"Low","0","C","0",0,NA,NA,0,"0",2010,3,16
+"Chatam Mine","Iron","?","NA",NA,NA,"?",1,NA,NA,NA,2005-04-01,"High","0",NA,NA,NA,NA,NA,NA,NA,2005,4,1
+"Child's Adit","Copper","92","115","2.5","2.5","1",0,"27.5","42.9","100",1996-12-28,"40","31","C","31",0,NA,NA,0,"0",1996,12,28
+"Child's Adit",NA,NA,NA,NA,NA,NA,NA,"30.2","45.5","100",2011-12-24,NA,"132","C","132",29,26,3,0,"0",2011,12,24
+"Child's Adit",NA,NA,NA,NA,NA,NA,NA,"3","44.6","93-97",2017-12-27,NA,"8","c","8",8,8,0,0,"0",2017,12,27
+"Child's Adit",NA,NA,NA,NA,NA,NA,NA,"23","43.7","93.1",2020-01-01,NA,"17",NA,"17",17,17,0,0,"0",2020,1,1
+"Child's Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2024-02-16,NA,"22","c","22",22,22,0,0,"0",2024,2,16
+"Colby Mine","Iron","0","NA",NA,NA,"0",0,NA,NA,NA,2006-02-26,"Low","0","C",NA,NA,NA,NA,0,"0",2006,2,26
+"Collin's Adit","Copper","35","80","5","6","1",0,"35.799999999999997","37.4","83",1998-12-17,"Low","1","C","1",0,NA,NA,0,"0",1998,12,17
+"Collin's Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-12-20,NA,"0","c","0",NA,NA,NA,0,"0",2014,12,20
+"Collin's Adit",NA,NA,NA,NA,NA,NA,NA,"25",NA,NA,2018-02-21,NA,"0",NA,"0",NA,NA,NA,0,"0",2018,2,21
+"Copper Falls Mine","Copper",">11,000","NA","2","2","9",1,"38.9","42.8-46","95-100",1999-03-14,"Low","11483","C","11483",53,41,12,0,"0",1999,3,14
+"Copper Falls Mine",NA,NA,NA,NA,NA,NA,NA,NA,"44.6-45.5","93-100",2018-02-23,NA,"27",NA,"0",27,27,0,0,"0",2018,2,23
+"Copper Peak Adit","Copper","39","335","5","6","1",0,NA,"37.9",NA,2006-11-03,"High","0","C","0",0,NA,NA,0,"0",2006,11,3
+"Copper Peak Adit",NA,NA,NA,NA,NA,NA,NA,"30.2","37.4","94",2011-12-20,NA,"1","C","1",1,0,1,0,"0",2011,12,20
+"County Line Adit","Copper","8","205","5","5","1",0,NA,"<32",NA,1996-12-17,"High","0","C","0",NA,NA,NA,0,"0",1996,12,17
+"County Line Adit",NA,NA,NA,NA,NA,NA,NA,"25.7","31.1",NA,2011-12-22,NA,"0","C","0",0,NA,NA,0,"0",2011,12,22
+"Cushman Adit","Copper",NA,NA,"2","1.5","1",0,NA,"49-50","95-100",2012-11-03,"Low","825","C","820",57,56,1,0,"5",2012,11,3
+"Cushman Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-26,NA,"713","c","708",708,676,32,0,"5",2015,2,26
+"Cushman Adit",NA,NA,NA,NA,NA,NA,NA,"23","48.2",NA,2017-02-15,NA,"20","c","20",20,20,0,0,"0",2017,2,15
+"Cushman Adit",NA,NA,NA,NA,NA,NA,NA,"17","47.3","93.7",2019-12-19,NA,"28",NA,"28",28,28,0,0,"0",2019,12,19
+"Cyclops A","Iron","65",NA,"50","18","1",0,"20","26.6-28.4",NA,2014-02-21,"High","0","c","0",NA,NA,NA,0,"0",2014,2,21
+"Cyclops B","Iron","35",NA,"3","5","1",0,"20","23",NA,2014-02-21,"High","0","c","0",NA,NA,NA,0,"0",2014,2,21
+"Cyclops C","Iron","35",NA,"50","15","1",0,"20","23.9",NA,2014-02-21,"High","0","c","0",NA,NA,NA,0,"0",2014,2,21
+"Delaware Mine","Copper","2600","0","5","1","1",1,NA,"43.5-46.9","92-100",1996-02-08,"Low","1702","C","1702",NA,NA,NA,0,"0",1996,2,8
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,"40","43.7-47.3",NA,2012-03-06,NA,"2360","C","2352",407,325,82,1,"7",2012,3,6
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2013-03-13,NA,"2666","c","2664",NA,NA,NA,0,"2",2013,3,13
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-02-24,NA,"2591","c","2587",718,622,96,1,"3",2014,2,24
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-23,NA,"3587","c","3583",545,524,21,0,"4",2015,2,23
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,"20","43-45",NA,2016-02-21,NA,"842","c","841",490,488,2,0,"1",2016,2,21
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,"53",NA,NA,2017-02-18,NA,"862","c","862",849,848,1,0,"0",2017,2,18
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,"27","39.2-45.5",NA,2018-02-21,NA,"700",NA,"700",458,457,1,0,"0",2018,2,21
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,NA,"33-42.8","84.9-91.2",2019-02-28,NA,"1297",NA,"1297",1228,1227,1,0,"0",2019,2,28
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,"32","44.8-45.5","90.1-93.4",2020-01-02,NA,"1465",NA,"1465",357,357,0,0,"0",2020,1,2
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-03-30,NA,"1491",NA,"1491",296,296,0,0,"0",2021,3,30
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-03-16,NA,"2322",NA,"2322",199,199,0,0,NA,2022,3,16
+"Delaware Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-03-22,NA,"1382",NA,"1382",157,157,0,0,"0",2023,3,22
+"Derby Adit","Copper","80","80","4","4","1",0,NA,"47","93",NA,"Low","230","C","216",25,22,3,14,"0",NA,NA,NA
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,"24.8","45.5","80",2010-11-26,NA,"243","C","234",0,NA,NA,8,"1",2010,11,26
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,"28","41-43","90-96",2013-01-03,NA,"158","C","146",146,130,16,11,"1",2013,1,3
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,NA,"41-43.7",NA,2014-12-19,NA,"242","c","235",235,210,14,19,"0",2014,12,19
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,NA,"46.4-47.3",NA,2015-11-26,NA,"233","c","228",227,208,19,5,"0",2015,11,26
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,NA,"45.5-47.3",NA,2016-11-19,NA,"133","c","130",130,126,4,3,"0",2016,11,19
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2017-11-30,NA,"82",NA,NA,NA,NA,NA,9,"0",2017,11,30
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,"27","48",NA,2019-11-15,NA,"38",NA,"32",32,32,0,6,"0",2019,11,15
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-04-13,NA,"45",NA,"44",44,44,0,1,"0",2022,4,13
+"Derby Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-04-16,NA,"23",NA,"23",23,23,0,0,"0",2023,4,16
+"Derby Shaft","Copper","30","330","8","10","0",1,NA,NA,NA,2010-08-27,"Low","0","E","0",NA,NA,NA,0,"0",2010,8,27
+"Detroit Gold + Silver Co. Adit","Gold","30","330",NA,"6","1",0,NA,"41.7",NA,2019-11-25,"Low","0",NA,NA,NA,NA,NA,NA,NA,2019,11,25
+"Detroit Salt Mine","Halite",">20,000",NA,NA,NA,"1",2,NA,"62","66",2017-04-08,"High","0","c","0",NA,NA,NA,0,"0",2017,4,8
+"Devil's Kitchen","Limestone","15",NA,NA,NA,"1",0,NA,NA,NA,2010-05-15,"High","0","C","0",0,NA,NA,0,"0",2010,5,15
+"Devon Mine","Copper","0",NA,"NA","NA","1",0,NA,NA,NA,2005-04-02,"Low","0",NA,NA,NA,NA,NA,NA,NA,2005,4,2
+"Disgusting Cave","Limestone","142",NA,NA,NA,"1",0,NA,NA,NA,2010-03-20,"Low","0",NA,NA,NA,NA,NA,NA,NA,2010,3,20
+"Douglas Houghton Adit #1","Copper","128",NA,"4","4",NA,NA,NA,NA,NA,1980-11-01,"High","1","C","1",1,1,0,0,"0",1980,11,1
+"Douglas Houghton Adit #1",NA,NA,NA,NA,NA,NA,NA,"20.5","35-42","99-100",1996-01-16,NA,"4","C","3",3,1,2,1,"0",1996,1,16
+"Douglas Houghton Adit #1",NA,NA,NA,NA,NA,NA,NA,"22.1","41.9",NA,2015-12-27,NA,"2","c","1",1,0,1,1,"0",2015,12,27
+"Douglas Houghton Adit #1",NA,NA,NA,NA,NA,NA,NA,"46F","3.0-5.1",NA,2024-02-27,NA,"2","c","0",0,0,0,2,"0",2024,2,27
+"Douglas Houghton Adit #2","Copper","50",NA,NA,NA,"1",0,NA,NA,NA,1980-11-01,"Closed","0","C","0",NA,NA,NA,0,"0",1980,11,1
+"Eagle Point Cave","Limestone","11",NA,"15","7","1",0,NA,NA,NA,2010-05-16,"High","0","C","0",0,NA,NA,0,"0",2010,5,16
+"Eagle River Adit  1 (Lake Superior & Phoenix)","Copper","73","270","2","2","1",0,"26.2","40.6","100",1996-12-28,"Medium","37","C","37",37,25,12,0,"0",1996,12,28
+"Eagle River Adit  1 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,">60",NA,NA,2006-05-02,NA,"36","C","36",0,NA,NA,0,"0",2006,5,2
+"Eagle River Adit  1 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,"26.6","43.7","91",2011-12-24,NA,"31","C","31",31,25,6,0,"0",2011,12,24
+"Eagle River Adit  1 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,NA,"39.200000000000003",NA,2013-03-03,NA,"37","c","37",0,NA,NA,0,"0",2013,3,3
+"Eagle River Adit  1 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,"26",NA,NA,2016-12-29,NA,"12","c","12",11,11,0,0,"0",2016,12,29
+"Eagle River Adit  1 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,"27","43.7","93.1",2020-01-01,NA,"10",NA,"10",10,10,0,0,"0",2020,1,1
+"Eagle River Adit 2 (Lake Superior & Phoenix)","Copper","35","255","5","8","1",0,NA,"26",NA,2001-01-19,"Medium","0","C","0",0,NA,NA,0,"0",2001,1,19
+"Eagle River Adit 2 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,NA,"48",NA,2001-11-02,NA,"6","C","5",5,1,4,0,"1",2001,11,2
+"Eagle River Adit 2 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,"26.6","32","89",2011-12-24,NA,"4","C","4",4,0,4,0,"0",2011,12,24
+"Eagle River Adit 2 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,NA,"32.9",NA,2013-03-03,NA,"0","c","0",NA,NA,NA,0,"0",2013,3,3
+"Eagle River Adit 2 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,"26",NA,NA,2016-12-29,NA,"0","c","0",0,0,0,0,"0",2016,12,29
+"Eagle River Adit 3 (Lake Superior & Phoenix)","Copper","50","330","4","4","1",0,"32","43.1",NA,2006-11-04,"Medium","5","C","5",0,NA,NA,0,"0",2006,11,4
+"Eagle River Adit 3 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,"26.6","34.700000000000003","89",2011-12-24,NA,"12","C","12",12,7,5,0,"0",2011,12,24
+"Eagle River Adit 3 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,NA,"26.6",NA,2013-03-03,NA,"26","c","26",0,NA,NA,0,"0",2013,3,3
+"Eagle River Adit 3 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,NA,"35.6",NA,2015-12-29,NA,"13","c","13",13,13,0,0,"0",2015,12,29
+"Eagle River Adit 3 (Lake Superior & Phoenix)",NA,NA,NA,NA,NA,NA,NA,"10","27.5",NA,2017-12-28,NA,"0","c","0",0,NA,NA,0,"0",2017,12,28
+"East Evergreen Bluff Mine  (2, 4, 6)","Copper",NA,"295",NA,NA,"1",0,NA,"≤33",NA,2002-01-24,"Medium","19","C","5",3,0,3,14,"0",2002,1,24
+"East Evergreen 1","Copper","30","285","6","10","1",0,"26.6","32","100",2011-12-23,"Medium","0","C","0",0,NA,NA,0,"0",2011,12,23
+"East Evergreen 3","Copper","20","295","6","20","1",NA,"26.6","25.7",NA,2011-12-23,"Medium","0","C","0",0,NA,NA,0,"0",2011,12,23
+"East Evergreen 5","Copper",NA,NA,NA,NA,NA,NA,NA,NA,NA,2011-12-23,NA,"0",NA,NA,NA,NA,NA,NA,NA,2011,12,23
+"East Evergreen 7","Copper","16","240","6","15","1",NA,"26.6","27.5",NA,2011-12-23,"Medium","0","C","0",0,NA,NA,0,"0",2011,12,23
+"Eben Ice Caves","NA","100",NA,NA,NA,NA,NA,NA,"<32",NA,2015-02-28,"High","0","c","0",0,0,0,0,"0",2015,2,28
+"Eureka Mine (Norwich area)","Copper","48","245","3","5","1",0,NA,"41.9","88",1998-12-15,"Medium","1","C","0",0,NA,NA,1,"0",1998,12,15
+"Eureka Shaft #3","Iron","100","999",NA,NA,"0",1,NA,NA,NA,2005-03-01,"Low","0","C","0",0,NA,NA,0,"0",2005,3,1
+"Farm Mine Shaft A","Copper","45","330",NA,NA,"0",1,NA,NA,NA,2002-01-24,"Low","0","C","0",0,NA,NA,0,"0",2002,1,24
+"Farm Mine Shaft B","Copper","50","330",NA,NA,"0",1,NA,NA,NA,2002-01-24,"Low","0","C","0",0,NA,NA,0,"0",2002,1,24
+"Fenwick's Cache","Cave","5",NA,"3","2.5","1",0,NA,NA,NA,2010-05-15,"High","0","C","0",0,NA,NA,0,"0",2010,5,15
+"Firesteel Mine","Copper","150",NA,"7","6","1",1,"18.7","22.1-24.5",NA,1998-01-03,"Medium","0","C","0",0,NA,NA,0,"0",1998,1,3
+"Flintsteel Adit","Copper","164",NA,"6","6","1",0,"35.799999999999997","46.4","91",1998-12-16,"Low","500","C","497",26,25,1,0,"3",1998,12,16
+"Flintsteel Adit",NA,NA,NA,NA,NA,NA,NA,NA,"42.6","78",2010-03-03,NA,"102","C","98",0,NA,NA,4,"0",2010,3,3
+"Flintsteel Adit",NA,NA,NA,NA,NA,NA,NA,"30.2","42.8-43.7","93.1-100",2012-02-24,NA,"109","C","98",25,18,7,10,"1",2012,2,24
+"Flintsteel Adit",NA,NA,NA,NA,NA,NA,NA,NA,"44.2",NA,2014-02-23,NA,"103","c","97",89,81,8,6,"0",2014,2,23
+"Flintsteel Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-24,NA,"141","c","129",114,101,13,12,"0",2015,2,24
+"Flintsteel Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2016-02-22,NA,"213","c","198",135,132,3,15,"0",2016,2,22
+"Flintsteel Adit",NA,NA,NA,NA,NA,NA,NA,NA,"42.8-44.6","93.1",2019-02-27,NA,"9",NA,"2",2,2,0,7,"0",2019,2,27
+"Flintsteel Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-12-18,NA,"18",NA,"7",7,6,1,11,"0",2019,12,18
+"Ford Exploratory Adit","Iron","80","90","7","12","1",0,"35","38.799999999999997",NA,2015-04-01,"High","74","c","45",0,NA,NA,29,"0",2015,4,1
+"Ford Exploratory Adit",NA,NA,NA,NA,NA,NA,NA,NA,"35.6",NA,2017-02-11,NA,"86","c","8",8,7,1,78,"0",2017,2,11
+"Ford Exploratory Adit",NA,NA,NA,NA,NA,NA,NA,"30","34.700000000000003",NA,2018-02-17,NA,"46",NA,"1",1,1,0,45,"0",2018,2,17
+"Ford Exploratory Adit",NA,NA,NA,NA,NA,NA,NA,"36","39.200000000000003","84.9",2018-12-14,NA,"48",NA,"0",NA,NA,NA,48,"0",2018,12,14
+"Ford Exploratory Adit",NA,NA,NA,NA,NA,NA,NA,"32","39.200000000000003","84.9",2019-12-27,NA,"109",NA,"1",0,NA,NA,107,"1",2019,12,27
+"Fort Custer Tunnels","Tunnel","1000",NA,NA,NA,"1",0,NA,NA,NA,2015-03-13,NA,"0","c","0",NA,NA,NA,0,"0",2015,3,13
+"Galena Mine","Iron","30","180","6","6","1",0,"27.4","37.4",NA,2006-03-11,"High","1","C","1",1,1,0,0,"0",2006,3,11
+"Glen Adit #1","Copper","155","265","5","6","1",0,"26.2","36.5-40.1","81-90",1998-03-11,"Low","560","C","551",29,25,4,9,"0",1998,3,11
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-01,NA,"626","C","617",0,NA,NA,9,"0",2010,3,1
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,"28.4","41.9","92.9",2012-02-24,NA,"602","C","590",68,53,15,12,"0",2012,2,24
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012-11-30,NA,"280","c","280",NA,NA,NA,0,"0",2012,11,30
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-11-28,NA,"322","c","306",304,266,38,16,"0",2014,11,28
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2020-11-13,NA,"4",NA,"1",1,1,0,3,"0",2020,11,13
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-03-04,NA,"61",NA,"44",44,44,0,17,"0",2021,3,4
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-11-10,NA,"1",NA,"1",1,1,0,0,"0",2021,11,10
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-03-06,NA,"34",NA,"22",22,22,0,12,"0",2022,3,6
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-11-11,NA,"1",NA,"1",1,1,0,0,"0",2022,11,11
+"Glen Adit #1",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-03-01,NA,"59",NA,"47",47,47,0,12,"0",2023,3,1
+"Glen Adit #2","Copper","46","260","4","6","1",0,"26.2","30.2","88",1998-03-11,"Low","4","C","2",2,1,1,2,"0",1998,3,11
+"Glen Adit #2",NA,NA,NA,NA,NA,NA,NA,"28.4","35.6","83.6",2012-02-24,NA,"1","C","1",1,0,1,0,"0",2012,2,24
+"Glen Adit #2",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012-11-30,NA,"7","c","6",6,1,5,1,"0",2012,11,30
+"Glen Adit #3","Copper","79","345","5","10","1",0,"26.2","32","88-100",1998-03-11,"Low","0","C","0",0,NA,NA,0,"0",1998,3,11
+"Glen Adit #3",NA,NA,NA,NA,NA,NA,NA,"28.4","34.7-35.6","100",2012-02-24,NA,"6","C","1",1,0,1,5,"0",2012,2,24
+"Glen Adit #3",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012-11-30,NA,"4","c","2",2,0,2,2,"0",2012,11,30
+"Goodrich Adit A","Iron","200","310","3","4","1",0,"41","42.8","91",2011-04-01,"Low","1","C","1",0,NA,NA,NA,NA,2011,4,1
+"Goodrich Adit B","Iron","102","285","6","7","1",0,"41","41","83",2011-04-01,"Low","17","C","15",15,2,13,2,"0",2011,4,1
+"Goodrich Mine Tunnel","Iron","276","280","10","15","1",0,"41","33.9","65",2011-04-01,"Low","0","C",NA,NA,NA,NA,NA,NA,2011,4,1
+"Hammel Creek Railroad Tunnel","Tunnel","150","270","8","10","1",0,"22.1","28.4",NA,2015-12-27,"Low","0","c","0",0,0,0,0,"0",2015,12,27
+"Hancock Mine (Dupee Shaft)","Copper","640",NA,NA,NA,NA,1,NA,"49-50","92-96",1996-02-09,"Low","0",NA,NA,NA,NA,NA,NA,NA,1996,2,9
+"Hendrie River Water Cave","Limestone","2049",NA,NA,NA,"1",0,"32",NA,NA,2009-03-29,"Medium","46",NA,"46",0,NA,NA,0,"0",2009,3,29
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-20,NA,"135","C","135",135,115,20,0,"0",2010,3,20
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,"33","39.200000000000003","89",2011-02-13,NA,"68","C","68",0,NA,NA,0,"0",2011,2,13
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,"23","36.5-42.8","100",2012-02-19,NA,"102","C","102",98,91,7,0,"0",2012,2,19
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,NA,"40.1","100",2013-02-24,NA,"97","c","97",0,NA,NA,0,"0",2013,2,24
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-03-23,NA,"39","C","39",0,NA,NA,0,"0",2014,3,23
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,"4","39.200000000000003",NA,2016-02-14,NA,"1","c","1",1,1,0,0,"0",2016,2,14
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,NA,"41",NA,2017-02-21,NA,"1","c","1",1,1,0,0,"0",2017,2,21
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,"27","41",NA,2019-03-01,NA,"1",NA,"1",1,1,0,0,"0",2019,3,1
+"Hendrie River Water Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2020-03-18,NA,"0",NA,NA,NA,NA,NA,NA,NA,2020,3,18
+"Henwood Mine (Douglas Houghton)","Copper","254","226","3","5","1",1,"16.7","25-32.5","66-88",1996-12-29,"Medium","1","C","0",0,NA,NA,1,"0",1996,12,29
+"Henwood Mine (Douglas Houghton)",NA,NA,NA,NA,NA,NA,NA,NA,"1.2-3.3",NA,2024-04-11,NA,"0",NA,NA,NA,NA,NA,NA,NA,2024,4,11
+"Hilton (Shaft 1)","Copper","97",NA,"5","10","1",1,NA,"37.9",NA,1998-12-16,"Low","0","C","0",0,NA,NA,0,"0",1998,12,16
+"Hilton (Shaft 1)",NA,NA,NA,NA,NA,"1",1,"29","34.700000000000003","100",2011-12-22,"High","6","C","5",4,0,4,0,"1",2011,12,22
+"Hilton (Shaft 1)",NA,NA,NA,NA,NA,NA,NA,"47","40.1","78",2018-12-15,NA,"0",NA,"0",0,0,0,0,"0",2018,12,15
+"Hilton Ohio (Hilton #5 Adit)","Copper","32","255","6","6","1",0,"21.5","23.9",NA,1998-03-10,"Medium","0","C","0",0,NA,NA,0,"0",1998,3,10
+"Hilton Ohio (Hilton #5 Adit)",NA,NA,NA,NA,NA,NA,NA,NA,"24.8",NA,2001-01-20,NA,"0","C","0",0,NA,NA,NA,NA,2001,1,20
+"Hilton Ohio (Hilton #5 Adit)",NA,NA,NA,NA,NA,"1",0,"28","32.9","100",2011-12-22,NA,"0","C","0",0,NA,NA,0,"0",2011,12,22
+"Hole-in-the-Wall Adit","Copper","10","50",NA,NA,"1",0,NA,NA,NA,1999-01-16,"Low","0","C","0",0,NA,NA,0,"0",1999,1,16
+"Indiana Mine","Copper","125","233","7","12","1",1,NA,"39.299999999999997",NA,2000-04-13,"High","0","C","0",0,NA,NA,0,"0",2000,4,13
+"Indiana Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2005-04-02,NA,"5","C","4",0,NA,NA,1,"0",2005,4,2
+"Indiana Mine",NA,NA,NA,NA,NA,NA,NA,NA,"3.5-4.8",NA,2024-04-18,NA,"37","c","37",31,31,0,0,"0",2024,4,18
+"Iron Mountain Iron Mine (Tourist Mine)","Iron","3500",NA,NA,NA,"2",2,"38.200000000000003","34.5-47.5",NA,1995-03-20,"Low",NA,NA,NA,NA,NA,NA,NA,NA,1995,3,20
+"Iron Mountain Iron Mine (Tourist Mine)",NA,NA,NA,NA,NA,NA,NA,NA,"<49.2",NA,2009-01-24,NA,"18738","C","18713",0,NA,NA,20,"5",2009,1,24
+"Iron Mountain Iron Mine (Tourist Mine)",NA,NA,NA,NA,NA,NA,NA,NA,"42.1-49.1",NA,2013-03-16,NA,"23891","C","23888",811,811,0,1,"2",2013,3,16
+"Iron Mountain Iron Mine (Tourist Mine)",NA,NA,NA,NA,NA,NA,NA,NA,"43.7-49.6",NA,2017-02-20,NA,"1118","c","1103",710,710,0,13,"0",2017,2,20
+"Iron Mountain Iron Mine (Tourist Mine)",NA,NA,NA,NA,NA,NA,NA,"37","48.7-50","93.8-93.9",2019-12-29,NA,"525",NA,"510",470,470,0,14,"1",2019,12,29
+"Iron Mountain Iron Mine (Tourist Mine)",NA,NA,NA,NA,NA,NA,NA,NA,"5.1-8.9",NA,2024-03-12,NA,"1087","c","770",737,737,0,13,NA,2024,3,12
+"Isabella Mine","Iron","50+",NA,NA,NA,"?",0,"?","?","?",2005-03-03,"Medium","0",NA,NA,NA,NA,NA,NA,NA,2005,3,3
+"Jackson Mine, Pit 1, Adit 1","Iron","80","240","8","10","1",0,NA,"34","73",2011-02-28,"High","2","C","2",2,2,0,0,"0",2011,2,28
+"Jackson Mine, Pit 4, Tunnel, Adit 2","Iron","105","240",NA,NA,"1",0,NA,"26.6",NA,2011-02-28,"High","0","C","0",0,NA,NA,0,"0",2011,2,28
+"Jackson Mine, Pit 4, Adit 3","Iron","40","240","8","8","1",0,NA,"29.3",NA,2011-02-28,"High","0","C","0",0,NA,NA,0,"0",2011,2,28
+"Jackson Mine, Pit 4, Adit 3",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Jackson Mine, A Working","Iron","209","90","20","75","1",0,"23","27.5","79.7",2012-03-05,"High","0","C","0",0,0,0,0,"0",2012,3,5
+"Jackson Mine, A Working",NA,NA,NA,NA,NA,NA,NA,"7","23.8",NA,2018-03-14,NA,"0",NA,NA,NA,0,0,0,NA,2018,3,14
+"Jackson Mine, B Working","Iron",NA,NA,"6","9","1",0,"25","32","82",2012-03-05,"High","6","C","5",0,0,0,1,"0",2012,3,5
+"Jackson Mine, B Working",NA,NA,NA,NA,NA,NA,NA,"7","31.7",NA,2018-03-14,NA,"2",NA,"0",NA,0,0,2,"0",2018,3,14
+"Jackson Mine, Tram Tunnel","Iron",NA,"330","10","10","1",0,"25","28.4-35.6","70.5-83.6",2012-03-05,"High","58","C","18",18,14,4,38,"2",2012,3,5
+"Jackson Mine, Tram Tunnel",NA,NA,NA,NA,NA,NA,NA,"7","32.299999999999997",NA,2018-03-14,NA,"22",NA,"6",6,6,0,16,"0",2018,3,14
+"Jackson Mine, Tram Tunnel Exit","Iron","120","150","7","10","1",0,"23","32","100",2012-03-05,"High","6","C","6",0,NA,NA,0,"0",2012,3,5
+"Jackson Mine, Tram Tunnel Exit",NA,NA,NA,NA,NA,NA,NA,"7",NA,NA,2018-03-14,NA,"0",NA,"0",NA,0,0,0,"0",2018,3,14
+"Jones' Adit","Iron","705","30","1.5","5","1",0,NA,NA,NA,2007-12-30,"Medium","260","C","257",0,NA,NA,0,"3",2007,12,30
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,"< 0","45","100",2009-01-25,NA,"442","C","438",NA,NA,NA,0,"4",2009,1,25
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,"24","48.2-49.1","91-93",2011-03-05,NA,"415","C","411",20,20,0,0,"4",2011,3,5
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,"36.5","48.2","100",2012-02-23,NA,"297","C","293",53,53,0,0,"4",2012,2,23
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,NA,"48.2",NA,2013-03-15,NA,"317","c","314",0,NA,NA,0,"3",2013,3,15
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-02-22,NA,"437","c","435",435,423,12,0,"2",2014,2,22
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-22,NA,"730","c","728",725,622,103,0,"2",2015,2,22
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,"40","48",NA,2016-02-20,NA,"694","c","694",691,689,2,0,"0",2016,2,20
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,"34","47.3-48.2",NA,2017-02-11,NA,"2","c","2",2,2,0,0,"0",2017,2,11
+"Jones' Adit",NA,NA,NA,"5","8",NA,NA,"44","46.4-48.2","93.8-100",2018-12-14,NA,"17",NA,"17",16,15,1,0,"0",2018,12,14
+"Jones' Adit",NA,NA,NA,NA,NA,NA,NA,"30","46.4-48.2","87.3-93.5",2019-12-28,NA,"27",NA,"25",25,25,0,2,"0",2019,12,28
+"Keel Ridge Mine","Iron","380","300","6","5","1",0,"18.2","39-51","98-100",1996-01-05,"Low","246","C","242",71,65,6,2,"2",1996,1,5
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1998-03-31,NA,NA,NA,NA,NA,NA,NA,0,"3",1998,3,31
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,"48",NA,2004-12-29,NA,"394","C","393",0,NA,NA,0,"1",2004,12,29
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,"55-60","45-46",NA,2007-03-24,NA,"268","C","267",0,NA,NA,0,"1",2007,3,24
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2009-03-21,NA,"206","C/E","203",NA,NA,NA,0,"3",2009,3,21
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2009-11-14,NA,"280","C","275",0,NA,NA,0,"5",2009,11,14
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-27,NA,"294","C","290",0,NA,NA,0,"4",2010,3,27
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,"48.2","91",2010-11-06,NA,"324","C","324",0,NA,NA,0,"0",2010,11,6
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2011-03-26,NA,"262","C","262",0,NA,NA,0,"0",2011,3,26
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,"46.9-48.2","93.6-100",2013-03-15,NA,"228","C","222",0,194,8,0,"6",2013,3,15
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-02-24,NA,"304","c","300",254,244,10,0,"4",2014,2,24
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-22,NA,"590","c","587",532,525,7,0,"3",2015,2,22
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,"40","46-47",NA,2016-02-20,NA,"225","c","221",199,198,1,0,"4",2016,2,20
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,"34","45.5-48.2",NA,2017-02-11,NA,"46","c","45",43,43,0,1,"0",2017,2,11
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2017-12-01,NA,"93",NA,NA,NA,88,1,0,"4",2017,12,1
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-01-14,NA,"109",NA,"103",103,103,0,0,"6",2019,1,14
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-12-28,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019,12,28
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-03-03,NA,"107",NA,"107",107,107,0,0,"0",2021,3,3
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-04-12,NA,"35",NA,"30",0,0,0,0,"5",2023,4,12
+"Keel Ridge Mine",NA,NA,NA,NA,NA,NA,NA,NA,"5.2-7.3",NA,2024-04-12,NA,"20","c","18",3,3,0,0,"2",2024,4,12
+"Keel Ridge New Adit","iron","30","30","4","10","1",0,"22","33",NA,2013-11-28,"High","0","c","0",NA,NA,NA,0,"0",2013,11,28
+"Keel Ridge Shaft","iron","492","NA","7","7","1",2,"22","51.4",NA,2013-11-28,"low","794","c","784",784,760,24,6,"4",2013,11,28
+"Keel Ridge Shaft",NA,NA,NA,NA,NA,NA,NA,NA,"32-44",NA,2016-01-17,NA,"602","c","593",587,580,7,6,"3",2016,1,17
+"Keel Ridge Shaft",NA,NA,NA,NA,NA,NA,NA,NA,"41",NA,2017-02-10,NA,"60","c","54",54,53,1,1,"2",2017,2,10
+"Keel Ridge Shaft",NA,NA,NA,NA,NA,NA,NA,"44","46.4-50","93.9-96.7",2018-12-14,NA,"114",NA,"112",112,112,0,2,"0",2018,12,14
+"Keel Ridge Shaft",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-04-12,NA,"150",NA,"150",25,25,0,0,"0",2023,4,12
+"Keel Ridge Shaft",NA,NA,NA,NA,NA,NA,NA,NA,"1.5-6.0",NA,2024-04-12,NA,"371","c","370",320,320,0,1,"0",2024,4,12
+"Knowlton Mine","Copper","400+",NA,NA,NA,NA,0,"18","45-46","93",1996-12-18,"Low","0",NA,NA,NA,NA,NA,NA,NA,1996,12,18
+"Kochab Cave","Limestone","528",NA,NA,NA,"0",0,NA,NA,NA,1980-04-05,NA,"3","C","3",1,1,0,0,"0",1980,4,5
+"Kochab Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,1981-02-19,NA,"1","C","1",1,0,1,0,"0",1981,2,19
+"Kochab Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-20,NA,"0","c",NA,NA,NA,NA,NA,NA,2010,3,20
+"Lafayette East Adit","Copper","25","360","6","4","1",0,NA,NA,NA,2005-11-04,"Low","0","C",NA,NA,NA,NA,NA,NA,2005,11,4
+"Lafayette East Adit",NA,NA,NA,NA,NA,NA,NA,"55.4","52.7","80",2011-11-12,NA,"0","C","0",NA,NA,NA,0,"0",2011,11,12
+"Lafayette East Adit",NA,NA,NA,NA,NA,NA,NA,"42.8","43.7",NA,2015-11-14,NA,"0","c","0",NA,NA,NA,0,"0",2015,11,14
+"Lafayette East Adit",NA,NA,NA,NA,NA,NA,NA,"33.799999999999997","39.200000000000003",NA,2017-11-17,NA,"0","c","0",NA,NA,NA,0,"0",2017,11,17
+"Lafayette East Shaft","Copper","420","330","2","5","1",0,NA,"44.7-46.4",NA,2005-11-06,"Low","2261","C","2259",31,29,2,1,"1",2005,11,6
+"Lafayette East Shaft",NA,NA,NA,NA,NA,NA,NA,"55.4","46.4-48.2","100",2011-11-12,NA,"2804","C","2804",NA,NA,NA,0,"0",2011,11,12
+"Lafayette East Shaft",NA,NA,NA,NA,NA,NA,NA,"42.8","46.4-48.2",NA,2015-11-14,NA,"2582","c","2582",1257,1240,17,0,"0",2015,11,14
+"Lafayette East Shaft",NA,NA,NA,NA,NA,NA,NA,"33.799999999999997","41.9-48.2",NA,2017-11-17,NA,"443","c","442",440,436,4,1,"0",2017,11,17
+"Lafayette East Shaft",NA,NA,NA,NA,NA,NA,NA,NA,"7.5-7.7",NA,2023-11-20,NA,"1106","c","1103",1103,1103,NA,2,"1",2023,11,20
+"Lafayette West Adit","Copper","75","315","2.5","4","1",0,NA,"48",NA,2005-11-04,"Low","7","C","7",7,4,3,0,"0",2005,11,4
+"Lafayette West Adit",NA,NA,NA,NA,NA,NA,NA,"55.4","49.1","100",2011-11-12,NA,"4","C","4",4,1,3,0,"0",2011,11,12
+"Lafayette West Adit",NA,NA,NA,NA,NA,NA,NA,"42.8","43.7",NA,2015-11-14,NA,"18","c","18",18,4,14,0,"0",2015,11,14
+"Lafayette West Adit",NA,NA,NA,NA,NA,NA,NA,"33.799999999999997","45.5",NA,2017-11-17,NA,"6","c","6",6,3,3,0,"0",2017,11,17
+"Lafayette West Shaft","Copper","95","345","2","5","1",0,NA,"45.3",NA,2005-11-06,"Low","35","C","34",NA,NA,NA,1,"0",2005,11,6
+"Lafayette West Shaft",NA,NA,NA,NA,NA,NA,NA,"55.4","50",NA,2011-11-12,NA,"52","C","52",NA,NA,NA,0,"0",2011,11,12
+"Lafayette West Shaft",NA,NA,NA,NA,NA,NA,NA,"42.8","48.5",NA,2015-11-14,NA,"55","c","55",0,NA,NA,0,"0",2015,11,14
+"Lafayette West Shaft",NA,NA,NA,NA,NA,NA,NA,"33.799999999999997",NA,NA,2017-11-17,NA,"10","c","10",10,10,NA,NA,NA,2017,11,17
+"Lafayette West Shaft",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-11-20,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023,11,20
+"Lake Shaft","Copper","75","NA",NA,NA,"0",1,NA,NA,NA,2012-03-29,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012,3,29
+"Mackinac Bridge, North Pier","NA",NA,NA,NA,NA,NA,NA,NA,"<32",NA,1994-03-10,"Low","0","C","0",NA,NA,NA,0,"0",1994,3,10
+"Mackinac Bridge, South Pier","NA",NA,NA,NA,NA,NA,NA,NA,"<33",NA,1994-03-10,"Low","0","C","0",NA,NA,NA,0,"0",1994,3,10
+"Mass Mine (C Shaft)","Copper","ca. 2,500",NA,NA,NA,NA,0,NA,"44.2-46","90-100",NA,"Low",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Mass  C Adit","Copper","158","50","5","7","1",0,"21.6","37",NA,2005-12-18,"Low","178","C","172",26,24,2,6,"0",2005,12,18
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,"32","41.9","100",2011-12-21,NA,"115","C","109",22,19,3,6,"0",2011,12,21
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,"17","40.1",NA,2013-03-04,NA,"122","c","113",113,96,17,0,"0",2013,3,4
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-11-29,NA,"178","c","160",147,129,18,18,"0",2014,11,29
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2020-11-13,NA,"11",NA,"11",11,10,1,0,"0",2020,11,13
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-03-04,NA,"12",NA,"11",11,10,1,1,"0",2021,3,4
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-11-10,NA,"9",NA,"9",9,8,1,0,"0",2021,11,10
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-03-06,NA,"7",NA,"6",6,6,0,1,"0",2022,3,6
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-11-11,NA,"9",NA,"8",8,8,0,1,"0",2022,11,11
+"Mass  C Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-03-01,NA,"13",NA,"7",7,7,0,6,"0",2023,3,1
+"Mastodon #2 Shaft","Iron",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"Closed","0",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Mead Adit of Carp Lake Mine","Copper","2725","180","2","2","1",0,NA,"48-50","92-100",1996-02-27,"Low","13540","C","13539",65,64,1,1,"0",1996,2,27
+"Mead Adit of Carp Lake Mine",NA,NA,NA,"2.5","4",NA,NA,NA,"45.6",NA,1998-03-30,NA,"14048","C","14046",0,NA,NA,0,"2",1998,3,30
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2000-12-15,NA,"16739","C","16735",0,NA,NA,0,"4",2000,12,15
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"42.2-46.2",NA,2004-12-31,NA,"13346","C","13342",0,NA,NA,0,"4",2004,12,31
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"48",NA,2009-03-20,NA,"17511","C","17508",0,NA,NA,0,"3",2009,3,20
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"46.4-47.3","91",2011-03-03,NA,"19265","C","19263",0,NA,NA,0,"2",2011,3,3
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"46.9",NA,2013-03-05,NA,"17702","C","17700",0,NA,NA,0,"2",2013,3,5
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-25,NA,"15973","c","15971",1048,1024,24,0,"2",2015,2,25
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,"23","46.4-47.3",NA,2017-02-15,NA,"92","c","92",91,91,0,0,"0",2017,2,15
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"46.7-48.5",NA,2019-02-27,NA,"208",NA,"208",207,207,0,0,"0",2019,2,27
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-12-09,NA,"316",NA,"312",315,312,3,0,"1",2019,12,9
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-11-13,NA,"513",NA,"513",513,510,3,0,"0",2021,11,13
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-03-08,NA,"486",NA,"486",486,484,2,0,"0",2022,3,8
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-04-11,NA,"546","c","546",320,320,0,0,"0",2023,4,11
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-11-09,NA,"993","c","992",105,104,1,1,"0",2023,11,9
+"Mead Adit of Carp Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"4.4-7.2",NA,2024-04-22,NA,"700","c","700",129,129,0,0,"0",2024,4,22
+"Merchant Mine","Copper","641","170","2","2","2",0,NA,"30–44.7","95",2009-03-06,"Low","213","C","208",NA,NA,NA,3,"2",2009,3,6
+"Merchant Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2011-03-25,NA,"224","C","217",0,NA,NA,1,"6",2011,3,25
+"Merchant Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012-12-01,NA,"225","C","214",214,206,8,5,"6",2012,12,1
+"Merchant Mine",NA,NA,NA,NA,NA,NA,NA,"32","41.9",NA,2017-02-12,NA,"53","C","48",46,45,1,5,"0",2017,2,12
+"Merchant Mine",NA,NA,NA,NA,NA,NA,NA,"44","37.4-45.5","84.3-93.4",2018-12-15,NA,"18",NA,"12",11,11,0,9,"0",2018,12,15
+"Merchant Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-04-14,NA,"45",NA,"38",38,38,0,7,"0",2022,4,14
+"Merchant Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-04-14,NA,"40",NA,"33",33,33,0,7,"0",2023,4,14
+"Merchant's Adit North","Copper","105","270","2.25","1.5","1",NA,NA,"46.4","85",1998-12-15,"High","11","C","5",5,0,5,6,"0",1998,12,15
+"Merchant's Adit North",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-02,NA,"21","C","16",0,NA,NA,5,"0",2010,3,2
+"Merchant's Adit North",NA,NA,NA,NA,NA,NA,NA,NA,"41.9","86",2017-12-29,NA,"2",NA,"0",NA,0,0,2,"0",2017,12,29
+"Merchant's Adit South","Copper","60","270","5","7","1",0,NA,"42.8","77",1998-12-15,"High","1","C","1",1,0,1,0,"0",1998,12,15
+"Merchant's Adit South",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-02,NA,"21","C","16",0,NA,NA,5,"0",2010,3,2
+"Merchant's Adit South",NA,NA,NA,NA,NA,NA,NA,NA,"31.1","64",2017-12-29,NA,"1",NA,"0",NA,0,0,1,"0",2017,12,29
+"Merriweather Shaft 1","Copper","30",NA,NA,NA,"0",1,NA,NA,NA,NA,"Low","0","E",NA,NA,NA,NA,0,"0",NA,NA,NA
+"Merriweather Shaft 2","Copper","30",NA,"6","10","0",1,NA,NA,NA,2010-08-29,"Low","0","E",NA,0,NA,NA,0,"0",2010,8,29
+"Merriweather Shaft 3","Copper","90","350","6","10","1",1,NA,"33","95",NA,"Medium","0","C","0",NA,NA,NA,0,"0",NA,NA,NA
+"Michigan (A Shaft)","Copper",">400","NA","2.5","2.5",">1",1,NA,"41",NA,2001-12-28,"Low","1610","C/E","1610",0,NA,NA,0,"0",2001,12,28
+"Millie Mine","Iron","600","NA",NA,NA,"3",1,NA,NA,NA,1992-12-11,"Low","ca. 50,000","E","ca. 50,000",NA,NA,NA,0,"0",1992,12,11
+"Millie Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"ca. 37,000","E","ca. 37,000",NA,NA,NA,0,"0",NA,NA,NA
+"Millie Mine",NA,NA,NA,NA,NA,NA,NA,NA,"44","100",2009-03-14,NA,"5390","C","5390",0,NA,NA,0,"0",2009,3,14
+"Millie Mine",NA,NA,NA,NA,NA,NA,NA,NA,"44.6-48.2","84-96",2010-03-28,NA,">24,000","C",">24,000",0,NA,NA,0,"0",2010,3,28
+"Millie Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2018-02-18,NA,"5723",NA,NA,NA,NA,NA,0,"0",2018,2,18
+"Millie Mine",NA,NA,NA,NA,NA,NA,NA,"44","43-48",NA,2020-02-24,NA,"2765",NA,"2765",0,NA,NA,0,"o",2020,2,24
+"Nassau Mine","Copper","1300","270",NA,NA,"1",0,NA,"47.1",NA,2006-11-05,"Low","4635","C","4634",0,NA,NA,1,"0",2006,11,5
+"National Mine #7","Copper",">250","360","10","20","1",0,"35.799999999999997","38.3-42.8","72-89",1998-12-17,"Low","984","C","969",25,25,0,15,"0",1998,12,17
+"National Mine #7",NA,NA,NA,NA,NA,NA,NA,"27","37-48",NA,2019-11-15,NA,"198",NA,"194",194,194,0,4,"0",2019,11,15
+"National Mine #3","Copper","100","330","15","20","1",1,NA,"23.9",NA,2001-12-29,"Low","0","C","0",0,NA,NA,0,"0",2001,12,29
+"Nebraska Mine","Copper","1500",NA,"7","12","1",0,"18.7","29-39.3","88",1996-12-16,"Low","700","E",NA,NA,NA,NA,NA,NA,1996,12,16
+"New Algoma","Copper","0","NA","NA","NA","0",0,"27.5","NA","NA",1998-01-15,"Low","0","C","0",0,NA,NA,0,"0",1998,1,15
+"New Indiana Shaft",NA,"125","NA","17","17","0",1,NA,NA,NA,2012-03-29,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012,3,29
+"North American Adit","Copper","43","325","3","6","1",0,"25","37.9","100",1996-12-28,"Medium","1","C","1",1,0,1,0,"0",1996,12,28
+"North American Adit",NA,NA,NA,NA,NA,NA,NA,NA,"35.6-36.5","100",2001-01-19,NA,"5","C","5",0,NA,NA,0,"0",2001,1,19
+"North American Adit",NA,NA,NA,NA,NA,NA,NA,NA,"33.799999999999997",NA,2015-12-29,NA,"2","c","2",2,0,2,0,"0",2015,12,29
+"North American Adit",NA,NA,NA,NA,NA,NA,NA,"27","32.9",NA,2016-12-27,NA,"0","c","0",0,0,0,0,"0",2016,12,27
+"North Belt Mine","Copper","625","37","3","5","2",2,"27","34.5-44.9","90-100",1998-01-03,"Low","601","C","588",0,NA,NA,12,"1",1998,1,3
+"North Belt Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2002-02-28,NA,"1134","C","1118",NA,NA,NA,15,"1",2002,2,28
+"North Belt Mine",NA,NA,NA,NA,NA,NA,NA,NA,"32.7-40.5","86-88",2009-03-07,NA,"1071","C","1054",0,NA,NA,14,"3",2009,3,7
+"North Belt Mine",NA,NA,NA,NA,NA,NA,NA,"28.4","36.5-39.2","82",2011-03-25,NA,"1129","C","1120",0,NA,NA,9,"0",2011,3,25
+"North Cliff Mine (Shaft #3?)","Copper","752","NA","3.5","2.5","2",1,"27.5","45-48","92-100",1996-12-27,"Medium","2958","C","2958",50,50,0,0,"0",1996,12,27
+"North Cliff Mine (Shaft #3?)",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2016-02-24,NA,"29","c","29",29,29,0,0,"0",2016,2,24
+"North Cliff Mine (Shaft #3?)",NA,NA,NA,NA,NA,NA,NA,NA,"4.7",NA,2024-02-16,NA,"26","c","26",26,26,0,0,"0",2024,2,16
+"North Lake Mine","Copper",">70","NA","10","20","1",1,"29",NA,NA,NA,"Low","0","C","0",0,NA,NA,0,"0",NA,NA,NA
+"Norway Mine","Iron","274",NA,"6","20","2",0,"22","21-41","97-100",1996-01-03,"Medium","23920","E","23855",77,76,1,65,"0",1996,1,3
+"Norway Mine",NA,NA,NA,NA,NA,NA,NA,"22.5","20-40.9","97-100",1998-01-01,"Low","18979","E","18781",0,NA,NA,198,"0",1998,1,1
+"Norway Mine",NA,NA,NA,NA,NA,NA,NA,NA,"39.5-42.4",NA,2004-12-29,NA,"16796","C","16676",0,NA,NA,120,"0",2004,12,29
+"Norway Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-03-08,NA,NA,NA,NA,1815,1815,0,NA,"0",2014,3,8
+"Norway Mine",NA,NA,NA,NA,NA,NA,NA,NA,"31.1-45.5",NA,2017-02-10,NA,"8647","c","8459",142,142,0,188,"0",2017,2,10
+"Norway Mine",NA,NA,NA,NA,NA,NA,NA,"30","34.7-44.6","75-96.3",2019-12-28,NA,"5155",NA,"4909",691,691,0,245,"1",2019,12,28
+"Norway Mine",NA,NA,NA,NA,NA,NA,NA,NA,"2.2-4.4",NA,2023-12-14,NA,"10284","c","9535",351,351,0,748,"1",2023,12,14
+"The Norwich (Norwich B)","Copper",NA,NA,NA,NA,"?",1,NA,NA,NA,2009-07-28,"Low","0",NA,NA,NA,NA,NA,NA,NA,2009,7,28
+"The Norwich (Norwich B)",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2013-11-29,NA,"2","c","0",NA,NA,NA,2,"0",2013,11,29
+"Norwich D (MacDonald Shaft)","Copper","80","999","8","10","0",1,NA,NA,NA,2002-02-27,"Low","0","C","0",0,NA,NA,0,"0",2002,2,27
+"Norwich D (MacDonald Shaft)",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Ogimaw Adit","Copper","90","345","5","7","1",0,NA,"30-40.9",NA,2005-12-16,"Low","28","C","28",0,NA,NA,0,"0",2005,12,16
+"Ogimaw Adit",NA,NA,NA,NA,NA,NA,NA,"32","41.9","100",2011-12-21,NA,"24","C","23",21,14,7,1,"0",2011,12,21
+"Ogimaw Adit",NA,NA,NA,NA,NA,NA,NA,"17","39.200000000000003",NA,2013-03-04,NA,"21","c","21",18,2,16,0,"0",2013,3,4
+"Ogimaw Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2017-02-16,NA,"4","C","4",4,4,0,0,"0",2017,2,16
+"Ogimaw Adit",NA,NA,NA,NA,NA,NA,NA,NA,"41","96.3",2019-12-21,NA,"2",NA,"2",2,2,0,0,"0",2019,12,21
+"Ogimaw Mine","Copper","338",NA,NA,NA,"1",0,"37.6","41.4-44.9","88-100",1998-12-14,"Low","410","C","407",25,25,0,3,"0",1998,12,14
+"Ohio Traprock Mine #1","Copper","106","355","4","6","1",0,"27.4","43.7","89",1998-12-17,"Low","150","C","149",35,28,7,1,"0",1998,12,17
+"Ohio Traprock Mine #1",NA,NA,NA,NA,NA,NA,NA,"25","39.200000000000003","92.4",2018-02-21,NA,"81",NA,"74",74,74,0,7,"0",2018,2,21
+"Ohio Traprock Mine #2","Copper","111","340","2","2","1",0,"27.4","48.6","93",1998-12-17,"Low","654","C","654",26,26,0,0,"0",1998,12,17
+"Ohio Traprock Mine #2",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-12-20,NA,"274","c","274",270,255,15,0,"0",2014,12,20
+"Ohio Traprock Mine #2",NA,NA,NA,NA,NA,NA,NA,"25","46.4","100",2018-02-21,NA,"49",NA,"49",49,49,0,0,"0",2018,2,21
+"Ohio Traprock Mine #3","Copper","95","34","8","12","1",1,"27.4","41","82",1998-12-17,"Low","19","C","13",10,8,2,6,"0",1998,12,17
+"Ohio Traprock Mine #3",NA,NA,NA,NA,NA,NA,NA,"25","32","82",2018-02-21,NA,"11",NA,"8",8,8,0,3,"0",2018,2,21
+"Ohio Traprock Mine #59 (Norwich Adit)","Copper","45","302","8","4","1",0,"-12",NA,NA,1996-03-07,"Low","0",NA,NA,NA,NA,NA,NA,NA,1996,3,7
+"Ohio Traprock Mine #59 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2009-03-08,NA,"0",NA,NA,NA,NA,NA,NA,NA,2009,3,8
+"Ohio Traprock Mine #59 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"27","34","80",2010-11-27,NA,"0","C","0",0,NA,NA,0,"0",2010,11,27
+"Ohio Traprock Mine #59 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"30.6","35.6","100",2013-01-04,NA,"6","C","6",6,0,6,0,"0",2013,1,4
+"Ohio Traprock Mine #59 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"35-37","42.8",NA,2015-11-25,NA,"2","c","1",1,0,1,1,"0",2015,11,25
+"Ohio Traprock Mine #59 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"40.5-41","45.5",NA,2016-11-18,NA,"2","c","0",0,0,0,2,"0",2016,11,18
+"Ohio Traprock Mine #59 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"33.799999999999997","42.8",NA,2017-11-18,NA,"2","c","0",0,0,0,2,"0",2017,11,18
+"Ohio Traprock Mine #59 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"39",NA,NA,2019-11-16,NA,"0",NA,"0",0,0,0,0,"0",2019,11,16
+"Ohio Traprock Mine #60 (Norwich Adit)","Copper","236","302","6","4.5","1",0,NA,"44.4-47.4","93",1996-03-07,"Low","294","C","291",31,22,9,3,"0",1996,3,7
+"Ohio Traprock Mine #60 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"29.5","46.7-47.8",NA,2009-03-08,NA,"253","C","247",0,NA,NA,6,"0",2009,3,8
+"Ohio Traprock Mine #60 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"27","45-46.4","85-91",2010-11-27,NA,"308","C","305",0,NA,NA,3,"0",2010,11,27
+"Ohio Traprock Mine #60 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"30.6","46-46.4","96.7",2013-01-04,NA,"274","C","270",0,242,28,4,"0",2013,1,4
+"Ohio Traprock Mine #60 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,NA,"41-45.6",NA,2014-12-18,NA,"305","c","299",299,263,36,6,"0",2014,12,18
+"Ohio Traprock Mine #60 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"35-37","46.4",NA,2015-11-25,NA,"191","c","188",187,168,19,3,"0",2015,11,25
+"Ohio Traprock Mine #60 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"40.5-41",NA,NA,2016-11-18,NA,"74","c","74",74,66,8,0,"0",2016,11,18
+"Ohio Traprock Mine #60 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,"33.799999999999997","47.3",NA,2017-11-18,NA,"51","c","50",50,48,2,1,"0",2017,11,18
+"Ohio Traprock Mine #60 (Norwich Adit)",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-11-16,NA,"39",NA,"37",37,37,0,2,"0",2019,11,16
+"Ohio Traprock #61","Copper","17",NA,"6","5","1",0,"35-37",NA,NA,2015-11-25,NA,"0","c","0",NA,NA,NA,0,"0",2015,11,25
+"Ohio Traprock #61",NA,NA,NA,NA,NA,NA,NA,"40.5-41","44.6",NA,2016-11-18,NA,"0","c","0",NA,NA,NA,0,"0",2016,11,18
+"Ohio Traprock #61",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-11-16,NA,"0",NA,"0",NA,NA,NA,NA,NA,2019,11,16
+"Ohio Traprock #61",NA,NA,NA,NA,NA,NA,NA,"33.799999999999997","37.4",NA,2017-11-18,NA,"0","c","0",NA,NA,NA,0,"0",2017,11,18
+"Old Caledonia Mine (south)","Copper","NA",NA,NA,NA,NA,NA,"27",NA,NA,1996-12-18,"Low","0",NA,NA,NA,NA,NA,NA,NA,1996,12,18
+"Old Flintsteel River Adit A","Copper","18","30","6","10","1",0,NA,NA,NA,2006-02-25,"Low","0",NA,NA,NA,NA,NA,NA,NA,2006,2,25
+"Old Flintsteel River Adit A",NA,NA,NA,NA,NA,NA,NA,"31.1","32.9","100",2011-12-21,NA,"0","C","0",0,NA,0,0,NA,2011,12,21
+"Old Flintsteel River Adit B","Copper","225","360","6","4","1",0,NA,"37.2-41.5",NA,2006-02-25,"Low","222","C","214",0,NA,NA,6,"2",2006,2,25
+"Old Flintsteel River Adit B",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-03,"Low","256","C","250",0,NA,NA,5,"1",2010,3,3
+"Old Flintsteel River Adit B",NA,NA,NA,NA,NA,NA,NA,"31.1","45.5","100",2011-12-21,NA,"268","C","264",23,19,4,2,"2",2011,12,21
+"Old Flintsteel River Adit B",NA,NA,NA,NA,NA,NA,NA,"11","46.4","100",2018-02-21,NA,"3",NA,"3",NA,3,0,0,"0",2018,2,21
+"Old Flintsteel River Adit B",NA,NA,NA,NA,NA,NA,NA,NA,"44.6","93.3",2019-12-21,NA,"2",NA,"2",2,2,0,0,"0",2019,12,21
+"Old Penn Mine","Copper","108",NA,"6","6","1",1,"14.8","16.399999999999999",NA,1999-12-27,"Low","0","C","0",0,NA,NA,0,"0",1999,12,27
+"Owl Creek Fissure (Old Copper Falls)","Copper","> 10,000",NA,"2","2","5",1,NA,"44-46","100",2000-02-18,"Low","6606","C","6606",0,NA,NA,0,"0",2000,2,18
+"Pabst Mine H Shaft","Iron","100",NA,NA,NA,"?",0,NA,NA,NA,2005-03-01,"Low","0",NA,NA,NA,NA,NA,NA,NA,2005,3,1
+"Palms Mine Air Shaft","Iron","0",NA,NA,NA,"0",0,NA,NA,NA,2005-03-01,"Low","0",NA,NA,NA,NA,NA,NA,NA,2005,3,1
+"Penninsular Adit","Copper","0",NA,NA,NA,"0",0,NA,NA,NA,1998-12-16,"Closed","0",NA,NA,NA,NA,NA,NA,NA,1998,12,16
+"Petherick","Copper",NA,NA,NA,NA,NA,NA,NA,NA,NA,2020-01-17,"Low",NA,NA,NA,NA,NA,NA,NA,NA,2020,1,17
+NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2024-02-16,NA,"15","c","15",15,15,0,0,"0",2024,2,16
+"Pewabic Mine (Hancock)","Copper",">1,000",NA,NA,NA,NA,NA,NA,NA,NA,2000-04-13,"Low","0",NA,"0",NA,NA,NA,0,"0",2000,4,13
+"Pewabic Mine (Iron Mountain)","Iron","340",NA,"3","4","?",1,"16.7","21.2-31.9","61-68",1996-01-04,"Medium","40","C","32",24,22,2,8,"0",1996,1,4
+"Piscatauqau Adit","Copper","129",NA,"2","2","1",0,"38.9","46.4","88",1998-12-15,"Low","90","C","89",14,14,0,1,"0",1998,12,15
+"Pittsburgh and Boston Shaft A","Copper","0",NA,NA,NA,NA,0,NA,NA,NA,2015-12-29,NA,"0",NA,NA,NA,NA,NA,NA,NA,2015,12,29
+"Pittsburgh and Boston Shaft B","Copper","0",NA,NA,NA,NA,0,NA,NA,NA,2015-12-29,NA,"0",NA,NA,NA,NA,NA,NA,NA,2015,12,29
+"Pittsburgh and Boston Shaft C","Copper","0",NA,NA,NA,NA,0,NA,NA,NA,2015-12-29,NA,"0",NA,NA,NA,NA,NA,NA,NA,2015,12,29
+"Ponchartrain Shores Pit Cave","Limestone","0",NA,NA,NA,NA,1,NA,NA,NA,2020-04-12,NA,"0",NA,NA,NA,NA,NA,NA,NA,2020,4,12
+"Port Austin Cave East","Sandstone","6",NA,"3","12","1",0,NA,NA,NA,2011-07-16,"High","0","E",NA,NA,NA,NA,NA,NA,2011,7,16
+"Port Austin Cave West","Sandstone","20",NA,"3.5","40","1",0,NA,NA,NA,2011-07-16,"High","0","E",NA,NA,NA,NA,NA,NA,2011,7,16
+"Quarry Cave","Limestone","215",NA,NA,NA,"1",0,NA,NA,NA,2010-03-20,"High","0","C",NA,NA,NA,NA,NA,NA,2010,3,20
+"Quincy Mine Adit","Copper","2000","340",NA,NA,"7",1,"26.5","40-45","90-100",NA,"Low","0","E","0",0,NA,NA,0,"0",NA,NA,NA
+"Quincy Mine Adit",NA,NA,NA,NA,NA,NA,NA,NA,"46.9",NA,1998-11-15,NA,"1","C","1",0,NA,NA,0,"0",1998,11,15
+"Quincy Mine Adit",NA,NA,NA,NA,NA,NA,NA,NA,"46.4-48.2","91-95",2011-03-01,NA,"3691","C","3691",0,NA,NA,0,"0",2011,3,1
+"Quincy Mine Adit",NA,NA,NA,NA,NA,NA,NA,NA,"48.2",NA,2017-02-17,NA,"30","c","30",22,22,0,0,"0",2017,2,17
+NA,NA,NA,NA,NA,NA,NA,NA,NA,"8.0-10.2",NA,2024-03-22,NA,"9","c","9",0,NA,NA,NA,NA,2024,3,22
+"Quincy Shaft","Copper",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"Quinnesec Adit","Iron","477","30","2","3.5","1",0,"35.6","46.9-47.8","95-100",2010-11-05,NA,"2576","C","2572",0,NA,NA,0,"4",2010,11,5
+"Quinnesec Adit",NA,NA,NA,NA,NA,NA,NA,NA,"47.3","100",2013-03-05,NA,"2564","C","2554",2537,2538,16,1,"9",2013,3,5
+"Quinnesec Adit",NA,NA,NA,NA,NA,NA,NA,NA,"47.8",NA,2017-02-10,NA,"30","c","28",28,28,0,1,"1",2017,2,10
+"Quinnesec Adit",NA,NA,NA,NA,NA,NA,NA,"44","49.1","93.8",2018-12-14,NA,"40",NA,"36",36,36,0,4,"0",2018,12,14
+"Quinnesec Adit",NA,NA,NA,NA,NA,NA,NA,"35","48","93.7",2019-12-27,NA,"29",NA,"29",29,29,0,0,"0",2019,12,27
+"Randville Quarry Mine","Dolomite","331",NA,"15","20","1",0,"29","28.1-29.7","65-71",1996-01-08,"High","35","C","0",NA,NA,NA,35,"0",1996,1,8
+"Randville Quarry Mine",NA,NA,NA,NA,NA,NA,NA,NA,"27.5",NA,2014-03-07,NA,"42","C","2",0,NA,NA,40,"0",2014,3,7
+"Randville Quarry Mine",NA,NA,NA,NA,NA,NA,NA,"30","34.700000000000003",NA,2018-02-17,NA,"32",NA,"12",0,NA,NA,20,"0",2018,2,17
+"Ridge Adit","Copper","49","60","6","6","1",0,"16.7","32.5","90",1998-03-10,"High","12","C","10",8,0,8,2,"0",1998,3,10
+"Ridge Adit",NA,NA,NA,NA,NA,NA,NA,"30","37.4","100",2011-12-22,NA,"6","C","5",5,0,5,1,"0",2011,12,22
+"Ridge Adit",NA,NA,NA,NA,NA,NA,NA,"17","37.4",NA,2013-03-04,NA,"1","c","0",NA,NA,NA,1,"0",2013,3,4
+"Ridge Adit",NA,NA,NA,NA,NA,NA,NA,"47","43.7","86.4",2018-12-15,NA,"0",NA,"0",0,0,0,0,"0",2018,12,15
+"Rockland Mine, Shaft 3","Copper","800","NA","8","12","3",1,NA,"44.6",NA,2014-12-21,"Low","3263","c","3263",0,NA,NA,0,"0",2014,12,21
+"Rockport Quarry North Tunnel","Concrete","500","145","2","4",NA,NA,NA,"38.299999999999997","90",2010-03-14,"Medium","64","C","57",0,NA,NA,5,"2",2010,3,14
+"Rockport Quarry North Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,"35.6","66",2011-02-12,NA,"99","C","97",0,NA,NA,2,"0",2011,2,12
+"Rockport Quarry North Tunnel",NA,NA,NA,NA,NA,NA,NA,"29.3","35.6-39.2","100",2012-02-18,NA,"101","C","98",71,68,3,3,"0",2012,2,18
+"Rockport Quarry North Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2013-02-23,NA,NA,NA,NA,NA,NA,NA,NA,NA,2013,2,23
+"Rockport Quarry North Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2013-11-23,"Low","383","c","379",0,NA,NA,3,"1",2013,11,23
+"Rockport Quarry North Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-03-22,NA,"33","C","31",0,NA,NA,1,"1",2014,3,22
+"Rockport Quarry North Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2016-11-24,NA,"1","c","1",1,1,0,0,"0",2016,11,24
+"Rockport Quarry North Tunnel",NA,NA,NA,NA,NA,NA,NA,"41","41-42.4","86-93",2018-11-24,NA,"9",NA,"2",2,2,0,7,"0",2018,11,24
+"Rockport Quarry South Tunnel","Concrete","225","145","4","4",NA,NA,NA,NA,NA,2010-03-14,"Medium","1","C","0",0,NA,NA,0,"1",2010,3,14
+"Rockport Quarry South Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,"35.6","81",2011-02-12,NA,"0","C","0",0,NA,NA,0,"0",2011,2,12
+"Rockport Quarry South Tunnel",NA,NA,NA,NA,NA,NA,NA,"29.3","35.6-37.4","100",2012-02-18,NA,"3","C","0",0,NA,NA,0,"3",2012,2,18
+"Rockport Quarry South Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,"35.6","100",2013-02-23,NA,"1","c","1",1,1,0,0,"0",2013,2,23
+"Rockport Quarry South Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2013-11-23,NA,"2","c","1",1,0,1,0,"1",2013,11,23
+"Rockport Quarry South Tunnel",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-03-22,"Low","1","C","0",NA,NA,NA,0,"1",2014,3,22
+"Rockport Quarry South Tunnel",NA,NA,NA,NA,NA,NA,NA,"41","51","94",2018-11-24,NA,"0",NA,"0",0,0,0,0,"0",2018,11,24
+"Scott Falls Cave","Sandstone","20","70","15","25",NA,NA,"23","28.4",NA,2012-03-09,"High","0","C","0",0,NA,NA,0,"0",2012,3,9
+"Scott Falls Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2018-11-30,NA,"0",NA,"0",0,0,0,0,"0",2018,11,30
+"Scott Falls Cave",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-11-17,NA,"0",NA,"0",0,0,0,0,"0",2019,11,17
+"Scott's Cave","Limestone","7",NA,"8.5","17.5",NA,NA,NA,NA,NA,2010-05-16,"Medium","0","C","0",NA,NA,NA,0,"0",2010,5,16
+"Seneca Mine #3","Copper","2039","NA","8","20","2",1,NA,"46.4-49.8",NA,2014-04-07,"Low","3201","C","3201",0,NA,NA,0,"0",2014,4,7
+"Silas Doty Cave","Tufa","18",NA,"2.5","3",NA,NA,"42","39-41",NA,2006-03-26,"High","0","C","0",NA,NA,NA,0,"0",2006,3,26
+"Silas Doty Cave",NA,NA,NA,NA,NA,NA,NA,"27","34",NA,2011-03-06,NA,"0","C","0",NA,NA,NA,0,"0",2011,3,6
+"Silver Mountain Mine","Copper","147",NA,"5","5","1",0,"35.4","42.2-45.5","90",1996-11-30,"Medium","1036","C","1036",44,41,3,0,"0",1996,11,30
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2001-11-21,NA,"1131","C","1131",0,NA,NA,0,"0",2001,11,21
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,"50","47.1","95",2009-11-13,NA,"1401","C","1401",0,NA,NA,0,"0",2009,11,13
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,"19.399999999999999","44.6","91",2010-11-26,NA,"1536","C","1524",0,NA,NA,11,"1",2010,11,26
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,"24.1","44.6","100",2013-01-03,NA,"1302","C","1280",0,NA,NA,22,"0",2013,1,3
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,NA,"46.4",NA,2014-12-19,NA,"1580","c","1572",1572,1500,72,8,"0",2014,12,19
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,NA,"46.4",NA,2015-11-26,NA,"1342","c","1340",1339,1317,21,2,"0",2015,11,26
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,"23","47.3",NA,2016-11-19,NA,"247","c","247",247,243,3,0,"0",2016,11,19
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2017-11-29,NA,"271",NA,"269",NA,264,5,2,"0",2017,11,29
+"Silver Mountain Mine",NA,NA,NA,NA,NA,NA,NA,"36","46",NA,2019-11-16,NA,"113",NA,"111",111,110,1,2,"0",2019,11,16
+"Skull Cave","Limestone","20",NA,"3.5","13.5","1",0,NA,NA,NA,2010-05-15,"High","0","C","0",NA,NA,NA,0,"0",2010,5,15
+"South Belt Mine","Copper","625",NA,"6","12","1",2,"16","22-37.5","71-100",1996-01-15,"Low","1302","C","1290",40,39,1,12,"0",1996,1,15
+"South Belt Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2001-02-27,"Low","2076","C","2028",0,NA,NA,48,"0",2001,2,27
+"South Belt Mine",NA,NA,NA,NA,NA,NA,NA,"36.4","33.5-37","92",2009-03-07,NA,"1513","C","1461",0,NA,NA,51,"1",2009,3,7
+"South Belt Mine",NA,NA,NA,NA,NA,NA,NA,NA,"37.4-38.3","89",2011-03-25,NA,"1299","C","1285",0,NA,NA,14,"0",2011,3,25
+"South Bluff Adit","Copper","145","55","5","6","1",0,"37.5","45.8-47.3","91",1998-12-16,"Low","235","C","234",23,21,2,NA,"1",1998,12,16
+"South Bluff Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2010-03-05,"Low","117","C","113",0,NA,NA,3,"1",2010,3,5
+"South Bluff Adit",NA,NA,NA,NA,NA,NA,NA,"47.8","46.2-47.3","100",2011-11-13,NA,"141","C","140",NA,NA,NA,0,"1",2011,11,13
+"South Bluff Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012-02-24,NA,"109","C","105",92,82,10,3,"1",2012,2,24
+"South Bluff Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-11-13,NA,"100","c","98",97,97,0,1,"1",2015,11,13
+"South Bluff Adit",NA,NA,NA,NA,NA,NA,NA,NA,"46.4",NA,2017-02-14,NA,"19","c","9",9,8,1,10,"0",2017,2,14
+"South Bluff Adit",NA,NA,NA,NA,NA,NA,NA,"26","46.4","87.1",2018-12-17,NA,"15",NA,"13",13,13,0,2,"0",2018,12,17
+"South Bluff East Adit","Copper","316","57.5","2","5","1",0,NA,"45.5-48",NA,2006-11-03,"Low","2391","C","2381",0,NA,NA,2,"8",2006,11,3
+"South Bluff East Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2009-11-13,NA,"2067","C","2063",0,NA,NA,2,"2",2009,11,13
+"South Bluff East Adit",NA,NA,NA,NA,NA,NA,NA,"51.8","46.4-47.3","100",2011-11-13,NA,"1999","C","1996",0,NA,NA,1,"2",2011,11,13
+"South Bluff East Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-11-13,NA,"1322","c","1317",1125,1121,4,0,"5",2015,11,13
+"South Bluff East Adit",NA,NA,NA,NA,NA,NA,NA,"27","45.5-47.8",NA,2016-11-19,NA,"116","c","115",113,110,3,2,"0",2016,11,19
+"South Bluff East Adit",NA,NA,NA,NA,NA,NA,NA,"29","46.4-47.3","86.6-100",2018-11-16,NA,"52",NA,"50",NA,50,0,2,"0",2018,11,16
+"South Lake Mine","Copper","1402","345",NA,NA,"2",2,NA,"33.7-43.8","77-94",1996-02-14,"Medium","1746","C","1568",88,85,3,178,"0",1996,2,14
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"38-44",NA,2002-02-27,NA,"1965","C","1831",0,NA,NA,131,"3",2002,2,27
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2009-02-14,NA,"1674","C","1536",0,NA,NA,136,"2",2009,2,14
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"39.200000000000003","82",2011-03-04,NA,"2669","C","2520",NA,NA,NA,146,"3",2011,3,4
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2013-03-04,NA,"3182","C","2982",0,NA,NA,200,"0",2013,3,4
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-26,NA,"2901","c","2782",2564,2451,113,119,"0",2015,2,26
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-11-08,NA,"1325",NA,"1325",NA,1324,1,NA,NA,2019,11,8
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2020-11-12,NA,"1349",NA,"1312",1312,1312,0,37,"0",2020,11,12
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-03-05,NA,"834",NA,"691",691,691,0,143,"0",2021,3,5
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-11-11,NA,"1190",NA,"1169",1169,1169,0,21,"0",2021,11,11
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-03-07,NA,"908",NA,"719",719,719,0,189,"0",2022,3,7
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-11-10,NA,"1117",NA,"1077",1077,1077,0,40,"0",2022,11,10
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-03-03,NA,"1034",NA,"844",844,844,0,190,"0",2023,3,3
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"34.7-40.1",NA,2017-02-13,NA,"1966","c","1798",1599,1599,0,168,"0",2017,2,13
+"South Lake Mine",NA,NA,NA,NA,NA,NA,NA,NA,"0.8-3.8",NA,2024-02-28,NA,"1082","c","882",882,882,0,200,"0",2024,2,28
+"Spider Cave","Dolomite","30",NA,NA,NA,"1",0,NA,NA,NA,2017-12-21,"Low","0",NA,"0",0,0,0,0,"0",2017,12,21
+"Spider Cave",NA,NA,NA,NA,NA,NA,NA,"29",NA,NA,2018-11-17,NA,"0",NA,"0",0,0,0,0,"0",2018,11,17
+"Stair Cave","Limestone","4",NA,"4","12",NA,NA,NA,NA,NA,2010-05-16,"High","0","C","0",NA,NA,NA,0,"0",2010,5,16
+"Sugarloaf Cave","Limestone","40",NA,"5.5","3.5",NA,NA,NA,NA,NA,2010-05-15,"Medium","0","C","0",NA,NA,NA,0,"0",2010,5,15
+"Sunday Lake Mine, Shaft #6","Iron","?",NA,"0.5","4","?",0,NA,NA,NA,2005-02-28,"Low","0",NA,NA,NA,NA,NA,NA,NA,2005,2,28
+"Taylor Adit","Iron","115","135","1.5","2","1",0,NA,"49",NA,2010-03-04,"Medium","250","C","250",29,21,8,0,"0",2010,3,4
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,"30.2","46.4","93.5",2012-03-05,"Medium","230","C","229",229,212,17,0,"1",2012,3,5
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,"~45","46","100",2013-03-29,NA,"201","c","200",187,158,19,0,"1",2013,3,29
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-11-28,NA,"285","c","285",285,201,84,0,"0",2014,11,28
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"144","c","144",144,128,16,0,"0",NA,NA,NA
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2020-11-12,NA,"20",NA,"20",20,20,0,0,"0",2020,11,12
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-03-04,NA,"19",NA,"19",19,19,0,0,"0",2021,3,4
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2021-11-10,NA,"29",NA,"29",29,29,0,0,"0",2021,11,10
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-03-07,NA,"27",NA,"27",27,27,0,0,"0",2022,3,7
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-11-10,NA,"36",NA,"36",36,35,1,0,"0",2022,11,10
+"Taylor Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-03-01,NA,"34",NA,"34",34,34,0,0,"0",2023,3,1
+"Tilden Mine","Iron","?","NA","15","30","1",1,NA,NA,NA,2009-03-13,"Low","?",NA,NA,NA,NA,NA,NA,NA,2009,3,13
+"Tippy Dam","Concrete","150","NA",NA,NA,"NA",NA,NA,"4.7 + .05 (SE) C","92 ± 3",2010-03-13,"Low","17550","C","17542",0,NA,NA,1,"7",2010,3,13
+"Tippy Dam",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2012-02-22,NA,"24360","c","24350",NA,NA,NA,0,"10",2012,2,22
+"Tippy Dam",NA,NA,NA,NA,NA,NA,NA,NA,"32-33",NA,2013-02-25,NA,"20116","C","20101",0,NA,NA,1,"14",2013,2,25
+"Tippy Dam",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-21,NA,"21381","c","21371",0,NA,NA,0,"10",2015,2,21
+"Tippy Dam",NA,NA,NA,NA,NA,NA,NA,NA,"40.1",NA,2017-02-28,NA,"27423","c","27415",0,NA,NA,0,"8",2017,2,28
+"Tippy Dam",NA,NA,NA,NA,NA,NA,NA,"26","35",NA,2018-02-16,NA,"23531",NA,"23516",0,NA,NA,0,"15",2018,2,16
+"Tippy Dam",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-02-14,NA,"24133",NA,"24121",0,NA,NA,0,"12",2019,2,14
+"Tippy Dam",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"26962",NA,NA,NA,NA,0,0,"7",NA,NA,NA
+"Toltec Mine","Copper","63","0","12","8","1",1,NA,"43","93",1999-12-18,"Low","450","C","450",28,26,2,0,"0",1999,12,18
+"Toltec Mine",NA,NA,NA,NA,NA,NA,NA,NA,"43.6","88",2010-03-02,NA,"836","C","836",0,NA,NA,0,"0",2010,3,2
+"Toltec Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2018-02-20,NA,"79",NA,"79",NA,79,0,0,"0",2018,2,20
+"Tracy MineService Tunnels","Concrete","925",NA,NA,NA,"2",0,"17","41","50",2011-02-28,"Low","17","C","2",2,0,2,15,"0",2011,2,28
+"Trader's Mine","Iron","500","225","5","10","1",0,NA,NA,NA,1996-03-06,"Low","?",NA,NA,NA,NA,NA,NA,NA,1996,3,6
+"Trader's Mine",NA,NA,NA,NA,NA,"1",0,"20","41.9-42.8",NA,2014-03-06,NA,"666","C","636",587,540,47,16,"14",2014,3,6
+"Union Mine","Copper","0",NA,NA,NA,"0",0,NA,NA,NA,2015-07-23,NA,"0",NA,NA,NA,NA,NA,NA,NA,2015,7,23
+"Unknown Keweenaw",NA,NA,NA,NA,NA,NA,NA,NA,"3.2-4.4",NA,2024-02-07,NA,"205","c","205",205,0,0,0,"0",2024,2,7
+"Unknown working","Copper","12",NA,"15","15","0",1,NA,NA,NA,2005-03-02,"Low","0","C","0",0,NA,NA,0,"0",2005,3,2
+"Vivian Adit","Iron","20","10","5","7","1",0,"20","30.2",NA,2014-02-21,"Low","5","c","0",NA,NA,NA,5,"0",2014,2,21
+"Vivian Adit",NA,NA,NA,NA,NA,NA,NA,NA,"40.1","78",2018-12-14,NA,"1",NA,"0",NA,NA,NA,1,"0",2018,12,14
+"Vulcan Adit","Iron","?",NA,NA,NA,"?",0,NA,NA,NA,2010-03-02,"low","?",NA,NA,NA,NA,NA,NA,NA,2010,3,2
+"Wakefield Water Tunnel",NA,"0",NA,NA,NA,"0",NA,NA,NA,NA,2011-12-20,"Low","?",NA,NA,NA,NA,NA,NA,NA,2011,12,20
+"Washburn Mine","Gold?","117","120","6","3","1",0,"31.5","43.7",NA,2006-11-03,"Medium","74","C","74",17,12,5,0,"0",2006,11,3
+"Washburn Mine",NA,NA,NA,"6","4",NA,NA,"30","39.200000000000003","83",2011-12-20,NA,"35","C","35",27,14,13,0,"0",2011,12,20
+"Washburn Mine",NA,NA,NA,NA,NA,NA,NA,NA,"33.799999999999997",NA,2018-03-10,NA,"25",NA,"25",25,25,0,0,"0",2018,3,10
+"Washburn Mine",NA,NA,NA,NA,NA,NA,NA,"15","37.4","54.2",2019-12-19,NA,"21",NA,"21",21,21,0,0,"0",2019,12,19
+"West Evergreen Adit","Copper","15","315","5","5","1",0,"35.6","39.200000000000003","82",2011-11-11,"High","0","C","0",0,NA,NA,0,"0",2011,11,11
+"West Evergreen Bluff Mine","Copper",NA,"NA","2","2","4",1,"39.9","39.9-43","83-90",1998-12-14,"Low","4523","C","4519",25,24,1,2,"2",1998,12,14
+"West Evergreen Bluff Mine",NA,NA,NA,NA,NA,NA,NA,NA,"42.4-44.0",NA,2005-11-05,"Low","6595","C","6585",0,NA,NA,10,NA,2005,11,5
+"West Evergreen Bluff Mine",NA,NA,NA,NA,NA,NA,NA,"35.6","42.8-44.6","100",2011-11-11,NA,"5625","C","5619",0,NA,NA,3,"3",2011,11,11
+"West Evergreen Bluff Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-11-27,NA,"3092","c","3092",0,NA,NA,0,"0",2015,11,27
+"West Evergreen Bluff Mine",NA,NA,NA,NA,NA,NA,NA,"29","41.9-44.6","86.6-92.9",2018-11-16,NA,"788",NA,"788",NA,787,1,0,"0",2018,11,16
+"West Vein Adit (Robin's Ore)","Copper","150","16","3","4","1",0,"20","39.200000000000003","92.4",2020-01-17,"Medium","185",NA,"185",162,162,0,0,"0",2020,1,17
+NA,NA,NA,NA,NA,NA,NA,NA,NA,"1.1-1.5",NA,2024-03-15,NA,"229","c","224",224,224,0,5,"0",2024,3,15
+"White Pine Mine","Copper",">10,000","NA",NA,NA,"1",1,NA,"41.9-49.1","84-100",2011-04-02,"Low","2","C","2",1,1,NA,0,"0",2011,4,2
+"White Pine Mine",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-27,NA,"0","c","0",NA,NA,NA,0,"0",2015,2,27
+"Windsor Shaft #3","Copper","696","180","7","7","4",1,"34.1","34-44","74-91",NA,"Low","2568","C","2450",25,25,0,118,"0",NA,NA,NA
+"Windsor Shaft #3",NA,NA,NA,NA,NA,NA,NA,"23","31.1-42.8","77-84",2010-11-27,NA,"3418","C","3285",0,NA,NA,133,"0",2010,11,27
+"Windsor Shaft #3",NA,NA,NA,NA,NA,NA,NA,"30.6","32-44.9","91-96",2013-01-04,NA,"2782","C","2646",0,NA,NA,136,"0",2013,1,4
+"Windsor Shaft #3",NA,NA,NA,NA,NA,NA,NA,NA,"35.6-?",NA,2014-12-18,NA,"2032","c","1884",119,110,9,148,"0",2014,12,18
+"Windsor Shaft #3",NA,NA,NA,NA,NA,NA,NA,NA,"38.3-43",NA,2015-11-25,NA,"3030","c","2892",611,591,20,138,"0",2015,11,25
+"Windsor Shaft #3",NA,NA,NA,NA,NA,NA,NA,"40.5-41","40.1-44.6",NA,2016-11-18,NA,"3483","c","3046",308,305,3,129,"0",2016,11,18
+"Windsor Shaft #3",NA,NA,NA,NA,NA,NA,NA,"33.799999999999997",NA,NA,2017-11-18,NA,"1779","c","1638",NA,NA,NA,141,"0",2017,11,18
+"Windsor Shaft #3",NA,NA,NA,NA,NA,NA,NA,"39","36.3-?",NA,2019-11-16,NA,"1921",NA,"1746",92,92,0,175,"0",2019,11,16
+"Windsor Shaft #3",NA,NA,NA,NA,NA,NA,NA,NA,"2.8-4.5",NA,2023-01-11,NA,"2321","c","1982",236,236,NA,339,NA,2023,1,11
+"Young's Adit","Copper","500","180","6","3","1",NA,"ca. 50","≤44.5","89",2010-03-05,"Low","276","C","265",28,27,1,8,"3",2010,3,5
+"Young's Adit",NA,NA,NA,NA,NA,NA,NA,NA,"32.9-?","91.7-100",2012-02-25,NA,"224","C","203",175,165,10,11,"10",2012,2,25
+"Young's Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2014-02-23,NA,"188","c","182",175,164,11,2,"4",2014,2,23
+"Young's Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2015-02-24,NA,"234","c","219",192,174,18,7,"8",2015,2,24
+"Young's Adit",NA,NA,NA,NA,NA,NA,NA,NA,"33.8-42.8",NA,2016-02-22,NA,"219","c","205",203,201,2,10,"4",2016,2,22
+"Young's Adit",NA,NA,NA,NA,NA,NA,NA,"34","≤41",NA,2017-02-14,NA,"60","c","50",50,50,0,8,"2",2017,2,14
+"Young's Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2019-12-18,NA,"31",NA,"22",22,22,0,9,"0",2019,12,18
+"Young's Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2022-04-14,NA,"32",NA,"29",29,29,0,3,"0",2022,4,14
+"Young's Adit",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,2023-04-15,NA,"29",NA,"29",29,29,0,0,"0",2023,4,15

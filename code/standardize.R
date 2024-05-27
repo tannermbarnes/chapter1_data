@@ -1,3 +1,5 @@
+rm(list = ls())
+setwd("E:/chapter1_data/code")
 library(tidyverse)
 library(readxl)
 # Read in excel file - will be different for each person
@@ -19,9 +21,6 @@ dat1 <- dat %>% pivot_longer(cols=c("1980", "1993", "1996", "1997", "1998", "199
 dat1 <- dat1 %>% mutate(entrances = as.numeric(as.character(numberofentrancesforhumanaccess)),
                 year = as.numeric(as.character(year)))
 
-#remove all NAs
-dat2=dat1[complete.cases(dat1), ]
-
 
 # Figure out what year the lowest count was recorded for each mine
 
@@ -35,18 +34,6 @@ summarized_data <- dat1 %>%
 print(summarized_data)
 
 summarized_post_wns <- summarized_data %>% filter(year >= 2014 & year <= 2024)
-
-
-
-# summarized_data has the site and year of the minimum count post-WNS, that year per mine starts at year 0
-# Only use the mine with two data points after year 0 and create a regression per mine
-
-#View(summarized_post_wns)
-
-summarized_post_wns %>% ggplot(aes(x=year, y=min_value, color=site)) + 
-geom_point(show.legend = FALSE) + theme_classic()
-
-ggsave("E:/chapter1_data/min_value.png", width = 5, height=4)
 
 
 # Subset data from the minimum count value for each site and year combination
@@ -75,7 +62,7 @@ geom_path(show.legend = FALSE) +
 geom_point(show.legend = FALSE) +
 theme_classic()
 
-ggsave("E:/chapter1_data/species_recovery_since_min_value.png", width = 5, height=4)
+#ggsave("E:/chapter1_data/species_recovery_since_min_value.png", width = 5, height=4)
 
 
 # Try this code to summarize
@@ -108,6 +95,7 @@ do({
 }) %>% 
 ungroup()
 
+beta_estimate
 # Merge the beta estiamtes back to the species recovery dataframe
 species_recovery_with_beta <- species_recovery %>% 
 left_join(beta_estimate, by = "site")
@@ -157,6 +145,10 @@ write.csv(df_with_slopes, file_path, row.names = FALSE)
 df_wide <- df_with_slopes %>% 
 pivot_wider(names_from = year, values_from = count)
 
+
+
+
+View(df_wide)
 model <- lm(slope ~ temperaturedifferencec, data = df_wide)
 summary(model)
 
@@ -164,8 +156,6 @@ model1 <- lm(slope ~ temperaturedifferencec + lowestinternaltempc, data = df_wid
 summary(model1)
 # Explantory variables not correlated
 
-
-install.packages("visreg")
 library(visreg)
 visreg(model)
 View(df_wide)

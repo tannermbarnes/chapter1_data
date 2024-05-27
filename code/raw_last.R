@@ -82,67 +82,34 @@ result <- separate_temps %>%
 
 print(result)
 
-# left_join dataframe result onto other dat1 once you pivot that dataframe wider
-# pivot wider group_by(site) names_from(year) values_from(myotis_count) ???
-# data_wide <- dat1 %>% 
-# select(site, ore, azimuth,entrance_height, entrance_width,
-# levels = levels, shafts = shafts) %>% 
-# group_by(site) %>% 
-# summarize(across(everything(), ~ first(na.omit(.)), .names = "first_{col}")) %>% 
-# ungroup()
-
-# names(data_wide) <- sub("^first_", "", names(data_wide))
-
-# # Pivot and get columns by year and count as the data
-# data_wide1 <- dat1 %>% 
-# select(site, count = myotis_count, year) %>% 
-# mutate(year = as.numeric(year)) %>% 
-# group_by(site) %>% 
-# pivot_wider(names_from = year, values_from = count) %>% 
-# ungroup()
-
-# # Sort columns by numerical order, keeping 'site' as the first column
-# data_wide <- data_wide %>% 
-# left_join(data_wide1, by = "site") %>% 
-# select(site, ore, azimuth, entrance_height, entrance_width, levels,
-# shafts, sort(names(.)[-1]))
-
-# write.csv(data_wide, "E:/chapter1_data/data_wide.csv", row.names = FALSE)
-
-# View(data_wide)
-
-# There are mutiple counts for the same year and same site this is a problem
-# To correct this we can take the first count for the winter year
-# May need to come back to this 
-#View(data_wide)
-
-data_wide_test <- dat1 %>% 
+data_wide_testx <- dat1 %>% 
 select(site, ore, azimuth,entrance_height, entrance_width,
 levels, shafts, water) %>% 
 group_by(site) %>% 
-summarize(across(everything(), ~ first(na.omit(.)), .names = "first_{col}")) %>% 
+summarize(across(everything(), ~ first(na.omit(.)), .names = "last_{col}")) %>% 
 ungroup()
 
-names(data_wide_test) <- sub("^first_", "", names(data_wide_test))
+names(data_wide_testx) <- sub("^last_", "", names(data_wide_testx))
 
-data_wide <- result %>% 
-right_join(data_wide_test, by = "site")
+#View(data_wide_testx)
 
-test <- dat1 %>% 
+data_widex <- result %>% 
+right_join(data_wide_testx, by = "site")
+
+test1 <- dat1 %>% 
 group_by(site, winter_year) %>% 
-summarize(count = first(myotis_count), .groups = 'drop')
+summarize(count = last(myotis_count), .groups = 'drop')
 
-View(test)
-
-data_wide_first <- test %>% 
+data_wide_last <- test1 %>% 
 mutate(count = as.numeric(count),
     winter_year = as.numeric(winter_year)) %>%
 pivot_wider(names_from = winter_year, values_from = count) %>% 
 select(site, sort(names(.)[-1]))
 
+
 # data_wide1 has metadate for temperature, ore, azimuth, entrances, levels, shafts, and counts by year
-data_wide1 <- data_wide %>% 
-right_join(data_wide_first, by = "site")
+data_wide1 <- data_widex %>% 
+right_join(data_wide_last, by = "site")
 
 #View(data_wide1)
 
@@ -178,6 +145,7 @@ summarize(mean_rh = max(mean_rh))
 wide_rh$mean_rh[wide_rh$mean_rh == 0] <- NA
 
 # Join the RH values to the wider dataset with the other variables
-data_wide2 <- data_wide1 %>% 
+data_wide2x <- data_wide1 %>% 
 left_join(wide_rh, by = "site")
+
 
