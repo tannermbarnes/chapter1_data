@@ -35,6 +35,21 @@ dat$date[dat$date == "2/14-15/1997"] <- 35475
 dat$date[dat$date == "12/15/1998; 11-27-99"] <- 36144
 dat$date[dat$date == "2/30/2023"] <- 44985
 
+# Fix the spots that have dates but their format is messed up
+dat$passage_length[dat$passage_length == "?"] <- NA
+dat$passage_length[dat$passage_length == "75-100"] <- (75+100)/2
+dat$passage_length[dat$passage_length == ">11,000"] <- 11000
+dat$passage_length[dat$passage_length == ">20,000"] <- 20000
+dat$passage_length[dat$passage_length == "50+"] <- 50
+dat$passage_length[dat$passage_length == "400+"] <- 400
+dat$passage_length[dat$passage_length == "ca. 2,500"] <- 2500
+dat$passage_length[dat$passage_length == ">400"] <- 400
+dat$passage_length[dat$passage_length == ">250"] <- 250
+dat$passage_length[dat$passage_length == ">70"] <- 70
+dat$passage_length[dat$passage_length == "> 10,000"] <- 10000
+dat$passage_length[dat$passage_length == ">1,000"] <- 1000
+
+
 # Remove any rows where there is no date; not useful data
 cols_to_check <- "date"
 datx <- dat[complete.cases(dat[, cols_to_check]), ]
@@ -109,7 +124,7 @@ print(result)
 
 # write.csv(data_wide, "E:/chapter1_data/data_wide.csv", row.names = FALSE)
 
-# View(data_wide)
+#View(data_wide)
 
 # There are mutiple counts for the same year and same site this is a problem
 # To correct this we can take the first count for the winter year
@@ -132,7 +147,7 @@ test <- dat1 %>%
 group_by(site, winter_year) %>% 
 summarize(count = first(myotis_count), .groups = 'drop')
 
-View(test)
+#View(test)
 
 data_wide_first <- test %>% 
 mutate(count = as.numeric(count),
@@ -180,4 +195,16 @@ wide_rh$mean_rh[wide_rh$mean_rh == 0] <- NA
 # Join the RH values to the wider dataset with the other variables
 data_wide2 <- data_wide1 %>% 
 left_join(wide_rh, by = "site")
+
+#Need to add passage_length to data it got lost somewhere along the way
+passage <- dat %>% 
+mutate(passage_length = as.numeric(passage_length)) %>% 
+group_by(site) %>% 
+select(site, passage_length) %>% 
+ungroup()
+
+passage1 <- na.omit(passage)
+
+data_wide2 <- data_wide2 %>% 
+left_join(passage1, by = "site")
 
