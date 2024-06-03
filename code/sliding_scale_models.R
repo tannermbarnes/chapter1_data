@@ -29,7 +29,7 @@ mutate(complexity = case_when(
 )
 
 # Remove mines that were never hibernacula 
-View(model_this_data)
+#View(model_this_data)
 mines_to_remove <- c("Collin's Adit", "Douglas Houghton Adit #1", "Glen Adit #3", "Hilton Ohio (Hilton #5 Adit)",
 "Lafayette East Adit", "Ohio Traprock #61", "Scott Falls Cave")
 
@@ -98,4 +98,52 @@ adj_r_squared_table <- data.frame(
   Adjusted_R_Squared = adj_r_squared
 )
 print(adj_r_squared_table)
+
+############################ Visulalize the models ############################################################
+df_sliding_scale %>%
+ggplot(aes(x=min, y=slope)) +
+geom_point(show.legend = FALSE, size = 2) +
+geom_smooth(method = "lm")
+
+
+df_sliding_scale %>% ggplot(aes(x=temp_diff, y=slope)) +
+geom_point(show.legend = FALSE) + 
+geom_smooth(method = "lm")
+
+df_sliding_scale %>% ggplot(aes(x=complexity, y=slope)) +
+geom_point(show.legend = FALSE) + 
+geom_smooth(method = "lm")
+
+df_sliding_scale %>% ggplot(aes(x=max, y=slope)) +
+geom_point(show.legend = FALSE) + 
+geom_smooth(method = "lm")
+
+
+# Use the Negative Binomial regression for overdispersion ##########################################################
+## Since slope isn't count data the negative binomial doesn't make sense to use
+# if (!require(MASS)) {
+#   install.packages("MASS")
+# }
+
+# library(MASS)
+
+nulls_nb <- glm.nb(slope ~ 1, data = df_sliding_scale)
+model1_nb <- glm.nb(slope ~ temp_diff, df_sliding_scale)
+model2_nb <- glm.nb(slope ~ mean_rh, df_sliding_scale)
+model3_nb <- glm.nb(slope ~ complexity, df_sliding_scale)
+model4_nb <- glm.nb(slope ~ temp_diff + complexity, df_sliding_scale)
+model5_nb <- glm.nb(slope ~ min, df_sliding_scale)
+model6_nb <- glm.nb(slope ~ max, df_sliding_scale)
+model7_nb <- glm.nb(slope ~ min + mean_rh, df_sliding_scale)
+model8_nb <- glm.nb(slope ~ max + mean_rh, df_sliding_scale)
+model9_nb <- glm.nb(slope ~ min + mean_rh + complexity, df_sliding_scale)
+model10_nb <- glm.nb(slope ~ max + mean_rh + complexity, df_sliding_scale)
+model11_nb <- glm.nb(slope ~ min + complexity, df_sliding_scale)
+model12_nb <- glm.nb(slope ~ max + complexity, df_sliding_scale)
+globals_nb <- glm.nb(slope ~ temp_diff + mean_rh + complexity, data = df_sliding_scale)
+
+# Compare models using AIC for Negative Binomial regression
+aic_nb <- AIC(nulls_nb, model1_nb, model2_nb, model3_nb, model4_nb, model5_nb, model6_nb, 
+model7_nb, model8_nb, model9_nb, model10_nb, model11_nb, model12_nb, globals_nb)
+print(aic_nb)
 

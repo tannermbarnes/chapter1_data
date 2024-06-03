@@ -3,6 +3,12 @@ setwd("E:/chapter1_data/code")
 library(readxl)
 library(tidyverse)
 
+if (!require(dplyr)) {
+  install.packages("dplyr")
+}
+
+library(dplyr)
+
 # Because the dates are in different formats, this function will be able to get them all in the correct format
 convert_excel_dates <-
 function(x){
@@ -13,7 +19,7 @@ function(x){
     )
 }
 
-dat <- read_excel("E:/chapter1_data/data.xlsx", sheet = "bat survey data") %>% 
+dat <- read_excel("E:/chapter1_data/data.xlsx", sheet = "bat survey data") %>%
 select(site = `Name of Hibernaculum...1`, ore = `Ore or Rock`, passage_length = `Length of Open Passage (feet)`,
 azimuth = `Azimuth into Main Entrance`, entrance_height = `Maximum Height of Main Entrance`, entrance_width = `Maximum Width of Main Entrance`,
 levels = `Number of Open Levels`, shafts = `Number of Shafts Open for Human Access`, 

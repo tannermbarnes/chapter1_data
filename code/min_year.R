@@ -121,8 +121,48 @@ pivot_wider(names_from = relative_year,
 select(site, slope) %>% 
 left_join(data_wide2, by = "site")
 
-View(model_this_data1)
+#View(model_this_data1)
+
+
+################################# Test normalized_counts for normality ##########################################
+# Plot histogram
+ggplot(sites_with_data, aes(x = normalized_count)) +
+  geom_histogram(bins = 30, color = "black", fill = "blue") +
+  ggtitle("Histogram of Normalized Count") +
+  xlab("Normalized Count") +
+  ylab("Frequency")
+
+# Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
+ggplot(sites_with_data, aes(sample = normalized_count)) +
+  geom_qq() +
+  geom_qq_line() +
+  ggtitle("Q-Q Plot of Normalized Count")
+
+# Shapiro-Wilk test A small p-value indicates the null hypothesis can be rejected, meaning the data is not normally distributed
+shapiro_test <- shapiro.test(sites_with_data$normalized_count)
+print(shapiro_test)
 
 
 
-View(model_this_data1)
+################## Test slope for normality ###############################
+ggplot(final_data_frame, aes(x = slope)) +
+  geom_histogram(bins = 30, color = "black", fill = "blue") +
+  ggtitle("Histogram of Normalized Count") +
+  xlab("Normalized Count") +
+  ylab("Frequency")
+
+shapiro_test <- shapiro.test(final_data_frame$slope)
+print(shapiro_test)
+
+# Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
+ggplot(final_data_frame, aes(sample = slope)) +
+  geom_qq() +
+  geom_qq_line() +
+  ggtitle("Q-Q Plot of Normalized Count")
+
+final_data_frame %>% ggplot(aes(x=relative_year, y=normalized_count, color = site)) +
+geom_point(show.legend = FALSE) +
+geom_smooth(method = "lm", show.legend = FALSE, se = FALSE) 
+
+ggsave("E:/chapter1_data/figures/normalized_slope_by_mine.png", width = 6, height=4)
+
