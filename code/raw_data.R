@@ -208,3 +208,50 @@ passage1 <- na.omit(passage)
 data_wide2 <- data_wide2 %>% 
 left_join(passage1, by = "site")
 
+
+# Need to combine Belt Mine, North Belt Mine, and South Belt Mine
+belt_data <- data_wide2 %>% 
+pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
+"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
+"2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
+
+
+
+belt_mine <- belt_data %>% filter(site %in% c("Belt Mine", "North Belt Mine", "South Belt Mine"))
+
+
+combined_data <- belt_mine %>% 
+mutate(site = "belt mine") %>% 
+group_by(site, year) %>% 
+summarize(
+    min = min(min),
+    max = max(max),
+    temp_diff = (max - min),
+    ore = first(ore),
+    azimuth = 37,
+    entrance_height = last(entrance_height),
+    entrance_width = last(entrance_width),
+    levels = 2, 
+    shafts = 2, 
+    water = NA,
+    mean_rh = mean(mean_rh),
+    passage_length = 625, 
+    count = sum(count, na.rm = TRUE),
+    .groups = 'drop') %>% 
+mutate(count = ifelse(count == 0, NA, count)) %>% 
+mutate(azimuth = as.character(azimuth),
+levels = as.character(levels))
+
+remaining_data <- belt_data %>% 
+filter(!site %in% c("Belt Mine", "North Belt Mine", "South Belt Mine"))
+
+
+final_data <- bind_rows(remaining_data, combined_data)
+
+final_data <- final_data %>% 
+filter(!site %in% NA)
+
+data_wide3 <- final_data %>% 
+pivot_wider(names_from = year, values_from = count) %>% 
+select(site, sort(names(.)[-1])) %>% 
+arrange(site)

@@ -6,7 +6,7 @@ library(purrr)
 library(tidyr)
 #View(data_wide2)
 
-model_data <- data_wide2 %>% 
+model_data <- data_wide3 %>% 
 pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
 "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
 "2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
@@ -21,7 +21,7 @@ pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998
 
 min_max_counts <- model_data %>% 
 group_by(site) %>% 
-summarize(min_count = min(count, na.rm = TRUE), max_count = max(count, na.rm = TRUE)) %>% 
+summarize(min_count = min(count, na.rm = TRUE), max_count = max((count/1.5), na.rm = TRUE)) %>% 
 ungroup()
 #View(min_max_counts)
 #View(model_data)
@@ -45,7 +45,8 @@ filter(normalized_count == min(normalized_count)) %>%
 slice(1) %>% # in case of ties, take the first occurence
 ungroup() %>% 
 select(site, min_year = year) %>% 
-mutate(min_year = as.numeric(min_year))
+mutate(min_year = as.numeric(min_year)) %>% 
+subset(min_year >= 2013)
 
 # Merge the minimum count year back into the normalized data
 model_data_with_min_year <- normalized_data %>% 
@@ -100,17 +101,28 @@ regress_results$slope <- round(regress_results$slope, 3)
 print(regress_results)
 
 
-
-
-
 regress_results$slope
 # Add the slope to the original data frame
 final_data_frame <- sites_with_data %>% 
 left_join(regress_results, by = "site")
 
+############################## Visulize the normalized data ##########################
+# sites_with_data %>% ggplot(aes(x=relative_year, y=normalized_count)) +
+# geom_point() +
+# geom_smooth(method = "lm")
+
+# ggsave("E:/chapter1_data/figures/normal_count_relative_year.png", width = 6, height=4)
+
+
+# Merge final slopes with the other metadata in a wide format to model
 model_this_data1 <- final_data_frame %>% 
 pivot_wider(names_from = relative_year, 
             values_from = normalized_count) %>% 
 select(site, slope) %>% 
 left_join(data_wide2, by = "site")
 
+View(model_this_data1)
+
+
+
+View(model_this_data1)
