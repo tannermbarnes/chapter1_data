@@ -6,14 +6,13 @@ library(purrr)
 library(tidyr)
 #View(data_wide2)
 
+# Pivot the data longer to work with a column for year and a column for count
 model_data <- data_wide3 %>% 
 pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
 "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
 "2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
 
 # Identify the minimum and maximum count for each site
-
-# ?????????????????????????????????
 # Need to find the most recovered mine and use that as recovered
 # For example, if the best mine has recovered 50% from its max count then half max count for every site
 # If the best site has recovered 25% then divied each max count by 4 
@@ -126,43 +125,66 @@ left_join(data_wide2, by = "site")
 
 ################################# Test normalized_counts for normality ##########################################
 # Plot histogram
-ggplot(sites_with_data, aes(x = normalized_count)) +
-  geom_histogram(bins = 30, color = "black", fill = "blue") +
-  ggtitle("Histogram of Normalized Count") +
-  xlab("Normalized Count") +
-  ylab("Frequency")
+# ggplot(sites_with_data, aes(x = normalized_count)) +
+#   geom_histogram(bins = 30, color = "black", fill = "blue") +
+#   ggtitle("Histogram of Normalized Count") +
+#   xlab("Normalized Count") +
+#   ylab("Frequency")
 
-# Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
-ggplot(sites_with_data, aes(sample = normalized_count)) +
-  geom_qq() +
-  geom_qq_line() +
-  ggtitle("Q-Q Plot of Normalized Count")
+# # Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
+# ggplot(sites_with_data, aes(sample = normalized_count)) +
+#   geom_qq() +
+#   geom_qq_line() +
+#   ggtitle("Q-Q Plot of Normalized Count")
 
-# Shapiro-Wilk test A small p-value indicates the null hypothesis can be rejected, meaning the data is not normally distributed
-shapiro_test <- shapiro.test(sites_with_data$normalized_count)
-print(shapiro_test)
+# # Shapiro-Wilk test A small p-value indicates the null hypothesis can be rejected, meaning the data is not normally distributed
+# shapiro_test <- shapiro.test(sites_with_data$normalized_count)
+# print(shapiro_test)
 
 
+# ################## Test slope for normality ###############################
+# ggplot(final_data_frame, aes(x = slope)) +
+#   geom_histogram(bins = 30, color = "black", fill = "blue") +
+#   ggtitle("Histogram of Normalized Count") +
+#   xlab("Normalized Count") +
+#   ylab("Frequency")
 
-################## Test slope for normality ###############################
-ggplot(final_data_frame, aes(x = slope)) +
-  geom_histogram(bins = 30, color = "black", fill = "blue") +
-  ggtitle("Histogram of Normalized Count") +
-  xlab("Normalized Count") +
-  ylab("Frequency")
+# shapiro_test <- shapiro.test(final_data_frame$slope)
+# print(shapiro_test)
 
-shapiro_test <- shapiro.test(final_data_frame$slope)
-print(shapiro_test)
+# # Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
+# ggplot(final_data_frame, aes(sample = slope)) +
+#   geom_qq() +
+#   geom_qq_line() +
+#   ggtitle("Q-Q Plot of Normalized Count")
 
-# Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
-ggplot(final_data_frame, aes(sample = slope)) +
-  geom_qq() +
-  geom_qq_line() +
-  ggtitle("Q-Q Plot of Normalized Count")
+colors <- c("blue", "white", "red")
+colors_temp_diff <-
 
-final_data_frame %>% ggplot(aes(x=relative_year, y=normalized_count, color = site)) +
+model_data_with_min_year %>% filter(normalized_count >= 0) %>% 
+filter(relative_year >= 0) %>% 
+group_by(site) %>% 
+filter(n() >= 2) %>% 
+ungroup() %>% 
+ggplot(aes(x=relative_year, y=normalized_count, group = site, color = min)) +
 geom_point(show.legend = FALSE) +
-geom_smooth(method = "lm", show.legend = FALSE, se = FALSE) 
+geom_smooth(method = "lm", show.legend = TRUE, se = FALSE) +
+scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+labs(title = "Colored scaled by the \ndifference in temperatures",
+x = "Year since minimum count", 
+y = "Normalized Count") +
+theme(
+  panel.background  = element_rect(fill = "white"),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  axis.line = element_line(colour = "black"),
+  axis.text = element_text(size = 12),
+  axis.title = element_text(size = 14, face = "bold"),
+  plot.title = element_text(size = 16, face = "bold"),
+  axis.title.x = element_text(margin = margin(t = 10)),
+  axis.title.y = element_text(margin = margin(r = 10)),
+  axis.ticks = element_line(color = "black"))
 
-ggsave("E:/chapter1_data/figures/normalized_slope_by_mine.png", width = 6, height=4)
+ggsave("E:/chapter1_data/figures/normalized_slope_by_temp_diff.png", width = 6, height=4)
 
+View(final_data_frame)

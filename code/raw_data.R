@@ -151,7 +151,7 @@ right_join(data_wide_test, by = "site")
 
 test <- dat1 %>% 
 group_by(site, winter_year) %>% 
-summarize(count = first(myotis_count), .groups = 'drop')
+summarize(count = last(myotis_count), .groups = 'drop')
 
 #View(test)
 

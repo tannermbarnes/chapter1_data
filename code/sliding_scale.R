@@ -107,7 +107,7 @@ regression_results <- tidied_data %>%
 # Step 6: Add the slope to the original data frame
 final_data <- sites_with_sufficient_data %>%
   left_join(regression_results, by = "site")
-
+View(final_data)
 # Check the final data
 #print("Final data with slopes:")
 #View(final_data)
@@ -149,46 +149,46 @@ left_join(data_wide2, by = "site")
 
 
 
-# ################################# Test normalized_counts for normality ##########################################
-# # Plot histogram
-ggplot(final_data, aes(x = normalize_count)) +
-  geom_histogram(bins = 30, color = "black", fill = "blue") +
-  ggtitle("Histogram of Normalized Count") +
-  xlab("Normalized Count") +
-  ylab("Frequency")
+# # ################################# Test normalized_counts for normality ##########################################
+# # # Plot histogram
+# ggplot(final_data, aes(x = normalize_count)) +
+#   geom_histogram(bins = 30, color = "black", fill = "blue") +
+#   ggtitle("Histogram of Normalized Count") +
+#   xlab("Normalized Count") +
+#   ylab("Frequency")
 
-# Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
-ggplot(final_data, aes(sample = normalize_count)) +
-  geom_qq() +
-  geom_qq_line() +
-  ggtitle("Q-Q Plot of Normalized Count")
+# # Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
+# ggplot(final_data, aes(sample = normalize_count)) +
+#   geom_qq() +
+#   geom_qq_line() +
+#   ggtitle("Q-Q Plot of Normalized Count")
 
-# Shapiro-Wilk test A small p-value indicates the null hypothesis can be rejected, meaning the data is not normally distributed
-shapiro_test <- shapiro.test(final_data$normalize_count)
-print(shapiro_test)
+# # Shapiro-Wilk test A small p-value indicates the null hypothesis can be rejected, meaning the data is not normally distributed
+# shapiro_test <- shapiro.test(final_data$normalize_count)
+# print(shapiro_test)
 
-################## Test slope for normality ###############################
-ggplot(final_data, aes(x = slope)) +
-  geom_histogram(bins = 30, color = "black", fill = "blue") +
-  ggtitle("Histogram of Normalized Count") +
-  xlab("Normalized Count") +
-  ylab("Frequency")
+# ################## Test slope for normality ###############################
+# ggplot(final_data, aes(x = slope)) +
+#   geom_histogram(bins = 30, color = "black", fill = "blue") +
+#   ggtitle("Histogram of Normalized Count") +
+#   xlab("Normalized Count") +
+#   ylab("Frequency")
 
-shapiro_test <- shapiro.test(final_data$slope)
-print(shapiro_test)
+# shapiro_test <- shapiro.test(final_data$slope)
+# print(shapiro_test)
 
-# Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
-ggplot(final_data, aes(sample = slope)) +
-  geom_qq() +
-  geom_qq_line() +
-  ggtitle("Q-Q Plot of Normalized Count")
+# # Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
+# ggplot(final_data, aes(sample = slope)) +
+#   geom_qq() +
+#   geom_qq_line() +
+#   ggtitle("Q-Q Plot of Normalized Count")
 
-final_data %>% filter(!site %in% "Tippy Dam") %>% 
-ggplot(aes(x=relative_year, y=normalize_count, color = site)) +
-geom_point(show.legend = FALSE) +
-geom_smooth(method = "lm", show.legend = FALSE, se = FALSE)
+# final_data %>% filter(!site %in% "Tippy Dam") %>% 
+# ggplot(aes(x=relative_year, y=normalize_count, color = site)) +
+# geom_point(show.legend = FALSE) +
+# geom_smooth(method = "lm", show.legend = FALSE, se = FALSE)
 
-ggsave("E:/chapter1_data/figures/sliding_normalize_slope_by_mine.png", width = 6, height=4)
+# ggsave("E:/chapter1_data/figures/sliding_normalize_slope_by_mine.png", width = 6, height=4)
 
 
 
