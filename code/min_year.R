@@ -4,7 +4,6 @@ source("raw_data.R")
 library(broom)
 library(purrr)
 library(tidyr)
-#View(data_wide2)
 
 # Pivot the data longer to work with a column for year and a column for count
 model_data <- data_wide3 %>% 
@@ -20,10 +19,12 @@ pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998
 
 min_max_counts <- model_data %>% 
 group_by(site) %>% 
-summarize(min_count = min(count, na.rm = TRUE), max_count = max((count/1.5), na.rm = TRUE)) %>% 
+summarize(min_count = min(count, na.rm = TRUE), max_count = max((count/1.5), na.rm = TRUE), 
+real_max_count = max(count, na.rm = TRUE)) %>% 
 ungroup()
 #View(min_max_counts)
 #View(model_data)
+
 
 
 # Merge the min and max counts back into the original data
@@ -32,7 +33,9 @@ left_join(min_max_counts, by = "site")
 
 # Normalize the counts 
 normalized_data <- model_data_with_min_max %>% 
-mutate(normalized_count = (count - min_count) / (max_count - min_count))
+mutate(normalized_count = (count - min_count) / (max_count - min_count)) %>% 
+mutate(normalized_to_min = (count) / (min_count + 1))
+
 
 # To get the normalized count and year relative to the year of minimum count
 # Subset data from the minimum count value for each site and year combination
@@ -105,6 +108,7 @@ regress_results$slope
 final_data_frame <- sites_with_data %>% 
 left_join(regress_results, by = "site")
 
+
 ############################## Visulize the normalized data ##########################
 # sites_with_data %>% ggplot(aes(x=relative_year, y=normalized_count)) +
 # geom_point() +
@@ -118,9 +122,14 @@ model_this_data1 <- final_data_frame %>%
 pivot_wider(names_from = relative_year, 
             values_from = normalized_count) %>% 
 select(site, slope) %>% 
-left_join(data_wide2, by = "site")
+left_join(data_wide3, by = "site")
 
-#View(model_this_data1)
+
+model_this_data2 <- model_data_with_min_year %>% 
+group_by(site) %>% 
+summarize(min_count = min(min_count), max_count = max(real_max_count)) %>% 
+inner_join(model_this_data1, by = "site") %>% 
+ungroup()
 
 
 ################################# Test normalized_counts for normality ##########################################
@@ -158,33 +167,33 @@ left_join(data_wide2, by = "site")
 #   geom_qq_line() +
 #   ggtitle("Q-Q Plot of Normalized Count")
 
-colors <- c("blue", "white", "red")
-colors_temp_diff <-
+# colors <- c("blue", "white", "red")
+# colors_temp_diff <-
 
-model_data_with_min_year %>% filter(normalized_count >= 0) %>% 
-filter(relative_year >= 0) %>% 
-group_by(site) %>% 
-filter(n() >= 2) %>% 
-ungroup() %>% 
-ggplot(aes(x=relative_year, y=normalized_count, group = site, color = min)) +
-geom_point(show.legend = FALSE) +
-geom_smooth(method = "lm", show.legend = TRUE, se = FALSE) +
-scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
-labs(title = "Colored scaled by the \ndifference in temperatures",
-x = "Year since minimum count", 
-y = "Normalized Count") +
-theme(
-  panel.background  = element_rect(fill = "white"),
-  panel.grid.major = element_blank(),
-  panel.grid.minor = element_blank(),
-  axis.line = element_line(colour = "black"),
-  axis.text = element_text(size = 12),
-  axis.title = element_text(size = 14, face = "bold"),
-  plot.title = element_text(size = 16, face = "bold"),
-  axis.title.x = element_text(margin = margin(t = 10)),
-  axis.title.y = element_text(margin = margin(r = 10)),
-  axis.ticks = element_line(color = "black"))
+# model_data_with_min_year %>% filter(normalized_count >= 0) %>% 
+# filter(relative_year >= 0) %>% 
+# group_by(site) %>% 
+# filter(n() >= 2) %>% 
+# ungroup() %>% 
+# ggplot(aes(x=relative_year, y=normalized_count, group = site, color = min)) +
+# geom_point(show.legend = FALSE) +
+# geom_smooth(method = "lm", show.legend = TRUE, se = FALSE) +
+# scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+# labs(title = "Colored scaled by the \ndifference in temperatures",
+# x = "Year since minimum count", 
+# y = "Normalized Count") +
+# theme(
+#   panel.background  = element_rect(fill = "white"),
+#   panel.grid.major = element_blank(),
+#   panel.grid.minor = element_blank(),
+#   axis.line = element_line(colour = "black"),
+#   axis.text = element_text(size = 12),
+#   axis.title = element_text(size = 14, face = "bold"),
+#   plot.title = element_text(size = 16, face = "bold"),
+#   axis.title.x = element_text(margin = margin(t = 10)),
+#   axis.title.y = element_text(margin = margin(r = 10)),
+#   axis.ticks = element_line(color = "black"))
 
-ggsave("E:/chapter1_data/figures/normalized_slope_by_temp_diff.png", width = 6, height=4)
+# ggsave("E:/chapter1_data/figures/normalized_slope_by_color.png", width = 6, height=4)
 
-View(final_data_frame)
+# View(final_data_frame)

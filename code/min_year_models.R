@@ -8,14 +8,14 @@ library(car)
 library(lmtest)
 
 # Change water to a factor
-model_this_data1$standing_water <- as.factor(model_this_data1$water)
-model_this_data1$levels <- as.factor(model_this_data1$levels)
-model_this_data1$shafts <- as.factor(model_this_data1$shafts)
+model_this_data2$standing_water <- as.factor(model_this_data2$water)
+model_this_data2$levels <- as.factor(model_this_data2$levels)
+model_this_data2$shafts <- as.factor(model_this_data2$shafts)
 
 # Create a variable for mine complexity
 #View(model_this_data)
 
-model_with_complexity <- model_this_data1 %>% 
+model_with_complexity <- model_this_data2 %>% 
 mutate(levels = ifelse(is.na(levels), 1, levels)) %>% 
 mutate(shafts = ifelse(is.na(shafts), 1, shafts)) %>% 
 mutate(complexity = case_when(
@@ -27,18 +27,15 @@ mutate(complexity = case_when(
 )
 
 
-mines_to_remove <- c("Aztec East Adit", "Aztec Upper Drift", "B-95 (cave)", "Collin's Adit", 
-"Copper Peak Adit", "County Line Adit", "Glen Adit #3", "Hilton Ohio (Hilton #5 Adit)", 
-"Lafayette East Adit", "Ohio Traprock #61", "Rockport Quarry South Tunnel", "Scott Falls Cave",
-"Silas Doty Cave", "Spider Cave", "Vivian Adit")
+# remove collin's adit because max is 1 and min is 0 not a hibernacula
+mines_to_remove <- c("Collin's Adit")
 
-# Cannot compare models because some mines have NA values for RH which means the model2 that only includes
-# mean_rh will have a different size dataframe then the models that have all the variables
-# so below I removed those mines so we can compare the models
-# we can add them later once we get relative humidity data for those mines or a different way I am not sure yet
 df_min_value <- model_with_complexity %>% 
-filter(!site %in% mines_to_remove) %>% 
-subset(mean_rh >= 0)
+filter(!site %in% mines_to_remove)
+
+# Add crash intensity
+df_min_value$crash <- 1 - (df_min_value$min_count/df_min_value$max_count)
+df_min_value$log_max_count <- log(df_min_value$max_count)
 
 # Check and see if temp_diff and complexity are colinear
 library(car)
@@ -278,15 +275,86 @@ qqline(residuals, col = "red")
 shapiro_test_result <- shapiro.test(residuals)
 print(shapiro_test_result)
 
-ggplot(df_min_value, aes(x= log_max_value, y = slope)) +
-geom_point() +
+colors <- c("blue", "white", "red")
+
+df_min_value %>%
+mutate(min = ifelse(min < 0, 0, min)) %>%
+ggplot(aes(x= min, y = slope)) +
+geom_point(aes(color = crash), size = 2) +
 geom_smooth(method = "lm") +
 labs(title = "Log transformed of maximum temperature + 1 compared to slope, \nif maximum temperature was negative it was changed to 0.5",
 x = "Log transformed of maximum temperature + 1",
 y = "Slope") + 
+scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
 theme_bw() +
 theme(
   plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
 )
 
-ggsave("E:/chapter1_data/figures/log_max_to_slope.png", width = 6, height=4)
+ggsave("E:/chapter1_data/figures/min_to_slope.png", width = 6, height=4)
+
+df_min_value %>%
+mutate(min = ifelse(min < 0, 0, min)) %>%
+filter(slope > 0) %>% 
+ggplot(aes(x= temp_diff, y = slope)) +
+geom_point(aes(color = crash, size = max_count)) +
+geom_smooth(method = "lm") +
+labs(title = "temp_diff by slope",
+x = "Temperature Difference (max-min)",
+y = "Slope") + 
+scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+
+ggsave("E:/chapter1_data/figures/lm_temp_diff_max.png", width = 6, height=4)
+
+df_min_value_slope_above_0 <- df_min_value %>% 
+filter(slope > 0)
+
+
+model_min_crash_ <- lm(slope ~ min + crash, data = df_min_value_slope_above_0)
+summary(model_min_crash_)
+model_td_crash_ <- lm(slope ~ temp_diff + crash, data = df_min_value_slope_above_0)
+summary(model_td_crash_)
+crash1 <- lm(crash ~ min, data = df_min_value_slope_above_0)
+summary(crash1)
+
+crash2 <- lm(slope ~ crash, data = df_min_value_slope_above_0)
+summary(crash2)
+
+df_min_value %>%
+filter(slope > 0) %>% 
+ggplot(aes(x= min, y = crash)) +
+geom_point(aes(color = slope, size = max_count)) +
+geom_smooth(method = "lm") +
+labs(title = "How did min influence slope",
+x = "Minimum temperature",
+y = "Crash intensity (%)") + 
+scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+
+ggsave("E:/chapter1_data/figures/lm_crash_min.png", width = 6, height=4)
+
+View(df_min_value)
+
+new_model <- lm(slope ~ min + crash + complexity, data = df_min_value_slope_above_0)
+df_min_value_slope_above_0$predicted <- predict(new_model)
+
+ggplot(df_min_value_slope_above_0, aes(x = predicted, y = slope)) +
+geom_point(aes(color = crash)) +
+geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+labs(title = "Predicted vs Actual Slope", x = "Predicted Slope", y = "Actual Slope") +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+
+ggsave("E:/chapter1_data/figures/joes_curosity1.png", width = 6, height=4)
+
+summary(new_model)

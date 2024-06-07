@@ -55,6 +55,12 @@ dat$passage_length[dat$passage_length == ">70"] <- 70
 dat$passage_length[dat$passage_length == "> 10,000"] <- 10000
 dat$passage_length[dat$passage_length == ">1,000"] <- 1000
 
+#Fix the spots that temperature format is messed up
+dat$internal_ta[dat$internal_ta == "-3.9to6.7(2nd level)"] <- -3.9
+dat$internal_ta[dat$internal_ta == "<32"] <- 32
+dat$internal_ta[dat$internal_ta == "≤33"] <- 33
+dat$internal_ta[dat$internal_ta == "<49.2"] <- 49.2
+dat$internal_ta[dat$internal_ta == "<33"] <- 33
 
 # Remove any rows where there is no date; not useful data
 cols_to_check <- "date"
@@ -80,25 +86,43 @@ ifelse(dat1$month >= 10, dat1$year + 1, dat1$year))
 # Need to split the cells with temp data that looks like 45-48 into two columns then
 # Need to convert any values from farhenheit to celsius while leaving the ones in celsius 
 
+# Function to convert temperatures from Fahreheit to Celsius if they are greater than 15
+convert_to_celsius <- function(temp) {
+    ifelse(temp > 15, (temp - 32) * (5/9), temp)
+}
+
 separate_temps <- dat1 %>% 
-    separate(internal_ta, into = c("temp1", "temp2"), sep = "-", convert = TRUE) %>% 
+separate(internal_ta, into = c("temp1", "temp2"), sep = "(?<=\\d)-(?=\\d)", convert = TRUE, fill = "right") %>%
     mutate(temp1 = as.numeric(temp1), 
-            temp2 = as.numeric(temp2)) %>% 
-    mutate(temp1 = ifelse(temp1 > 15,
-                        ((temp1 - 32) * (5/9)),
-                        temp1),
-            temp2 = ifelse(temp2 > 15,
-                        ((temp2 - 32) * (5/9)),
-                        temp2))
+            temp2 = as.numeric(temp2),
+            temp1 = convert_to_celsius(temp1),
+            temp2 = convert_to_celsius(temp2)
+    )
 
 
 # Group by site and calculate the minimum and maximum internal_ta values
+
+# Custom funciton to calculate the mode
+calculate_mode <- function(x){
+    x <- na.omit(x) #remove NA values
+    uniq_x <- unique(x)
+    if (length(uniq_x) == 0) {
+        return(NA) # Return NA if all values are NA
+    } else {
+        return(uniq_x[which.max(tabulate(match(x, uniq_x)))])
+    }
+}
+
+# Get the min, max, mean, median, and mode temperatures
 result <- separate_temps %>%
   group_by(site) %>%
   mutate(minimum_internal_ta = min(temp1, na.rm = TRUE),
         maximum_internal_ta = pmax(temp1, temp2, na.rm = TRUE)) %>% 
     summarize(min = min(minimum_internal_ta, na.rm = TRUE), 
-                max = max(maximum_internal_ta, na.rm = TRUE)) %>% 
+                max = max(maximum_internal_ta, na.rm = TRUE),
+                mean_temp = mean(c(temp1, temp2), na.rm = TRUE),
+                median_temp = median(c(temp1, temp2), na.rm = TRUE), 
+                mode_temp = calculate_mode(c(temp1, temp2))) %>% 
     mutate(temp_diff = (max-min))
 
 print(result)
@@ -187,14 +211,16 @@ separate_rh1$rh1[is.na(separate_rh$rh1)] <- 0
 separate_rh1$rh2[is.na(separate_rh$rh2)] <- 0
 
 # Changed the NA's to 0 so we could find the means of the numbers but have to correct for the 0s here
-separate_rh1$mean_rh <- ifelse(separate_rh1$rh1 + separate_rh1$rh2 > 100, 
-(separate_rh1$rh1 + separate_rh1$rh2) / 2, separate_rh1$rh1 + separate_rh1$rh2)
+separate_rh1 <- separate_rh1 %>% 
+mutate(mean_rh = ifelse(rh1 + rh2 > 100, (rh1 + rh2) / 2, rh1 + rh2))
 
 # Summarize so we can get the mean RH for each site
-wide_rh <- separate_rh1 %>% 
+wide_rh <- separate_rh1 %>% filter(mean_rh > 0) %>% 
 group_by(site) %>% 
-summarize(mean_rh = max(mean_rh))
+summarize(mean_rh = mean(mean_rh, na.rm = TRUE),
+            max_rh = max(rh1, rh2, na.rm = TRUE))
 
+print(wide_rh)
 # Change 0s in mean_rh to NAs
 wide_rh$mean_rh[wide_rh$mean_rh == 0] <- NA
 
@@ -227,7 +253,7 @@ belt_mine <- belt_data %>% filter(site %in% c("Belt Mine", "North Belt Mine", "S
 
 
 combined_data <- belt_mine %>% 
-mutate(site = "belt mine") %>% 
+mutate(site = "the belt mine") %>% 
 group_by(site, year) %>% 
 summarize(
     min = min(min),
