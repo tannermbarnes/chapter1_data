@@ -1,71 +1,89 @@
 rm(list = ls())
 setwd("E:/chapter1_data/code")
 library(dplyr)
-source("min_year.R")
+source("df_min_value.R")
 #View(model_this_data1)
 library(lme4)
 library(car)
 library(lmtest)
 
-# Change water to a factor
-model_this_data2$standing_water <- as.factor(model_this_data2$water)
-model_this_data2$levels <- as.factor(model_this_data2$levels)
-model_this_data2$shafts <- as.factor(model_this_data2$shafts)
+# Check for Multicolinearity
+lim <- lm(slope ~ crash + min, data = df_min_value)
+vif_values = vif(lim)
+print(vif_values)
 
-# Create a variable for mine complexity
-#View(model_this_data)
-
-model_with_complexity <- model_this_data2 %>% 
-mutate(levels = ifelse(is.na(levels), 1, levels)) %>% 
-mutate(shafts = ifelse(is.na(shafts), 1, shafts)) %>% 
-mutate(complexity = case_when(
-    passage_length > 200 & shafts >= 2 & levels == 1 ~ 3,
-    passage_length > 200 & shafts >= 1 & levels >= 2 ~ 4,
-    passage_length <= 200 & shafts >= 1 & levels >= 1 ~ 2,
-    TRUE ~ 1  # Default to 1 if no other conditions are met
-  )
-)
-
-
-# remove collin's adit because max is 1 and min is 0 not a hibernacula
-mines_to_remove <- c("Collin's Adit")
-
-df_min_value <- model_with_complexity %>% 
-filter(!site %in% mines_to_remove)
-
-# Add crash intensity
-df_min_value$crash <- 1 - (df_min_value$min_count/df_min_value$max_count)
-df_min_value$log_max_count <- log(df_min_value$max_count)
+crash_by_min <- lm(crash ~ min, data = df_min_value)
+summary(crash_by_min)
 
 colors <- c("blue", "white", "red")
 
-df_min_value %>%
-ggplot(aes(x= min, y = slope)) +
-geom_point(aes(color = crash), size = 2) +
+
+
+complexity_colors <- c("1" = "#56B4E9", "2" = "#E69F00", "3" = "#009E73", "4" = "#CC79A7")
+df_min_value$complexity <- factor(df_min_value$complexity, levels = 1:4)
+
+df_min_value %>% filter(last_count > 0) %>% 
+ggplot(aes(x= complexity, y = crash)) +
+geom_point(aes(color = complexity, size = last_count)) +
 geom_smooth(method = "lm") +
-labs(title = "How does min temperature affect slope",
-x = "Minimum temperature",
+labs(title = "How does population crash and complexity affect slope",
+x = "Population Crash",
+y = "Slope of recovery") + 
+scale_color_manual(values = complexity_colors) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1)
+#   legend.position = c(0.95, 0.95), 
+#   legend.justification = c(1,1), 
+#   legend.text = element_text(size = 8),
+#   legend.key.size = unit(0.5, "cm")
+)
+
+df_min_value %>% filter(last_count > 0) %>% 
+ggplot(aes(x= crash, y = slope)) +
+geom_point(aes(fill = last_count, size = complexity), shape = 21, color = "black", stroke = 0.5) +
+geom_smooth(method = "lm") +
+labs(title = "How does pop crash, min temp, and size affect slope",
+x = "Population Crash",
 y = "Slope") + 
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+
+ggsave("E:/chapter1_data/figures/crash_popsize_min.png", width = 6, height=4)
+
+df_min_value %>% 
+ggplot(aes(x= crash, y = slope)) +
+geom_point(aes(fill = min, size = max_count, shape = complexity), color = "black", stroke = 0.5) +
+geom_smooth(method = "lm") +
+labs(title = "How does pop crash, min temp, and complexity affect slope",
+x = "Population Crash",
+y = "Slope") + 
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+
+ggsave("E:/chapter1_data/figures/crash_popsize_complex_min.png", width = 6, height=4)
+
+df_min_value %>%
+ggplot(aes(x= complexity, y = crash)) +
+geom_point(aes(color = min), size = 2) +
+geom_smooth(method = "lm") +
+labs(title = "How does complexity and mintemp affect pop crash",
+x = "complexity",
+y = "Population Crash") + 
 scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
 theme_bw() +
 theme(
   plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
 )
 
-ggsave("E:/chapter1_data/figures/min_to_slope.png", width = 6, height=4)
+ggsave("E:/chapter1_data/figures/popcrash_complex_min.png", width = 6, height=4)
 
-df_min_value %>%
-ggplot(aes(x= mean_temp, y = slope)) +
-geom_point(aes(color = crash), size = 2) +
-geom_smooth(method = "lm") +
-labs(title = "How does mean temperature affect slope",
-x = "Mean temperature",
-y = "Slope") + 
-scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
-theme_bw() +
-theme(
-  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
-)
 
 df_min_value %>%
 ggplot(aes(x= mode_temp, y = slope)) +
@@ -121,12 +139,12 @@ theme(
 
 df_min_value %>%
 ggplot(aes(x= crash, y = slope)) +
-geom_point(aes(color = min), size = 2) +
+geom_point(aes(color = mean_temp), size = 2) +
 geom_smooth(method = "lm") +
-labs(title = "How does crash intensity and min temperature affect slope",
+labs(title = "How does crash intensity and mean temperature affect slope",
 x = "Crash intensity",
 y = "Slope",
-color = "Minimum \nTemperature") + 
+color = "Mean \nTemperature") + 
 scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
 theme_bw() +
 theme(
@@ -137,4 +155,9 @@ theme(
   legend.key.size = unit(0.3, "cm")
 )
 
-ggsave("E:/chapter1_data/figures/crash_intensity-color-min-temp.png", width = 6, height=4)
+ggsave("E:/chapter1_data/figures/crash_intensity-color-mean-temp.png", width = 6, height=4)
+
+
+df_min_value %>% 
+ggplot(aes(x = max_count, y = last_count)) +
+geom_point(aes(color = site), show.legend = FALSE)
