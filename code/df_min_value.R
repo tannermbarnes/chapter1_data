@@ -3,6 +3,9 @@ setwd("E:/chapter1_data/code")
 library(dplyr)
 source("min_year.R")
 #View(model_this_data1)
+# install.packages("lme4")
+# install.packages("car")
+# install.packages("lmtest")
 library(lme4)
 library(car)
 library(lmtest)
@@ -51,4 +54,14 @@ filter(!site %in% mines_to_remove)
 # Add crash intensity
 df_min_value$crash <- 1 - (df_min_value$min_count/df_min_value$max_count)
 df_min_value$log_max_count <- log(df_min_value$max_count)
+df_min_value$log_passage <- log(df_min_value$passage_length)
 
+# LN of explantory variables to get Pseduothreshold
+# Add 1 all min values to avoid log(0)
+df_min_value <- df_min_value %>% 
+mutate(min_value = min + 1, 
+      max_value = max + 1) %>% 
+mutate(min_value = ifelse(min_value < 0, 1, min_value))
+
+df_min_value$log_min_value <- log(df_min_value$min_value)
+df_min_value$log_max_value <- log(df_min_value$max_value)

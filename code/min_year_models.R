@@ -19,16 +19,6 @@ m2 <- lm(slope ~ min + max, data = df_min_value)
 vif_values <- vif(m2)
 print(vif_values)
 
-# LN of explantory variables to get Pseduothreshold
-# Add 1 all min values to avoid log(0)
-df_min_value <- df_min_value %>% 
-mutate(min_value = min + 1, 
-      max_value = max + 1) %>% 
-mutate(min_value = ifelse(min_value < 0, 1, min_value))
-
-df_min_value$log_min_value <- log(df_min_value$min_value)
-df_min_value$log_max_value <- log(df_min_value$max_value)
-
 # Check and see if log_min and log_max are colinear 
 log_min_max_ <- lm(slope ~ log_min_value + log_max_value, data = df_min_value)
 vif(log_min_max_) # log_min and log_max 1 < VIF < 5: moderate correlation
@@ -110,6 +100,105 @@ comparison_table <- data.frame(
 print(comparison_table)
 
 write.csv(comparison_table, file = "E:/chapter1_data/comparison_table.csv", row.names = FALSE)
+
+##################################################################################################################
+# Use crash as an offset variable
+
+null <- lm(slope ~ 1, data = df_min_value)
+null1 <- lm(slope ~ 1 + offset(crash), data = df_min_value)
+temp_diff_ <- lm(slope ~ temp_diff + offset(crash), df_min_value)
+meanrh_ <- lm(slope ~ mean_rh + offset(crash), df_min_value)
+complexity_ <- lm(slope ~ complexity + offset(crash), df_min_value)
+temp_diff_complexity_ <- lm(slope ~ temp_diff + complexity + offset(crash), df_min_value)
+min_ <- lm(slope ~ min + offset(crash), df_min_value)
+max_ <- lm(slope ~ max + offset(crash), df_min_value)
+min_max_ <- lm(slope ~ min + max + offset(crash), data = df_min_value)
+min_meanrh_ <- lm(slope ~ min + mean_rh + offset(crash), df_min_value)
+max_meanrh_ <- lm(slope ~ max + mean_rh + offset(crash), df_min_value)
+min_meanrh_complex_ <- lm(slope ~ min + mean_rh + complexity + offset(crash), df_min_value)
+max_meanrh_complex_ <- lm(slope ~ max + mean_rh + complexity + offset(crash), df_min_value)
+min_complex_ <- lm(slope ~ min + complexity + offset(crash), df_min_value)
+max_complex_ <- lm(slope ~ max + complexity + offset(crash), df_min_value)
+temp_diff_meanrh_complex_ <- lm(slope ~ temp_diff + mean_rh + complexity + offset(crash), data = df_min_value)
+log_min_ <- lm(slope ~ log_min_value + offset(crash), data = df_min_value)
+log_max_ <- lm(slope ~ log_max_value + offset(crash), data = df_min_value)
+log_min_max_ <- lm(slope ~ log_min_value + log_max_value + offset(crash), data = df_min_value)
+log_length_ <- lm(slope ~ log_passage + offset(crash), data = df_min_value)
+log_length_log_min_ <- lm(slope ~ log_passage + log_min_value + offset(crash), data = df_min_value)
+log_length_complex <- lm(slope ~ log_passage + complexity + offset(crash), df_min_value)
+log_length_min_ <- lm(slope ~ log_passage + min + offset(crash), df_min_value)
+log_length_temp_diff <- lm(slope ~ log_passage + temp_diff + offset(crash), df_min_value)
+
+model_list <- list(null, null1, temp_diff_, meanrh_, complexity_, temp_diff_complexity_, min_, max_, min_max_,
+min_meanrh_, max_meanrh_, min_meanrh_complex_, max_meanrh_complex_, min_complex_, max_complex_, 
+temp_diff_meanrh_complex_, log_min_, log_max_, log_min_max_, log_length_, log_length_log_min_, log_length_complex,
+log_length_min_, log_length_temp_diff)
+aic_values <- sapply(model_list, AIC)
+bic_values <- sapply(model_list, BIC)
+comparison_table <- data.frame(
+  Model = c("null", "null1", "temp_diff_", "meanrh_", "complexity_", "temp_diff_complexity_", "min_", "max_", "min_max_",
+"min_meanrh_", "max_meanrh_", "min_meanrh_complex_", "max_meanrh_complex_", "min_complex_", "max_complex_", 
+"temp_diff_meanrh_complex_", "log_min_", "log_max_", "log_min_max_", "log_length_", "log_length_log_min_", "log_length_complex",
+"log_length_min_", "log_length_temp_diff"),
+  AIC = aic_values,
+  BIC = bic_values
+)
+print(comparison_table)
+
+# Corrected AIC values 
+library(AICcmodavg)
+# List of models
+model_list <- list(
+  null = null,
+  null1 = null1,
+  temp_diff_ = temp_diff_,
+  meanrh_ = meanrh_,
+  complexity_ = complexity_,
+  temp_diff_complexity_ = temp_diff_complexity_,
+  min_ = min_,
+  max_ = max_,
+  min_max_ = min_max_,
+  min_meanrh_ = min_meanrh_,
+  max_meanrh_ = max_meanrh_,
+  min_meanrh_complex_ = min_meanrh_complex_,
+  max_meanrh_complex_ = max_meanrh_complex_,
+  min_complex_ = min_complex_,
+  max_complex_ = max_complex_,
+  temp_diff_meanrh_complex_ = temp_diff_meanrh_complex_,
+  log_min_ = log_min_,
+  log_max_ = log_max_,
+  log_min_max_ = log_min_max_,
+  log_length_ = log_length_, 
+  log_length_log_min_ = log_length_log_min_, 
+  log_length_complex = log_length_complex,
+log_length_min_ = log_length_min_, 
+log_length_temp_diff = log_length_temp_diff
+)
+
+# Calculate AICc values
+aic_values <- sapply(model_list, AIC)
+aicc_values <- sapply(model_list, AICc)
+bic_values <- sapply(model_list, BIC)
+
+# Create comparison table
+comparison_table <- data.frame(
+  Model = names(model_list),
+  AIC = aic_values,
+  AICc = aicc_values,
+  BIC = bic_values
+)
+
+# Print comparison table
+print(comparison_table)
+
+if (!require(MuMIn)) install.packages("MuMIn")
+library(MuMIn)
+
+model_avg <- model.avg(model_list)
+summary(model_avg)
+
+
+
 
 
 # Average competitive models
@@ -246,6 +335,15 @@ comparison_table1 <- data.frame(
 )
 print(comparison_table1)
 
+# Extract and compare adjusted R-squared values
+adj_r_squared <- sapply(model_list1, function(model) summary(model)$adj.r.squared)
+adj_r_squared_table <- data.frame(
+  Model = c("null", "crash_", "crash_mintemp", "crash_complex", 
+  "crash_mintemp_complex", "crash_logmin", "crash_maxcount", "crash_mincount", "crash_lastcount"),
+  Adjusted_R_Squared = adj_r_squared
+)
+print(adj_r_squared_table)
+
 
 # Compare nested models to minimum temperature lm
 anova_crash_min <- anova(crash_, crash_mintemp)
@@ -267,3 +365,4 @@ anova_results <- list(
 )
 
 print(anova_results)
+

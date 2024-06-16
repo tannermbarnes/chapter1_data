@@ -6,8 +6,12 @@ library(tidyverse)
 if (!require(dplyr)) {
   install.packages("dplyr")
 }
+#install.packages(c("dplyr", "lubridate", "stringr", "tidyr"))
 
 library(dplyr)
+library(lubridate)
+library(stringr)
+library(tidyr)
 
 # Because the dates are in different formats, this function will be able to get them all in the correct format
 convert_excel_dates <-
@@ -259,6 +263,9 @@ summarize(
     min = min(min),
     max = max(max),
     temp_diff = (max - min),
+    mean_temp = max(mean_temp),
+    median_temp = max(median_temp),
+    mode_temp = max(mode_temp),
     ore = first(ore),
     azimuth = 37,
     entrance_height = last(entrance_height),
@@ -267,6 +274,7 @@ summarize(
     shafts = 2, 
     water = NA,
     mean_rh = mean(mean_rh),
+    max_rh = max(max_rh),
     passage_length = 625, 
     count = sum(count, na.rm = TRUE),
     .groups = 'drop') %>% 
@@ -287,3 +295,5 @@ data_wide3 <- final_data %>%
 pivot_wider(names_from = year, values_from = count) %>% 
 select(site, sort(names(.)[-1])) %>% 
 arrange(site)
+
+

@@ -7,6 +7,14 @@ library(lme4)
 library(car)
 library(lmtest)
 
+df_min_value$qualified_recovery <- df_min_value$slope * df_min_value$crash
+View(df_min_value)
+
+df_min_value$normalized_count1 <- df_min_value$last_count / df_min_value$max_count
+
+model <- lm(normalized_count1 ~ complexity + min + crash, df_min_value)
+summary(model)
+
 # Check for Multicolinearity
 lim <- lm(slope ~ crash + min, data = df_min_value)
 vif_values = vif(lim)
@@ -39,35 +47,87 @@ theme(
 #   legend.key.size = unit(0.5, "cm")
 )
 
-df_min_value %>% filter(last_count > 0) %>% 
-ggplot(aes(x= crash, y = slope)) +
-geom_point(aes(fill = last_count, size = complexity), shape = 21, color = "black", stroke = 0.5) +
+
+
+df_min_value %>% 
+ggplot(aes(x=site, y=max_count)) +
+geom_point() +
+geom_point(aes(y= last_count))
+ggsave("E:/chapter1_data/figures/max-vs-current.png", width = 6, height=4)
+
+df_min_value %>% 
+ggplot(aes(x=crash, y = normalized_count1)) +
+geom_point(aes(fill = min, size = complexity), shape = 21, color = "black", stroke = 0.5) +
 geom_smooth(method = "lm") +
-labs(title = "How does pop crash, min temp, and size affect slope",
-x = "Population Crash",
-y = "Slope") + 
 scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+labs(title = "Pop crash and min temp affect the amount of bats that have recovered",
+x = "Population crash",
+y = "Percent recovered") + 
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+ggsave("E:/chapter1_data/figures/normalzied_recovery.png", width = 6, height=4)
+
+df_min_value %>% filter(passage_length < 7000) %>% 
+ggplot(aes(x=passage_length, y = qualified_recovery)) +
+geom_point(aes(fill = min), shape = 21, color = "black", stroke = 0.5) +
+geom_smooth(method = "lm") +
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+labs(title = "How does min temp, and complexity affect qualified slope",
+x = "minimum temperature",
+y = "Qualified recovery (slope x pop crash)") + 
 theme_bw() +
 theme(
   plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
 )
 
-ggsave("E:/chapter1_data/figures/crash_popsize_min.png", width = 6, height=4)
+ggsave("E:/chapter1_data/figures/q-slope_by_min_length.png", width = 6, height=4)
 
-df_min_value %>% 
+df_min_value %>%
 ggplot(aes(x= crash, y = slope)) +
-geom_point(aes(fill = min, size = max_count, shape = complexity), color = "black", stroke = 0.5) +
+geom_point(aes(fill = min, size = complexity), shape = 21, color = "black", stroke = 0.5) +
 geom_smooth(method = "lm") +
 labs(title = "How does pop crash, min temp, and complexity affect slope",
 x = "Population Crash",
-y = "Slope") + 
+y = "Recovery Rate") + 
 scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
 theme_bw() +
 theme(
   plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
 )
 
-ggsave("E:/chapter1_data/figures/crash_popsize_complex_min.png", width = 6, height=4)
+ggsave("E:/chapter1_data/figures/slope_by_crash_min_complex.png", width = 6, height=4)
+
+df_min_value %>%
+ggplot(aes(x= crash, y = slope)) +
+geom_point(aes(fill = min, size = max_count), shape = 21, color = "black", stroke = 0.5) +
+geom_smooth(method = "lm") +
+labs(title = "How does pop crash, min temp, and complexity affect slope",
+x = "Population Crash",
+y = "Recovery Rate") + 
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+
+ggsave("E:/chapter1_data/figures/slope_by_crash_min_maxpop.png", width = 6, height=4)
+
+df_min_value %>% filter(last_count < 9000) %>% 
+ggplot(aes(x= crash, y = slope)) +
+geom_point(aes(fill = min, size = last_count), shape = 21, color = "black", stroke = 0.5) +
+geom_smooth(method = "lm") +
+labs(title = "How does pop crash, min temp, and complexity affect slope",
+x = "Population Crash",
+y = "Recovery Rate") + 
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+
+ggsave("E:/chapter1_data/figures/slope_by_crash_min_lastcount.png", width = 6, height=4)
 
 df_min_value %>%
 ggplot(aes(x= complexity, y = crash)) +
