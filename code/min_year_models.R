@@ -23,6 +23,8 @@ print(vif_values)
 log_min_max_ <- lm(slope ~ log_min_value + log_max_value, data = df_min_value)
 vif(log_min_max_) # log_min and log_max 1 < VIF < 5: moderate correlation
 
+best_model <- lm(slope ~ crash, df_min_value)
+summary(best_model)
 
 # Linear Models
 null <- lm(slope ~ 1, data = df_min_value)
@@ -123,23 +125,17 @@ temp_diff_meanrh_complex_ <- lm(slope ~ temp_diff + mean_rh + complexity + offse
 log_min_ <- lm(slope ~ log_min_value + offset(crash), data = df_min_value)
 log_max_ <- lm(slope ~ log_max_value + offset(crash), data = df_min_value)
 log_min_max_ <- lm(slope ~ log_min_value + log_max_value + offset(crash), data = df_min_value)
-log_length_ <- lm(slope ~ log_passage + offset(crash), data = df_min_value)
-log_length_log_min_ <- lm(slope ~ log_passage + log_min_value + offset(crash), data = df_min_value)
-log_length_complex <- lm(slope ~ log_passage + complexity + offset(crash), df_min_value)
-log_length_min_ <- lm(slope ~ log_passage + min + offset(crash), df_min_value)
-log_length_temp_diff <- lm(slope ~ log_passage + temp_diff + offset(crash), df_min_value)
+log_min_complex <- lm(slope ~ log_min_value + complexity + offset(crash), df_min_value)
 
 model_list <- list(null, null1, temp_diff_, meanrh_, complexity_, temp_diff_complexity_, min_, max_, min_max_,
 min_meanrh_, max_meanrh_, min_meanrh_complex_, max_meanrh_complex_, min_complex_, max_complex_, 
-temp_diff_meanrh_complex_, log_min_, log_max_, log_min_max_, log_length_, log_length_log_min_, log_length_complex,
-log_length_min_, log_length_temp_diff)
+temp_diff_meanrh_complex_, log_min_, log_max_, log_min_max_, log_min_complex)
 aic_values <- sapply(model_list, AIC)
 bic_values <- sapply(model_list, BIC)
 comparison_table <- data.frame(
   Model = c("null", "null1", "temp_diff_", "meanrh_", "complexity_", "temp_diff_complexity_", "min_", "max_", "min_max_",
 "min_meanrh_", "max_meanrh_", "min_meanrh_complex_", "max_meanrh_complex_", "min_complex_", "max_complex_", 
-"temp_diff_meanrh_complex_", "log_min_", "log_max_", "log_min_max_", "log_length_", "log_length_log_min_", "log_length_complex",
-"log_length_min_", "log_length_temp_diff"),
+"temp_diff_meanrh_complex_", "log_min_", "log_max_", "log_min_max_", "log_min_complex"),
   AIC = aic_values,
   BIC = bic_values
 )
@@ -149,7 +145,6 @@ print(comparison_table)
 library(AICcmodavg)
 # List of models
 model_list <- list(
-  null = null,
   null1 = null1,
   temp_diff_ = temp_diff_,
   meanrh_ = meanrh_,
@@ -168,11 +163,7 @@ model_list <- list(
   log_min_ = log_min_,
   log_max_ = log_max_,
   log_min_max_ = log_min_max_,
-  log_length_ = log_length_, 
-  log_length_log_min_ = log_length_log_min_, 
-  log_length_complex = log_length_complex,
-log_length_min_ = log_length_min_, 
-log_length_temp_diff = log_length_temp_diff
+  log_min_complex = log_min_complex
 )
 
 # Calculate AICc values
@@ -197,7 +188,7 @@ library(MuMIn)
 model_avg <- model.avg(model_list)
 summary(model_avg)
 
-
+model.sel(model_list)
 
 
 

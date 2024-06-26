@@ -1,0 +1,295 @@
+rm(list = ls())
+setwd("E:/chapter1_data/code")
+source("raw_data.R")
+library(tidyr)
+library(purrr)
+library(broom)
+#View(data_wide3)
+
+data <- data_wide3 %>% 
+pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
+"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
+"2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
+
+# Subset data from the minimum count value for each site and year combination
+data1 <- data %>% drop_na(count)
+#View(data1)
+
+# Get the minimum and maximum count data to normalize the counts
+min_max_count <- data %>% 
+group_by(site) %>% 
+filter(year < 2016) %>% 
+summarize(min_count = min(count, na.rm = TRUE), max_count = max(count, na.rm = TRUE)) %>% 
+ungroup()
+
+data_with_min_max <- data %>% 
+left_join(min_max_count, by = "site")
+
+
+before_data <- data_with_min_max %>% 
+group_by(site) %>% 
+filter(max_count > 0) %>%
+filter(max > 0) %>% 
+pivot_wider(names_from = year, 
+            values_from = count)
+
+#View(before_data)
+
+before_data <- before_data %>%
+  mutate(water = ifelse(water == "?", NA, water),
+  water = as.factor(water),
+  shafts = as.factor(shafts),
+  levels = as.factor(levels),
+  passage_length = as.numeric(passage_length)
+  )
+
+library(MASS)
+
+# Define the list of temperature variables
+temp_vars <- c("min", "max", "mean_temp", "median_temp", "mode_temp", "temp_diff")
+
+# Initialize lists to store models and their AIC values
+poisson_models <- list()
+nb_models <- list()
+aic_values <- data.frame(Model = character(), Poisson_AIC = numeric(), NB_AIC = numeric(), stringsAsFactors = FALSE)
+
+# Loop through each temperature variable and fit models
+for (temp_var in temp_vars) {
+  formula <- as.formula(paste("max_count ~", temp_var))
+  
+  # Fit Poisson model
+  poisson_model <- glm(formula, data = before_data, family = poisson(link = "log"))
+  poisson_models[[temp_var]] <- poisson_model
+  
+  # Check for overdispersion
+  dispersion <- sum(residuals(poisson_model, type = "pearson")^2) / df.residual(poisson_model)
+  
+  # Initialize AIC values
+  poisson_aic <- AIC(poisson_model)
+  nb_aic <- NA
+  
+  # Fit Negative Binomial model if overdispersion is present
+  if (dispersion > 1) {
+    nb_model <- glm.nb(formula, data = before_data)
+    nb_models[[temp_var]] <- nb_model
+    nb_aic <- AIC(nb_model)
+  }
+  
+  # Store AIC values
+  aic_values <- rbind(aic_values, data.frame(Model = temp_var, Poisson_AIC = poisson_aic, NB_AIC = nb_aic, stringsAsFactors = FALSE))
+}
+
+# Print AIC values for comparison
+print(aic_values)
+
+# Identify the best model based on AIC
+best_poisson_model <- aic_values[which.min(aic_values$Poisson_AIC), "Model"]
+best_nb_model <- aic_values[which.min(aic_values$NB_AIC), "Model"]
+
+print(paste("Best Poisson model based on AIC:", best_poisson_model))
+if (!is.na(best_nb_model)) {
+  print(paste("Best Negative Binomial model based on AIC:", best_nb_model))
+}
+
+# Summary of the best models
+if (!is.na(best_poisson_model)) {
+  print("Summary of the best Poisson model:")
+  summary(poisson_models[[best_poisson_model]])
+}
+
+if (!is.na(best_nb_model)) {
+  print("Summary of the best Negative Binomial model:")
+  summary(nb_models[[best_nb_model]])
+}
+
+before_data %>%
+  ggplot(aes(x = max)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
+  labs(title = "Distribution of Median Temperatures",
+       x = "Median Temperature",
+       y = "Count") +
+  theme_bw()
+
+ggsave("E:/chapter1_data/figures/final/before_wns_median_temp.png", width = 6, height=4)
+
+after_data %>%
+  ggplot(aes(x = max)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
+  labs(title = "Distribution of Median Temperatures",
+       x = "Median Temperature",
+       y = "Count") +
+  theme_bw()
+
+ggsave("E:/chapter1_data/figures/final/after_wns_median_temp.png", width = 6, height=4)
+
+library(ggplot2)
+library(patchwork)
+
+# Create the first histogram for before_data
+p1 <- before_data %>%
+filter(site != "Tippy Dam") %>% 
+  ggplot(aes(x = median_temp)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
+  labs(title = "Distribution of Median Temperatures (Before)",
+       x = "Median Temperature",
+       y = "Count") +
+  theme_bw()
+
+# Create the second histogram for after_data
+p2 <- after_data %>%
+filter(site != "Tippy Dam") %>% 
+  ggplot(aes(x = median_temp)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
+  labs(title = "Distribution of Median Temperatures (After)",
+       x = "Median Temperature",
+       y = "Count") +
+  theme_bw()
+
+# Combine the two plots side by side
+combined_plot <- p1 + p2
+
+# Save the combined plot
+ggsave("E:/chapter1_data/figures/final/before_after_median_temp.png", plot = combined_plot, width = 12, height = 6)
+
+
+before_data %>%
+  ggplot(aes(x = median_temp, y = max_count)) +
+  geom_point() +
+  geom_smooth(method = "gam", formula = y ~ s(x), color = "blue") +
+  labs(title = "Relationship between Median Temperature and Max Count (GAM)",
+       x = "Median Temperature",
+       y = "Max Count") +
+  theme_bw()
+
+p1 <- before_data %>%
+filter(site != "Tippy Dam") %>% 
+  ggplot(aes(x = median_temp, y = max_count)) +
+  geom_point() +
+  geom_smooth(method = "loess", color = "green") +
+  labs(title = "Relationship between Median Temperature and Max Count (LOESS)",
+       x = "Median Temperature",
+       y = "Max Count") +
+  theme_bw()
+
+p2 <- after_data %>%
+filter(site != "Tippy Dam") %>% 
+  ggplot(aes(x = median_temp, y = max_count)) +
+  geom_point() +
+  geom_smooth(method = "loess", color = "green") +
+  labs(title = "Relationship between Median Temperature and Max Count (LOESS)",
+       x = "Median Temperature",
+       y = "Max Count") +
+  theme_bw()
+
+# p1 <- before_data %>%
+#   ggplot(aes(x = min, y = max_count)) +
+#   geom_point() +
+#   geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "purple") +
+#   labs(title = "Relationship between Minimum Temperature and Max Count (Polynomial Regression)",
+#        x = "Minimum Temperature",
+#        y = "Max Count") +
+#   theme_bw()
+
+# p2 <- after_data %>%
+#   ggplot(aes(x = min, y = max_count)) +
+#   geom_point() +
+#   geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "purple") +
+#   labs(title = "Relationship between Minimum Temperature and Max Count (Polynomial Regression)",
+#        x = "Minimum Temperature",
+#        y = "Max Count") +
+#   theme_bw()
+
+combined_plot <- p1 + p2
+
+# Save the combined plot
+ggsave("E:/chapter1_data/figures/final/median_scatter.png", plot = combined_plot, width = 12, height = 6)
+
+
+############
+# Now below do the same thing but for the max count after 2015
+
+# Get the minimum and maximum count data to normalize the counts
+min_max_count <- data %>% 
+group_by(site) %>% 
+filter(year > 2016) %>% 
+summarize(min_count = min(count, na.rm = TRUE), max_count = max(count, na.rm = TRUE)) %>% 
+ungroup()
+
+data_with_min_max <- data %>% 
+left_join(min_max_count, by = "site")
+
+
+after_data <- data_with_min_max %>% 
+group_by(site) %>% 
+filter(max_count > 0) %>%
+filter(max > 0) %>% 
+pivot_wider(names_from = year, 
+            values_from = count)
+
+View(after_data)
+
+after_data <- after_data %>%
+  mutate(water = ifelse(water == "?", NA, water),
+  water = as.factor(water),
+  shafts = as.factor(shafts),
+  levels = as.factor(levels),
+  passage_length = as.numeric(passage_length)
+  )
+
+# Define the list of temperature variables
+temp_vars <- c("min", "max", "mean_temp", "median_temp", "mode_temp", "temp_diff")
+
+# Initialize lists to store models and their AIC values
+poisson_models <- list()
+nb_models <- list()
+aic_values <- data.frame(Model = character(), Poisson_AIC = numeric(), NB_AIC = numeric(), stringsAsFactors = FALSE)
+
+# Loop through each temperature variable and fit models
+for (temp_var in temp_vars) {
+  formula <- as.formula(paste("max_count ~", temp_var))
+  
+  # Fit Poisson model
+  poisson_model <- glm(formula, data = after_data, family = poisson(link = "log"))
+  poisson_models[[temp_var]] <- poisson_model
+  
+  # Check for overdispersion
+  dispersion <- sum(residuals(poisson_model, type = "pearson")^2) / df.residual(poisson_model)
+  
+  # Initialize AIC values
+  poisson_aic <- AIC(poisson_model)
+  nb_aic <- NA
+  
+  # Fit Negative Binomial model if overdispersion is present
+  if (dispersion > 1) {
+    nb_model <- glm.nb(formula, data = before_data)
+    nb_models[[temp_var]] <- nb_model
+    nb_aic <- AIC(nb_model)
+  }
+  
+  # Store AIC values
+  aic_values <- rbind(aic_values, data.frame(Model = temp_var, Poisson_AIC = poisson_aic, NB_AIC = nb_aic, stringsAsFactors = FALSE))
+}
+
+# Print AIC values for comparison
+print(aic_values)
+
+# Identify the best model based on AIC
+best_poisson_model <- aic_values[which.min(aic_values$Poisson_AIC), "Model"]
+best_nb_model <- aic_values[which.min(aic_values$NB_AIC), "Model"]
+
+print(paste("Best Poisson model based on AIC:", best_poisson_model))
+if (!is.na(best_nb_model)) {
+  print(paste("Best Negative Binomial model based on AIC:", best_nb_model))
+}
+
+# Summary of the best models
+if (!is.na(best_poisson_model)) {
+  print("Summary of the best Poisson model:")
+  summary(poisson_models[[best_poisson_model]])
+}
+
+if (!is.na(best_nb_model)) {
+  print("Summary of the best Negative Binomial model:")
+  summary(nb_models[[best_nb_model]])
+}
+

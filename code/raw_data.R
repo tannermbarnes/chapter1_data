@@ -27,7 +27,7 @@ dat <- read_excel("E:/chapter1_data/data.xlsx", sheet = "bat survey data") %>%
 select(site = `Name of Hibernaculum...1`, ore = `Ore or Rock`, passage_length = `Length of Open Passage (feet)`,
 azimuth = `Azimuth into Main Entrance`, entrance_height = `Maximum Height of Main Entrance`, entrance_width = `Maximum Width of Main Entrance`,
 levels = `Number of Open Levels`, shafts = `Number of Shafts Open for Human Access`, 
-water = `Standing Water at Bottom of Shaft?`,
+water_in = `Standing Water at Bottom of Shaft?`, water_bottom = `Standing Water in Adit or Cave Entrance?`,
 external_ta = `External TA`, internal_ta = `Internal TA`, internal_rh = `Internal RH (%)`, date = `Date`,
 disturbance = `Current Level of Disturbance`, total_bats = `Total Number of Bats`, estimate_or_count = `Estimate or Count`,
 myotis_count = `Total Number of Myotis`, myotis_identified = `Sample of Myotis Identified to Species`, 
@@ -167,7 +167,7 @@ print(result)
 
 data_wide_test <- dat1 %>% 
 select(site, ore, azimuth,entrance_height, entrance_width,
-levels, shafts, water) %>% 
+levels, shafts, water_in, water_bottom) %>% 
 group_by(site) %>% 
 summarize(across(everything(), ~ first(na.omit(.)), .names = "first_{col}")) %>% 
 ungroup()
@@ -272,7 +272,7 @@ summarize(
     entrance_width = last(entrance_width),
     levels = 2, 
     shafts = 2, 
-    water = NA,
+    water_bottom = "Yes",
     mean_rh = mean(mean_rh),
     max_rh = max(max_rh),
     passage_length = 625, 
@@ -291,9 +291,23 @@ final_data <- bind_rows(remaining_data, combined_data)
 final_data <- final_data %>% 
 filter(!site %in% NA)
 
-data_wide3 <- final_data %>% 
+data_widex <- final_data %>% 
 pivot_wider(names_from = year, values_from = count) %>% 
 select(site, sort(names(.)[-1])) %>% 
 arrange(site)
 
+# Fix the spots where water columns are not coded as yes or no
+data_widex$water_bottom[data_widex$water_bottom == "Stream"] <- "Yes"
+data_widex$water_bottom[data_widex$water_bottom == "?"] <- NA
 
+# Combine water_in and water_bottom into standing_water
+data_wide3 <- data_widex %>% 
+  mutate(water_in = tolower(water_in),
+         water_bottom = tolower(water_bottom)) %>% 
+  mutate(standing_water = case_when(
+    water_in == "yes" | water_bottom == "yes" ~ "yes",
+    water_in == "no" & is.na(water_bottom) ~ "no",
+    water_bottom == "no" & is.na(water_in) ~ "no",
+    is.na(water_in) & is.na(water_bottom) ~ NA_character_,
+    TRUE ~ NA_character_
+  ))

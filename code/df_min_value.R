@@ -17,21 +17,19 @@ model_this_data2$shafts <- as.factor(model_this_data2$shafts)
 
 # Create a variable for mine complexity
 #View(model_this_data)
-
 model_with_complexity <- model_this_data2 %>% 
-mutate(levels = ifelse(is.na(levels), 1, levels)) %>% 
-mutate(shafts = ifelse(is.na(shafts), 1, shafts)) %>% 
-mutate(complexity = case_when(
+  mutate(levels = ifelse(is.na(levels), 1, levels)) %>% 
+  mutate(shafts = ifelse(is.na(shafts), 1, shafts)) %>% 
+  mutate(complexity = case_when(
+    passage_length > 600 & levels == 1 & shafts == 1 ~ 4,
     passage_length > 200 & shafts >= 2 & levels == 1 ~ 3,
     passage_length > 200 & shafts >= 1 & levels >= 2 ~ 4,
     passage_length >= 200 & shafts >= 1 & levels >= 1 ~ 2,
     TRUE ~ 1  # Default to 1 if no other conditions are met
-  )
-)
-
+  ))
 
 # remove collin's adit because max is 1 and min is 0 not a hibernacula
-mines_to_remove <- c("Collin's Adit")
+mines_to_remove <- c("Collin's Adit", "Ridge Adit", "Bear Cave")
 
 add_last_count <- model_with_complexity %>% 
 pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
@@ -65,3 +63,5 @@ mutate(min_value = ifelse(min_value < 0, 1, min_value))
 
 df_min_value$log_min_value <- log(df_min_value$min_value)
 df_min_value$log_max_value <- log(df_min_value$max_value)
+
+df_min_value$site

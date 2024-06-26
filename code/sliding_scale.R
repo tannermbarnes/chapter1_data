@@ -107,43 +107,116 @@ regression_results <- tidied_data %>%
 # Step 6: Add the slope to the original data frame
 final_data <- sites_with_sufficient_data %>%
   left_join(regression_results, by = "site")
-View(final_data)
+
+#View(final_data)
+
+# Merge final slopes with the other metadata in a wide format to model
+model_data1 <- final_data %>% 
+pivot_wider(names_from = relative_year, 
+            values_from = normalize_count) %>% 
+select(site, slope) %>% 
+left_join(data_wide3, by = "site")
+
+
+model_data2 <- data_with_decrease_year %>% 
+group_by(site) %>% 
+summarize(min_count = min(min_count), max_count = max(max_count)) %>% 
+inner_join(model_data1, by = "site") %>% 
+ungroup()
+
+sites_to_remove <- c("Collin's Adit", "Douglas Houghton Adit #1", "Eagle River Adit 2 (Lake Superior & Phoenix)",
+"North American Adit", "Ohio Traprock Mine #59 (Norwich Adit)", "Rockport Quarry South Tunnel",
+"Randville Quarry Mine")
+
+filtered_data1 <- model_data2 %>%
+  filter(!site %in% sites_to_remove)
+
+# Change water to a factor
+filtered_data1$standing_water <- as.factor(filtered_data1$water)
+filtered_data1$levels <- as.factor(filtered_data1$levels)
+filtered_data1$shafts <- as.factor(filtered_data1$shafts)
+
+
+model_with_complexity <- filtered_data1 %>% 
+  mutate(levels = ifelse(is.na(levels), 1, levels)) %>% 
+  mutate(shafts = ifelse(is.na(shafts), 1, shafts)) %>% 
+  mutate(complexity = case_when(
+    passage_length > 600 & levels == 1 & shafts == 1 ~ 4,
+    passage_length > 200 & shafts >= 2 & levels == 1 ~ 3,
+    passage_length > 200 & shafts >= 1 & levels >= 2 ~ 4,
+    passage_length >= 200 & shafts >= 1 & levels >= 1 ~ 2,
+    TRUE ~ 1  # Default to 1 if no other conditions are met
+  ))
+
+add_last_count <- model_with_complexity1 %>% 
+pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
+"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
+"2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
+
+add_last_count1 <- add_last_count %>% 
+group_by(site) %>% 
+arrange(site, desc(year)) %>% 
+mutate(last_count = first(na.omit(count))) %>% 
+ungroup()
+
+add_last_count2 <- add_last_count1 %>% 
+pivot_wider(names_from = year, values_from = count)
+
+df_slide_scale <- add_last_count2 %>% 
+filter(!site %in% sites_to_remove)
+
+# Add crash intensity
+df_slide_scale$crash <- 1 - (df_slide_scale$min_count/df_slide_scale$max_count)
+df_slide_scale$log_max_count <- log(df_slide_scale$max_count)
+df_slide_scale$log_passage <- log(df_slide_scale$passage_length)
+
+# LN of explantory variables to get Pseduothreshold
+# Add 1 all min values to avoid log(0)
+df_slide_scale <- df_slide_scale %>% 
+mutate(min_value = min + 1, 
+      max_value = max + 1) %>% 
+mutate(min_value = ifelse(min_value < 0, 1, min_value))
+
+df_slide_scale$log_min_value <- log(df_slide_scale$min_value)
+df_slide_scale$log_max_value <- log(df_slide_scale$max_value)
+
+
 # Check the final data
 #print("Final data with slopes:")
 #View(final_data)
 
-#Graph the regression lines
-ggplot(final_data, aes(x = year, y = count, color = site)) +
-geom_point() +
-geom_smooth(method = "lm", se = FALSE, aes(group = site)) + # Regression line per site
-theme_minimal() +
-labs(title = "Yearly Count Data with Regression Lines per Site",
-x = "Year", 
-y = "Count", 
-color = "Site") + 
-theme(legend.position = "none")
+# #Graph the regression lines
+# ggplot(final_data, aes(x = year, y = count, color = site)) +
+# geom_point() +
+# geom_smooth(method = "lm", se = FALSE, aes(group = site)) + # Regression line per site
+# theme_minimal() +
+# labs(title = "Yearly Count Data with Regression Lines per Site",
+# x = "Year", 
+# y = "Count", 
+# color = "Site") + 
+# theme(legend.position = "none")
 
- ggsave("E:/chapter1_data/figures/slide_scale_regressions.jpg", width = 8, height=4)
+#  ggsave("E:/chapter1_data/figures/slide_scale_regressions.jpg", width = 8, height=4)
 
-# Filter out tippy dam for better viewing purposes
-final_data %>% filter(count < 5000) %>% filter(year > 2013) %>% 
-ggplot(aes(x = year, y = count, color = site)) +
-geom_point() +
-geom_smooth(method = "lm", se = FALSE, aes(group = site)) + # Regression line per site
-theme_minimal() +
-labs(title = "Yearly Count Data with Regression Lines per Site",
-x = "Year", 
-y = "Count", 
-color = "Site") + 
-theme(legend.position = "none")
+# # Filter out tippy dam for better viewing purposes
+# final_data %>% filter(count < 5000) %>% filter(year > 2013) %>% 
+# ggplot(aes(x = year, y = count, color = site)) +
+# geom_point() +
+# geom_smooth(method = "lm", se = FALSE, aes(group = site)) + # Regression line per site
+# theme_minimal() +
+# labs(title = "Yearly Count Data with Regression Lines per Site",
+# x = "Year", 
+# y = "Count", 
+# color = "Site") + 
+# theme(legend.position = "none")
 
-ggsave("E:/chapter1_data/figures/slide_scale_regressions.jpg", width = 8, height=4)
+# ggsave("E:/chapter1_data/figures/slide_scale_regressions.jpg", width = 8, height=4)
 
-model_this_data <- final_data %>% 
-pivot_wider(names_from = relative_year, 
-            values_from = normalize_count) %>% 
-select(site, slope) %>% 
-left_join(data_wide2, by = "site")
+# model_this_data <- final_data %>% 
+# pivot_wider(names_from = relative_year, 
+#             values_from = normalize_count) %>% 
+# select(site, slope) %>% 
+# left_join(data_wide2, by = "site")
 
 #View(model_this_data)
 
