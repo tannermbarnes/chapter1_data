@@ -30,7 +30,7 @@ colors <- c("blue", "white", "red")
 complexity_colors <- c("1" = "#56B4E9", "2" = "#E69F00", "3" = "#009E73", "4" = "#CC79A7")
 df_min_value$complexity <- factor(df_min_value$complexity, levels = 1:4)
 
-df_min_value %>% filter(last_count > 0) %>% 
+df_min_value %>%
 ggplot(aes(x= complexity, y = crash)) +
 geom_point(aes(color = complexity, size = last_count)) +
 geom_smooth(method = "lm") +

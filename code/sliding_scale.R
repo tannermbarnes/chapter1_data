@@ -1,3 +1,4 @@
+##### Making models for sliding scales ######
 rm(list = ls())
 setwd("E:/chapter1_data/code")
 source("raw_data.R")
@@ -132,7 +133,7 @@ filtered_data1 <- model_data2 %>%
   filter(!site %in% sites_to_remove)
 
 # Change water to a factor
-filtered_data1$standing_water <- as.factor(filtered_data1$water)
+filtered_data1$standing_water <- as.factor(filtered_data1$standing_water)
 filtered_data1$levels <- as.factor(filtered_data1$levels)
 filtered_data1$shafts <- as.factor(filtered_data1$shafts)
 
@@ -148,7 +149,7 @@ model_with_complexity <- filtered_data1 %>%
     TRUE ~ 1  # Default to 1 if no other conditions are met
   ))
 
-add_last_count <- model_with_complexity1 %>% 
+add_last_count <- model_with_complexity %>% 
 pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
 "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
 "2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
@@ -262,6 +263,9 @@ df_slide_scale$log_max_value <- log(df_slide_scale$max_value)
 # geom_smooth(method = "lm", show.legend = FALSE, se = FALSE)
 
 # ggsave("E:/chapter1_data/figures/sliding_normalize_slope_by_mine.png", width = 6, height=4)
+
+
+
 
 
 

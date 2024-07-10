@@ -1,0 +1,35 @@
+# Models with only the complexity factors
+complexity_model <- '
+  # Crash regressions
+  crash ~ 1 + standing_water + complexity + passage_length + levels + shafts
+
+  # Slope regression
+  slope ~ 1 + standing_water + complexity + passage_length + levels + shafts + crash
+'
+
+# Models only with the climate factors
+climate_model <- '
+# Crash regression
+crash ~ 1 + min + max + mean_temp
+
+# Slope regression
+slope ~ 1 + min + max + mean_temp + crash
+min ~~ max
+'
+complete_model <- '
+  # Crash regressions
+  crash ~ 1 + complexity + standing_water + complexity + passage_length + levels + shafts + min + max + mean_temp
+  # Slope regression
+  slope ~ 1 + standing_water + complexity + passage_length + levels + shafts + crash + min + max + mean_temp
+'
+
+# Fit the model to your data
+fit.path1 <- sem(complexity_model, data = df_min_value)
+fit.path2 <- sem(climate_model, data = df_min_value)
+fit.path3 <- sem(complete_model, data = df_min_value)
+# Summarize the results
+anova(fit.path1, fit.path2, fit.path3)
+
+summary(fit.path1, fit.measures = TRUE, standardized = TRUE)
+summary(fit.path2, fit.measures = TRUE, standardized = TRUE)
+summary(fit.path3, fit.measures = TRUE, standardized = TRUE)

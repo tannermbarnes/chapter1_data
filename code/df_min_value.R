@@ -11,7 +11,7 @@ library(car)
 library(lmtest)
 
 # Change water to a factor
-model_this_data2$standing_water <- as.factor(model_this_data2$water)
+model_this_data2$standing_water <- as.factor(model_this_data2$standing_water)
 model_this_data2$levels <- as.factor(model_this_data2$levels)
 model_this_data2$shafts <- as.factor(model_this_data2$shafts)
 
@@ -65,3 +65,4 @@ df_min_value$log_min_value <- log(df_min_value$min_value)
 df_min_value$log_max_value <- log(df_min_value$max_value)
 
 df_min_value$site
+

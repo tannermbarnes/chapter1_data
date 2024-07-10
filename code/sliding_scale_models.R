@@ -9,24 +9,9 @@ library(car)
 #install.packages("lmtest")
 library(lmtest)
 
-# Change water to a factor
-model_this_data$standing_water <- as.factor(model_this_data$water)
-model_this_data$levels <- as.factor(model_this_data$levels)
-model_this_data$shafts <- as.factor(model_this_data$shafts)
-
 # Create a variable for mine complexity
 #View(model_this_data)
 
-model_with_complexity <- model_this_data %>% 
-mutate(levels = ifelse(is.na(levels), 1, levels)) %>% 
-mutate(shafts = ifelse(is.na(shafts), 1, shafts)) %>% 
-mutate(complexity = case_when(
-    passage_length > 200 & shafts >= 2 & levels == 1 ~ 3,
-    passage_length > 200 & shafts >= 1 & levels >= 2 ~ 4,
-    passage_length <= 200 & shafts >= 1 & levels >= 1 ~ 2,
-    TRUE ~ 1  # Default to 1 if no other conditions are met
-  )
-)
 
 # Remove mines that were never hibernacula 
 #View(model_this_data)
@@ -36,16 +21,104 @@ mines_to_remove <- c("Collin's Adit", "Douglas Houghton Adit #1", "Glen Adit #3"
 df_sliding_scale <- model_with_complexity %>% 
 filter(!site %in% mines_to_remove)
 
+df_slide_scale$ore <- as.factor(df_slide_scale$ore)
+
+#Path anaylsis
+model_df <- df_slide_scale %>% 
+select(slope, standing_water, complexity, passage_length, levels, shafts, 
+crash, min, max, median_temp, mean_temp, temp_diff, ore)
+
+
+# Define the path model
+model_df$ore <- as.factor(model_df$ore)
+model_df$levels <- as.numeric(model_df$levels)
+model_df$shafts <- as.numeric(model_df$shafts)
+model_df$standing_water[37] <- "yes"
+model_df$standing_water[is.na(model_df$standing_water)] <- "no"
+# Change row 37 to yes
+
+
+# Convert factors to dummy variables
+model_df_numeric <- model.matrix(~ . - 1, data = model_df)
+
+# Convert the matrix back to a dataframe
+model_df_numeric <- as.data.frame(model_df_numeric)
+
+# CFI = comparative fit index = models greater than 0.9, conservatively 0.95 indicate good fit
+# TLI = values greater than 0.9 indicating good fit. CFI is always greater than TLI
+# RMSEA <= 0.05 close-fit, >= 0.10 poor fit, between 0.5 & 0.8 reasonable approximate fit does not compare to baseline model
+# The baseline model is the worst fitting model assumes no covariances between variables wanna compare our model to baseline model
+# Saturated model is best model df = 0
+# Your model is somewhere between baseline and saturated model
+
+
+
+#View(model_df_numeric)
+
+min.model <- '
+crash ~ min + complexity + standing_wateryes
+slope ~ crash + standing_wateryes
+'
+max.model <- '
+crash ~ max + complexity + standing_wateryes
+slope ~ crash + standing_wateryes
+'
+
+mean.model <- '
+crash ~ mean_temp + complexity + standing_wateryes
+slope ~ crash + standing_wateryes
+'
+
+fit.m1d <- sem(min.model, data = model_df_numeric)
+fit.m2d <- sem(max.model, data = model_df_numeric)
+fit.m3d <- sem(mean.model, data = model_df_numeric)
+summary(fit.m1d, fit.measures = TRUE)
+summary(fit.m2d, fit.measures = TRUE)
+summary(fit.m3d, fit.measures = TRUE)
+
+
+#anova(fit.m1d, fit.m2d, fit.m3d) # models have same degrees of freedom so cannot compare
+modindices(fit.m1d, sort = TRUE) #1 degree of freedom test, mi = modification index (want around t-stat), epc = how much you expect the parameter to change
+modindices(fit.m2d, sort = TRUE)
+modindices(fit.m3d, sort = TRUE)
+
+# Add mean_temp
+mean.model2 <- '
+crash ~ mean_temp + complexity + standing_wateryes
+slope ~ crash + standing_wateryes + mean_temp
+'
+fit.m4d <- sem(mean.model2, data = model_df_numeric)
+summary(fit.m4d, fit.measures = TRUE)
+anova(fit.m3d, fit.m4d)
+
+# Add complexity
+complex.model <- '
+crash ~ mean_temp + complexity + standing_wateryes
+slope ~ crash + standing_wateryes + mean_temp + complexity
+'
+fit.m5d <- sem(complex.model, data = model_df_numeric)
+summary(fit.m5d, fit.measures = TRUE)
+anova(fit.m5d, fit.m3d)
+
+temp_diff.model <- '
+crash ~ temp_diff + complexity + standing_wateryes
+slope ~ crash
+'
+fit.m6d <- sem(temp_diff.model, data = model_df_numeric)
+summary(fit.m6d, fit.measures = TRUE)
+
+test.model <- '
+crash ~ min + max + complexity + standing_wateryes
+slope ~ crash + min + max
+'
+fit.m7d <- sem(test.model, data = model_df_numeric)
+summary(fit.m7d, fit.measures = TRUE)
 
 
 # Cannot compare models because some mines have NA values for RH which means the model2 that only includes
 # mean_rh will have a different size dataframe then the models that have all the variables
 # so below I removed those mines so we can compare the models
 # we can add them later once we get relative humidity data for those mines or a different way I am not sure yet
-
-df_sliding_scale <- model_with_complexity %>% 
-filter(!site %in% mines_to_remove) %>% 
-subset(mean_rh >= 0)
 
 null <- lm(slope ~ 1, data = df_sliding_scale)
 model1 <- lm(slope ~ temp_diff, df_sliding_scale)
@@ -147,3 +220,21 @@ aic_nb <- AIC(nulls_nb, model1_nb, model2_nb, model3_nb, model4_nb, model5_nb, m
 model7_nb, model8_nb, model9_nb, model10_nb, model11_nb, model12_nb, globals_nb)
 print(aic_nb)
 
+# Install and load the lavaan package
+#install.packages("lavaan")
+library(lavaan)
+
+# Define the path model
+model <- '
+  # Recovery regression
+  slope ~ standing_water + passage_length + levels + shafts
+  
+  # Slope regressions
+  slope ~ min + max + mean_temp + temp_diff + crash
+'
+
+# Fit the model to your data
+fit <- sem(model, data = df_slide_scale)
+
+# Summarize the results
+summary(fit, fit.measures = TRUE, standardized = TRUE)

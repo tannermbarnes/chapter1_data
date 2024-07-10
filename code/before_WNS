@@ -43,64 +43,40 @@ before_data <- before_data %>%
   passage_length = as.numeric(passage_length)
   )
 
-library(MASS)
+############
+# Now below do the same thing but for the max count after 2015
+
+# Get the minimum and maximum count data to normalize the counts
+min_max_count <- data %>% 
+group_by(site) %>% 
+filter(year > 2016) %>% 
+summarize(min_count = min(count, na.rm = TRUE), max_count = max(count, na.rm = TRUE)) %>% 
+ungroup()
+
+data_with_min_max <- data %>% 
+left_join(min_max_count, by = "site")
+
+
+after_data <- data_with_min_max %>% 
+group_by(site) %>% 
+filter(max_count > 0) %>%
+filter(max > 0) %>% 
+pivot_wider(names_from = year, 
+            values_from = count)
+
+#View(after_data)
+
+after_data <- after_data %>%
+  mutate(standing_water = ifelse(standing_water == "?", NA, standing_water),
+  water = as.factor(standing_water),
+  shafts = as.factor(shafts),
+  levels = as.factor(levels),
+  passage_length = as.numeric(passage_length)
+  )
 
 # Define the list of temperature variables
 temp_vars <- c("min", "max", "mean_temp", "median_temp", "mode_temp", "temp_diff")
 
-# Initialize lists to store models and their AIC values
-poisson_models <- list()
-nb_models <- list()
-aic_values <- data.frame(Model = character(), Poisson_AIC = numeric(), NB_AIC = numeric(), stringsAsFactors = FALSE)
-
-# Loop through each temperature variable and fit models
-for (temp_var in temp_vars) {
-  formula <- as.formula(paste("max_count ~", temp_var))
-  
-  # Fit Poisson model
-  poisson_model <- glm(formula, data = before_data, family = poisson(link = "log"))
-  poisson_models[[temp_var]] <- poisson_model
-  
-  # Check for overdispersion
-  dispersion <- sum(residuals(poisson_model, type = "pearson")^2) / df.residual(poisson_model)
-  
-  # Initialize AIC values
-  poisson_aic <- AIC(poisson_model)
-  nb_aic <- NA
-  
-  # Fit Negative Binomial model if overdispersion is present
-  if (dispersion > 1) {
-    nb_model <- glm.nb(formula, data = before_data)
-    nb_models[[temp_var]] <- nb_model
-    nb_aic <- AIC(nb_model)
-  }
-  
-  # Store AIC values
-  aic_values <- rbind(aic_values, data.frame(Model = temp_var, Poisson_AIC = poisson_aic, NB_AIC = nb_aic, stringsAsFactors = FALSE))
-}
-
-# Print AIC values for comparison
-print(aic_values)
-
-# Identify the best model based on AIC
-best_poisson_model <- aic_values[which.min(aic_values$Poisson_AIC), "Model"]
-best_nb_model <- aic_values[which.min(aic_values$NB_AIC), "Model"]
-
-print(paste("Best Poisson model based on AIC:", best_poisson_model))
-if (!is.na(best_nb_model)) {
-  print(paste("Best Negative Binomial model based on AIC:", best_nb_model))
-}
-
-# Summary of the best models
-if (!is.na(best_poisson_model)) {
-  print("Summary of the best Poisson model:")
-  summary(poisson_models[[best_poisson_model]])
-}
-
-if (!is.na(best_nb_model)) {
-  print("Summary of the best Negative Binomial model:")
-  summary(nb_models[[best_nb_model]])
-}
 
 before_data %>%
   ggplot(aes(x = max)) +
@@ -163,23 +139,27 @@ before_data %>%
 
 p1 <- before_data %>%
 filter(site != "Tippy Dam") %>% 
-  ggplot(aes(x = median_temp, y = max_count)) +
+  ggplot(aes(x = mean_temp, y = max_count)) +
   geom_point() +
   geom_smooth(method = "loess", color = "green") +
-  labs(title = "Relationship between Median Temperature and Max Count (LOESS)",
-       x = "Median Temperature",
+  labs(title = "Relationship between Mean Temperature and Max Count (LOESS)",
+       x = "Mean Temperature",
        y = "Max Count") +
   theme_bw()
 
 p2 <- after_data %>%
 filter(site != "Tippy Dam") %>% 
-  ggplot(aes(x = median_temp, y = max_count)) +
+  ggplot(aes(x = mean_temp, y = max_count)) +
   geom_point() +
   geom_smooth(method = "loess", color = "green") +
-  labs(title = "Relationship between Median Temperature and Max Count (LOESS)",
-       x = "Median Temperature",
+  labs(title = "Relationship between Mean Temperature and Max Count (LOESS)",
+       x = "Mean Temperature",
        y = "Max Count") +
   theme_bw()
+
+combined_plot <- p1 + p2
+# Save the combined plot
+ggsave("E:/chapter1_data/figures/final/mean_scatter.png", plot = combined_plot, width = 9, height = 6)
 
 # p1 <- before_data %>%
 #   ggplot(aes(x = min, y = max_count)) +
@@ -199,97 +179,191 @@ filter(site != "Tippy Dam") %>%
 #        y = "Max Count") +
 #   theme_bw()
 
-combined_plot <- p1 + p2
 
+# Prepare before_data for plotting
+before_plot <- before_data %>%
+  group_by(standing_water) %>%
+  summarise(count = n()) %>%
+  ggplot(aes(x = standing_water, y = count, fill = standing_water)) +
+  geom_bar(stat = "identity", color = "black") +
+  labs(title = "Before Data: Standing Water Count",
+       x = "Standing Water",
+       y = "Count") +
+  scale_fill_manual(values = c("no" = "blue", "yes" = "green", "NA" = "grey")) +
+  theme_minimal()
+
+# Prepare after_data for plotting
+after_plot <- after_data %>%
+  group_by(standing_water) %>%
+  summarise(count = n()) %>%
+  ggplot(aes(x = standing_water, y = count, fill = standing_water)) +
+  geom_bar(stat = "identity", color = "black") +
+  labs(title = "After Data: Standing Water Count",
+       x = "Standing Water",
+       y = "Count") +
+  scale_fill_manual(values = c("no" = "blue", "yes" = "green", "NA" = "grey")) +
+  theme_minimal()
+
+# Arrange the plots side by side
+grid.arrange(before_plot, after_plot, ncol = 2)
+
+combined_plot <- before_plot + after_plot
 # Save the combined plot
-ggsave("E:/chapter1_data/figures/final/median_scatter.png", plot = combined_plot, width = 12, height = 6)
+ggsave("E:/chapter1_data/figures/final/median_scatter.png", plot = combined_plot, width = 9, height = 6)
 
 
-############
-# Now below do the same thing but for the max count after 2015
+##############################################################################################################3
+# Install and load necessary packages
+install.packages("brms")
+install.packages("rstan")
+library(brms)
+library(rstan)
+Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
+                        "E:/rtools44/usr/bin", 
+                        Sys.getenv("PATH"), 
+                        sep = ";"))
 
-# Get the minimum and maximum count data to normalize the counts
-min_max_count <- data %>% 
-group_by(site) %>% 
-filter(year > 2016) %>% 
-summarize(min_count = min(count, na.rm = TRUE), max_count = max(count, na.rm = TRUE)) %>% 
-ungroup()
+# Sample with replacement to create a bootstrapped dataset
+before_samples <- sample(before_data$mean_temp, size = 1000, replace = TRUE)
+after_samples <- sample(after_data$mean_temp, size = 1000, replace = TRUE)
 
-data_with_min_max <- data %>% 
-left_join(min_max_count, by = "site")
+# Create a data frame for brms
+sampled_data <- data.frame(mean_temp = c(before_samples, after_samples),
+                           period = rep(c("before", "after"), each = 1000))
+
+# Define a simple Bayesian model to sample from the mean_temp data
+formula <- bf(mean_temp ~ period)
+
+# Fit the model using brms
+fit <- brm(formula, data = sampled_data, family = gaussian(), 
+           prior = c(set_prior("normal(0, 10)", class = "b")),
+           iter = 2000, warmup = 1000, chains = 4, seed = 123)
+
+# Summary of the model
+summary(fit)
+
+png(filename = "E:/chapter1_data/figures/final/brms_fit_plot.png", width = 800, height = 600)
+
+plot(fit)
+
+dev.off()
 
 
-after_data <- data_with_min_max %>% 
-group_by(site) %>% 
-filter(max_count > 0) %>%
-filter(max > 0) %>% 
-pivot_wider(names_from = year, 
-            values_from = count)
+# Create histograms for before_data and after_data
+p1 <- before_data %>%
+  ggplot(aes(x = mean_temp)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black", alpha = 0.5) +
+  labs(title = "Before WNS", x = "Mean Temperature", y = "Count") +
+  theme_bw()
 
-View(after_data)
+p2 <- after_data %>%
+  ggplot(aes(x = mean_temp)) +
+  geom_histogram(binwidth = 1, fill = "red", color = "black", alpha = 0.5) +
+  labs(title = "After WNS", x = "Mean Temperature", y = "Count") +
+  theme_bw()
+
+# Save plots
+ggsave("E:/chapter1_data/figures/final/before_mean_temp.png", plot = p1, width = 6, height = 4)
+ggsave("E:/chapter1_data/figures/final/after_mean_temp.png", plot = p2, width = 6, height = 4)
+
+before_data <- before_data %>% mutate(shafts = as.numeric(shafts))
+after_data <- after_data %>% mutate(shafts = as.numeric(shafts))
+# Combine the data into one dataframe
+combined_data <- bind_rows(
+  before_data %>% mutate(period = "Before"),
+  after_data %>% mutate(period = "After")
+)
+
+# Overlay histograms
+p_combined <- combined_data %>%
+  ggplot(aes(x = mean_temp, fill = period)) +
+  geom_histogram(binwidth = 1, color = "black", alpha = 0.5, position = "identity") +
+  labs(title = "Mean Temperature Distribution Before and After WNS", x = "Mean Temperature", y = "Count") +
+  scale_fill_manual(values = c("Before" = "blue", "After" = "red")) +
+  theme_bw()
+
+# Save combined plot
+ggsave("E:/chapter1_data/figures/final/test.png", plot = p_combined, width = 8, height = 6)
+
+# Perform Kolmogorov-Smirnov test
+ks_test <- ks.test(before_data$mean_temp, after_data$mean_temp)
+
+# Print test result
+print(ks_test)
+
+set.seed(123)  # Set a seed for reproducibility
+
+library(dplyr)
+library(ggplot2)
+library(brms)
+
+# Step 1: Calculate Weighted Mean Temperatures
+before_data <- before_data %>%
+  mutate(weighted_mean_temp = mean_temp * max_count)
 
 after_data <- after_data %>%
-  mutate(water = ifelse(water == "?", NA, water),
-  water = as.factor(water),
-  shafts = as.factor(shafts),
-  levels = as.factor(levels),
-  passage_length = as.numeric(passage_length)
-  )
+  mutate(weighted_mean_temp = mean_temp * max_count)
 
-# Define the list of temperature variables
-temp_vars <- c("min", "max", "mean_temp", "median_temp", "mode_temp", "temp_diff")
+# Step 2: Sample with Replacement
+sampled_before <- before_data %>% sample_frac(replace = TRUE)
+sampled_after <- after_data %>% sample_frac(replace = TRUE)
 
-# Initialize lists to store models and their AIC values
-poisson_models <- list()
-nb_models <- list()
-aic_values <- data.frame(Model = character(), Poisson_AIC = numeric(), NB_AIC = numeric(), stringsAsFactors = FALSE)
+# Step 3: Fit Bayesian Models
+fit_before <- brm(
+  weighted_mean_temp ~ 1,
+  data = sampled_before,
+  family = gaussian(),
+  prior = c(set_prior("normal(0, 10)", class = "Intercept")),
+  iter = 2000, warmup = 1000, chains = 4, seed = 123
+)
 
-# Loop through each temperature variable and fit models
-for (temp_var in temp_vars) {
-  formula <- as.formula(paste("max_count ~", temp_var))
-  
-  # Fit Poisson model
-  poisson_model <- glm(formula, data = after_data, family = poisson(link = "log"))
-  poisson_models[[temp_var]] <- poisson_model
-  
-  # Check for overdispersion
-  dispersion <- sum(residuals(poisson_model, type = "pearson")^2) / df.residual(poisson_model)
-  
-  # Initialize AIC values
-  poisson_aic <- AIC(poisson_model)
-  nb_aic <- NA
-  
-  # Fit Negative Binomial model if overdispersion is present
-  if (dispersion > 1) {
-    nb_model <- glm.nb(formula, data = before_data)
-    nb_models[[temp_var]] <- nb_model
-    nb_aic <- AIC(nb_model)
-  }
-  
-  # Store AIC values
-  aic_values <- rbind(aic_values, data.frame(Model = temp_var, Poisson_AIC = poisson_aic, NB_AIC = nb_aic, stringsAsFactors = FALSE))
-}
+fit_after <- brm(
+  weighted_mean_temp ~ 1,
+  data = sampled_after,
+  family = gaussian(),
+  prior = c(set_prior("normal(0, 10)", class = "Intercept")),
+  iter = 2000, warmup = 1000, chains = 4, seed = 123
+)
 
-# Print AIC values for comparison
-print(aic_values)
+# Step 4: Compare the Posterior Distributions
+posterior_before <- as.data.frame(posterior_samples(fit_before, pars = "Intercept"))
+posterior_after <- as.data.frame(posterior_samples(fit_after, pars = "Intercept"))
 
-# Identify the best model based on AIC
-best_poisson_model <- aic_values[which.min(aic_values$Poisson_AIC), "Model"]
-best_nb_model <- aic_values[which.min(aic_values$NB_AIC), "Model"]
+posterior_combined <- data.frame(
+  period = rep(c("Before", "After"), each = nrow(posterior_before)),
+  weighted_mean_temp = c(posterior_before$Intercept, posterior_after$Intercept)
+)
 
-print(paste("Best Poisson model based on AIC:", best_poisson_model))
-if (!is.na(best_nb_model)) {
-  print(paste("Best Negative Binomial model based on AIC:", best_nb_model))
-}
+p_posterior <- ggplot(posterior_combined, aes(x = weighted_mean_temp, fill = period)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Posterior Distributions of Weighted Mean Temperatures",
+       x = "Weighted Mean Temperature",
+       y = "Density") +
+  scale_fill_manual(values = c("Before" = "blue", "After" = "red")) +
+  theme_bw()
 
-# Summary of the best models
-if (!is.na(best_poisson_model)) {
-  print("Summary of the best Poisson model:")
-  summary(poisson_models[[best_poisson_model]])
-}
+ggsave("E:/chapter1_data/figures/final/posterior_distributions_weighted_mean_temp.png", plot = p_posterior, width = 8, height = 6)
 
-if (!is.na(best_nb_model)) {
-  print("Summary of the best Negative Binomial model:")
-  summary(nb_models[[best_nb_model]])
-}
+print(p_posterior)
 
+# Step 5: Perform Bayesian Hypothesis Testing
+posterior_diff <- posterior_before$Intercept - posterior_after$Intercept
+
+summary_diff <- data.frame(
+  Mean = mean(posterior_diff),
+  `2.5%` = quantile(posterior_diff, 0.025),
+  `97.5%` = quantile(posterior_diff, 0.975)
+)
+
+print(summary_diff)
+
+p_diff <- ggplot(data.frame(Difference = posterior_diff), aes(x = Difference)) +
+  geom_density(fill = "purple", alpha = 0.5) +
+  labs(title = "Posterior Distribution of the Difference in Weighted Mean Temperatures",
+       x = "Difference in Weighted Mean Temperature",
+       y = "Density") +
+  theme_bw()
+
+ggsave("E:/chapter1_data/figures/final/posterior_diff_weighted_mean_temp.png", plot = p_diff, width = 8, height = 6)
+
+print(p_diff)

@@ -6,6 +6,170 @@ source("df_min_value.R")
 library(lme4)
 library(car)
 library(lmtest)
+library(lavaan)
+
+df_min_value$log_passage <- log(df_min_value$passage_length)
+
+#Path anaylsis
+df_to_model <- df_min_value %>% 
+select(slope, standing_water, complexity, passage_length, levels, shafts, 
+crash, min, max, median_temp, mean_temp, temp_diff, ore, log_passage)
+
+
+# Define the path model
+df_to_model$ore <- as.factor(df_to_model$ore)
+df_to_model$levels <- as.numeric(df_to_model$levels)
+df_to_model$shafts <- as.numeric(df_to_model$shafts)
+df_to_model$complexity <- as.numeric(df_to_model$complexity)
+df_to_model$standing_water[25] <- "yes"
+df_to_model$standing_water[is.na(df_to_model$standing_water)] <- "no"
+
+#View(df_min_value)
+
+# Most important component of SEM is covariance 
+#cov(df_min_value) # create covariance matrix with variables we are using
+# positive numbers positive association, negative numbers negative assocation
+# the purpose of SEM is to reproduce the variance-covariance matrix using parameters
+# latent variable - a variable that is constructed and does not exist in the data
+# exogenous variable - a variable either observed (x) or latent that explains an endogenous variable
+# endongenous variale - a variable either observed (y) or latent that has a causal path leading to it
+# measurement model - a model that links observed variables with latent variables
+# ~ predict
+# =~ indicator for measurement model
+# ~~ covariance
+# interactions use enmeans (decomposing interactions R)
+# colinearity is accounted for by the covariance of the SEM model
+# modindices() add variables one by one modification index
+# when you add a parameter you decrease a degree of freedom
+# Residual covariance the closer to 0. The better fit of the model
+# CFI = comparative fit index = models greater than 0.9, conservatively 0.95 indicate good fit
+# TLI = values greater than 0.9 indicating good fit. CFI is always greater than TLI
+# RMSEA <= 0.05 close-fit, >= 0.10 poor fit, between 0.5 & 0.8 reasonable approximate fit does not compare to baseline model
+# The baseline model is the worst fitting model assumes no covariances between variables wanna compare our model to baseline model
+# Saturated model is best model df = 0
+# Your model is somewhere between baseline and saturated model
+# IS THIS PATH ANALYSIS BECAUSE CRASH AND SLOPE ARE ACTUALLY OBSERVED VARIABLES
+# latent exogenous variables do not have covariance
+
+
+# Convert factors to dummy variables
+df_min_value_numeric <- model.matrix(~ . - 1, data = df_to_model)
+
+# Convert the matrix back to a dataframe
+df_min_value_numeric <- as.data.frame(df_min_value_numeric)
+
+cov(df_min_value_numeric)
+# Standardize the numeric columns
+df_min_value_scaled <- as.data.frame(scale(df_min_value_numeric))
+
+# Define your models
+# Define the measurement model for complexity
+# Use complexity as a latent (unobserved variable in the model)
+# PATH ANLYSIS MODEL the STRUCTURAL MODEL matrix mutlivariate models
+measurement_model <- '
+  # Latent variable definition
+  complex =~ passage_length + levels + shafts
+
+  # Structural model
+  crash ~ standing_wateryes + complex
+  slope ~ standing_wateryes + complex + crash
+'
+
+# Fit the model to your data
+fit <- sem(measurement_model, data = df_min_value_numeric)
+
+# Summarize the results
+summary(fit, fit.measures = TRUE, standardized = TRUE)
+
+# Inspect the variances of the variables
+varTable(fit)
+
+min.model <- '
+complex =~ passage_length + levels + shafts
+crash ~ min + complex + standing_wateryes + log_passage
+slope ~ min + crash + standing_wateryes + complex + log_passage
+'
+max.model <- '
+complex =~ passage_length + levels + shafts
+crash ~ max + complex + standing_wateryes + log_passage
+slope ~ max + crash + standing_wateryes + complex + log_passage
+'
+
+mean.model <- '
+complex =~ passage_length + levels + shafts
+crash ~ mean_temp + complex + standing_wateryes + log_passage
+slope ~ mean_temp + crash + standing_wateryes + log_passage + complex
+'
+
+fit.m1d <- sem(min.model, data = df_min_value_numeric)
+fit.m2d <- sem(max.model, data = df_min_value_numeric)
+fit.m3d <- sem(mean.model, data = df_min_value_numeric)
+summary(fit.m1d, fit.measures = TRUE)
+summary(fit.m2d, fit.measures = TRUE)
+summary(fit.m3d, fit.measures = TRUE)
+
+
+#anova(fit.m1d, fit.m2d, fit.m3d) # models have same degrees of freedom so cannot compare
+modindices(fit.m1d, sort = TRUE) #1 degree of freedom test, mi = modification index (want around t-stat), epc = how much you expect the parameter to change
+modindices(fit.m2d, sort = TRUE)
+modindices(fit.m3d, sort = TRUE)
+
+# Add mean_temp
+mean.model2 <- '
+crash ~ mean_temp + complexity + standing_wateryes
+slope ~ crash + standing_wateryes + mean_temp
+'
+fit.m4d <- sem(mean.model2, data = df_min_value_numeric)
+summary(fit.m4d, fit.measures = TRUE)
+anova(fit.m3d, fit.m4d)
+
+# Add complexity
+complex.model <- '
+crash ~ mean_temp + complexity + standing_wateryes
+slope ~ crash + standing_wateryes + mean_temp + complexity
+'
+fit.m5d <- sem(complex.model, data = df_min_value_numeric)
+summary(fit.m5d, fit.measures = TRUE)
+anova(fit.m5d, fit.m3d)
+
+temp_diff.model <- '
+crash ~ temp_diff + complexity + standing_wateryes
+slope ~ crash
+'
+fit.m6d <- sem(temp_diff.model, data = df_min_value_numeric)
+summary(fit.m6d, fit.measures = TRUE)
+
+test.model <- '
+crash ~ min + max + complexity + standing_wateryes
+slope ~ crash + min + max
+'
+fit.m7d <- sem(test.model, data = df_min_value_numeric)
+summary(fit.m7d, fit.measures = TRUE)
+
+
+# Fit the models to the standardized data
+fit.path1 <- sem(complexity_model, data = df_min_value_numeric)
+fit.path2 <- sem(climate_model, data = df_min_value_numeric)
+fit.path3 <- sem(complete_model, data = df_min_value_numeric)
+
+# Compare the models
+anova(fit.path1, fit.path2, fit.path3)
+
+# Summarize the results
+summary(fit.path1, fit.measures = TRUE, standardized = TRUE)
+summary(fit.path2, fit.measures = TRUE, standardized = TRUE)
+summary(fit.path3, fit.measures = TRUE, standardized = TRUE)
+
+# Inspect the variances of the variables in one of the fits
+varTable(fit.path2)
+#anova(fit.m1d, fit.m2d, fit.m3d)
+modindices(fit.m1d, sort = TRUE) #1 degree of freedom test, mi = modification index (want around t-stat), epc = how much you expect the parameter to change
+modindices(fit.m2d, sort = TRUE)
+
+
+
+
+
 
 # Check and see if temp_diff and complexity are colinear
 library(car)
