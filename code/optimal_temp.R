@@ -68,7 +68,7 @@ pivot_wider(names_from = year,
 
 after_data <- after_data %>%
   mutate(standing_water = ifelse(standing_water == "?", NA, standing_water),
-  water = as.factor(standing_water),
+  standing_water = as.factor(standing_water),
   shafts = as.factor(shafts),
   levels = as.factor(levels),
   passage_length = as.numeric(passage_length)
@@ -111,4 +111,45 @@ p2 <- min_sites2 %>%
 combined_plot <- p1 + p2
 # Save the combined plot
 ggsave("E:/chapter1_data/figures/final/test.png", plot = combined_plot, width = 9, height = 6)
+
+
+source("df_min_value.R")
+library(lavaan)
+
+df1 <- df_min_value %>% 
+  pivot_longer(cols = c("1980", "1981", "1993", "1994", "1995", "1996", "1997", "1998", 
+                        "1999", "2000", "2001", "2002", "2005", "2006", "2007", "2008", 
+                        "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", 
+                        "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"), 
+               names_to = "year", values_to = "count") %>% 
+  drop_na(count) %>% 
+  filter(count != 0) %>% 
+  filter(passage_length != 0) %>% 
+    mutate(site_numeric = as.numeric(factor(site, levels = unique(site))),
+    log_passage = log(passage_length),
+    log_count = log(count)) %>% 
+    mutate(period = ifelse(year < 2016, "before", "after")) %>% 
+  select(site, site_numeric, min, max, mean_temp, count, levels, shafts, passage_length, 
+  crash, slope, max_count, min_count, log_passage, standing_water, log_count, period)
+
+# Load necessary libraries
+library(brms)
+library(rstan)
+Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
+                        "E:/rtools44/usr/bin", 
+                        Sys.getenv("PATH"), 
+                        sep = ";"))
+
+# Define the formula including weights
+formula <- bf(slope ~ min + crash + standing_water)
+
+# Fit the Bayesian model
+fit <- brm(formula, 
+           data = df1, family = gaussian(),
+           prior = c(set_prior("normal(0, 10)", class = "b")),
+           iter = 2000, warmup = 1000, chains = 4, seed = 123,
+           control = list(adapt_delta = 0.95))
+
+summary(fit)
+plot(fit)
 

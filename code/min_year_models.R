@@ -68,7 +68,7 @@ df_min_value_scaled <- as.data.frame(scale(df_min_value_numeric))
 # PATH ANLYSIS MODEL the STRUCTURAL MODEL matrix mutlivariate models
 measurement_model <- '
   # Latent variable definition
-  complex =~ passage_length + levels + shafts
+  complex =~ log_passage + levels + shafts
 
   # Structural model
   crash ~ standing_wateryes + complex
@@ -84,31 +84,44 @@ summary(fit, fit.measures = TRUE, standardized = TRUE)
 # Inspect the variances of the variables
 varTable(fit)
 
-min.model <- '
-complex =~ passage_length + levels + shafts
-crash ~ min + complex + standing_wateryes + log_passage
-slope ~ min + crash + standing_wateryes + complex + log_passage
+# best model according to Chi-Square (X^2) and df, CFI, TLI, RMSEA, SRMR, AIC
+best_fit_model <- '
+complex =~ log_passage + levels + shafts
+crash ~ complex
+slope ~ crash + standing_wateryes + complex
 '
-max.model <- '
-complex =~ passage_length + levels + shafts
-crash ~ max + complex + standing_wateryes + log_passage
-slope ~ max + crash + standing_wateryes + complex + log_passage
-'
-
-mean.model <- '
-complex =~ passage_length + levels + shafts
-crash ~ mean_temp + complex + standing_wateryes + log_passage
-slope ~ mean_temp + crash + standing_wateryes + log_passage + complex
+# Based on ANOVA including min improves the model fit by explaining more variance
+improved_model <- '
+complex =~ log_passage + levels + shafts
+crash ~ complex
+slope ~ crash + standing_wateryes + complex + min
 '
 
-fit.m1d <- sem(min.model, data = df_min_value_numeric)
-fit.m2d <- sem(max.model, data = df_min_value_numeric)
-fit.m3d <- sem(mean.model, data = df_min_value_numeric)
+model3 <- '
+complex =~ log_passage + levels + shafts
+crash ~ complex + min
+slope ~ crash + standing_wateryes + complex
+'
+
+fit.m1d <- sem(model1, data = df_min_value_numeric)
+fit.m2d <- sem(model2, data = df_min_value_numeric)
+fit.m3d <- sem(model3, data = df_min_value_numeric)
 summary(fit.m1d, fit.measures = TRUE)
 summary(fit.m2d, fit.measures = TRUE)
 summary(fit.m3d, fit.measures = TRUE)
 
+fitMeasures(fit.m1d, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr"))
+fitMeasures(fit.m2d, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr"))
+fitMeasures(fit.m3d, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr"))
+aic_bic <- data.frame(
+  model = c("model 1", "model 2", "model 3"),
+  AIC = c(AIC(fit.m1d), AIC(fit.m2d), AIC(fit.m3d)),
+  BIC = c(BIC(fit.m1d), BIC(fit.m2d), BIC(fit.m3d))
+)
+print(aic_bic)
 
+anova(fit.m1d, fit.m2d)
+anova(fit.m1d, fit.m3d)
 #anova(fit.m1d, fit.m2d, fit.m3d) # models have same degrees of freedom so cannot compare
 modindices(fit.m1d, sort = TRUE) #1 degree of freedom test, mi = modification index (want around t-stat), epc = how much you expect the parameter to change
 modindices(fit.m2d, sort = TRUE)
