@@ -130,7 +130,7 @@ df1 <- df_min_value %>%
     log_count = log(count)) %>% 
     mutate(period = ifelse(year < 2016, "before", "after")) %>% 
   select(site, site_numeric, min, max, mean_temp, count, levels, shafts, passage_length, 
-  crash, slope, max_count, min_count, log_passage, standing_water, log_count, period)
+  crash, slope, max_count, min_count, log_passage, standing_water, log_count, period, complexity)
 
 # Load necessary libraries
 library(brms)
@@ -141,7 +141,7 @@ Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
                         sep = ";"))
 
 # Define the formula including weights
-formula <- bf(slope ~ min + crash + standing_water)
+formula <- bf(slope ~ min + crash + standing_water + (complexity | site_numeric))
 
 # Fit the Bayesian model
 fit <- brm(formula, 
@@ -153,3 +153,5 @@ fit <- brm(formula,
 summary(fit)
 plot(fit)
 
+df_min_value %>% ggplot(x=slope) %>% 
+geom_histogram()

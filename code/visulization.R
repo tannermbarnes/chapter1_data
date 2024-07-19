@@ -251,9 +251,13 @@ sites_to_remove <- c("Site1", "Site2", "Site3")  # Replace with actual site name
 
 filtered_data <- model_data %>%
   filter(!site %in% sites_to_remove) %>%
-  group_by(site)
+  group_by(site) %>% 
+  mutate(year = as.numeric(year)) %>% 
+  drop_na(count)
 
 filtered_data %>%
+filter(year > 1998) %>% 
+filter(n() > 2) %>% 
   ggplot(aes(x = year, y = count, color = site, group = site)) +
   geom_line(show.legend = FALSE) +
   facet_wrap(~site, scales = "free_y") +  # Facet by site with free y-axis scales
@@ -266,6 +270,8 @@ filtered_data %>%
   labs(title = "Count Over Years by Site",
        x = "Year",
        y = "Count")
+
+ggsave("E:/chapter1_data/figures/final/to_show/all_mines.png", width = 12, height=12)
 
 pivoted_data <- df_min_value %>% 
 pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 

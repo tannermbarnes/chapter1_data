@@ -377,7 +377,9 @@ filter(n_distinct(period) == 2) %>%
 ungroup()
 
 df1 <- data1 %>% 
+mutate(site_numeric = as.numeric(factor(site), levels = unique(site))) %>% 
 select(site, site_numeric, period, year, min, max, mean_temp, count) %>% 
+mutate(period = factor(period, levels = c("before", "after"))) %>% 
 group_by(site) %>% 
 filter(n_distinct(period) == 2) %>% 
 ungroup()
@@ -394,8 +396,8 @@ Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
 formula <- bf(count ~ period + mean_temp + (1 | site_numeric))
 
 # Fit the Bayesian model
-fit <- brm(mean_temp | weights(count) ~ period, 
-           data = df1, family = gaussian(),
+fit <- brm(formula, 
+           data = df1, family = poisson(),
            prior = c(set_prior("normal(0, 10)", class = "b")),
            iter = 4000, warmup = 1000, chains = 4, seed = 123,
            control = list(adapt_delta = 0.95))
@@ -445,7 +447,7 @@ summary(m2)
 library(effects)
 
 # Compute the effects
-effects_model <- effect("period", m2)
+effects_model <- effect("period", m1)
 
 # Plot the effects
 p8 <- plot(effects_model,
@@ -454,6 +456,6 @@ p8 <- plot(effects_model,
      ylab = "Mean Temperature")
 p8
 
-png("E:/chapter1_data/figures/final/effects_model.png", width = 800, height = 600)
+png("E:/chapter1_data/figures/final/to_show/effects_model.png", width = 800, height = 600)
 print(p8)
 dev.off()

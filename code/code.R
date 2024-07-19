@@ -12,7 +12,7 @@ dat$tempdif <- round(dat$temperaturedifferencec)
 
 #dat %>% ggplot(aes(x=tempdif)) + geom_bar()
 
-cols.num <- c("2003", "2008", "2012", "2014", "2015", "2018")
+cols.num <- c("2003", "2008", "2010", "2011", "2012", "2014", "2015", "2018", "2021", "2022", "2023", "2024")
 dat[cols.num] <- sapply(dat[cols.num],as.numeric)
 str(dat)
 
@@ -38,8 +38,8 @@ ggsave("E:/chapter1_data/adventure_mine.png", width = 5, height=4)
 
 # I want to have year on xaxis counts on y axis and a line for each mine in 1 plot
 
-dat2 <- dat1 %>% select(hibe = NameofHibernaculum, low = lowestinternaltempc, high = highestinternaltempc, 
-diff = temperaturedifferencec, ore = ore, year = year, count = count) %>% group_by(year) %>% 
+dat2 <- dat1 %>% select(hibe = 'Name of Hibernaculum', low = 'Lowest internal temp c', high = 'highest internal temp c',
+year, count) %>% group_by(year) %>% 
 mutate(year = as.numeric(as.character(year)))
 
 #remove all NAs

@@ -263,11 +263,3 @@ df_slide_scale$log_max_value <- log(df_slide_scale$max_value)
 # geom_smooth(method = "lm", show.legend = FALSE, se = FALSE)
 
 # ggsave("E:/chapter1_data/figures/sliding_normalize_slope_by_mine.png", width = 6, height=4)
-
-
-
-
-
-
-
-
