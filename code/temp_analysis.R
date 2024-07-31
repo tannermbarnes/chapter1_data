@@ -393,7 +393,7 @@ Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
                         sep = ";"))
 
 # Define the formula including weights
-formula <- bf(count ~ period + mean_temp + (1 | site_numeric))
+formula <- bf(mean_temp ~ period + (1 | site_numeric))
 
 # Fit the Bayesian model
 fit <- brm(formula, 
@@ -437,7 +437,7 @@ ggplot(pred_data, aes(x = mean_temp, y = predicted_mean_temp, color = period)) +
 
 
 library(lme4)
-m1 <- lm(mean_temp ~ period, weights = count, data = df1)
+m1 <- lm(mean_temp ~ period + (1 | site_numeric), weights = count, data = df1)
 summary(m1)
 
 m2 <- lmer(mean_temp ~ period + (1 | site_numeric), weights = count, data = df1)
