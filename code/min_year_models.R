@@ -13,12 +13,13 @@ df_min_value$log_max_count <- log(df_min_value$max_count)
 
 #Path anaylsis
 df_to_model <- df_min_value %>% 
-select(slope, standing_water, complexity, passage_length, levels, shafts, 
-crash, min, max, median_temp, mean_temp, temp_diff, ore, log_passage, log_max_count)
+select(site, slope, standing_water, complexity, passage_length, levels, shafts, 
+crash, min, max, median_temp, mean_temp, temp_diff, ore, log_passage, log_max_count) %>% 
+filter(site != "Cushman Adit")
 
 
 # Define the path model
-df_to_model$ore <- as.numeric(df_to_model$ore)
+df_to_model$ore <- as.factor(as.numeric(df_to_model$ore))
 df_to_model$levels <- as.numeric(df_to_model$levels)
 df_to_model$shafts <- as.numeric(df_to_model$shafts)
 df_to_model$complexity <- as.numeric(df_to_model$complexity)
@@ -36,9 +37,11 @@ df_to_model$passage_length_standardized <- (df_to_model$passage_length - mean_pa
 # View the standardized variable
 head(df_to_model$passage_length_standardized)
 
-#View(df_min_value)
+View(df_to_model)
+cor(df_to_model$min, df_to_model$levels, use = "complete.obs")
+cor.test(df_to_model$levels, df_to_model$temp_diff, use = "complete.obs")
 
-# Most important component of SEM is covariance 
+# Most important component of SEM is covariance
 #cov(df_min_value) # create covariance matrix with variables we are using
 # positive numbers positive association, negative numbers negative assocation
 # the purpose of SEM is to reproduce the variance-covariance matrix using parameters
@@ -78,16 +81,18 @@ parameterEstimates(fit.combined, standardized = TRUE)
 
 
 
-# Same model minus a variable
+# variables making up complex are correlated? Not sure what this means? 
 minus.model <- '
 # latent variable
-complex =~ levels + shafts + log_passage + min
+complex =~ log_passage + levels + shafts + temp_diff
 # regresssions
-crash ~ complex + min
+crash ~ complex
 slope ~ crash + min
+# residual covariances
+temp_diff ~~ levels + shafts + log_passage
 '
 
-fit.minus <- sem(minus.model, data = df_min_value)
+fit.minus <- sem(minus.model, data = df_to_model)
 summary(fit.minus, fit.measures = TRUE, standardized = TRUE)
 fitMeasures(fit.minus, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr"))
 parameterEstimates(fit.minus, standardized = TRUE)
@@ -98,38 +103,38 @@ anova(fit.combined, fit.minus)
 # Rank each model using AICc 
 model1 <- '
 # latent variable
-complex =~ levels + shafts + temp_diff
+complex =~ passage_length_standardized + levels + shafts + temp_diff
 # regressions
 crash ~ complex
 slope ~ crash
 '
 model2 <- '
 # latent variable
-complex =~ levels + shafts
+complex =~ log_passage + levels + shafts + mean_temp
 # regressions
 crash ~ complex
-slope ~ crash + standing_water
+slope ~ crash
 '
 model3 <- '
 # latent variable
-complex =~ levels + shafts + temp_diff
+complex =~ levels + shafts
 # regressions
 crash ~ complex
-slope ~ crash + standing_water
+slope ~ crash + max + standing_water
 '
 model4 <- '
 # latent variable
-complex =~ levels + shafts + temp_diff
+complex =~ levels + shafts
 # regressions
-crash ~ complex + standing_water
-slope ~ crash
+crash ~ complex
+slope ~ crash + temp_diff
 '
 model5 <- '
 # latent variable
 complex =~ levels + shafts + temp_diff
 # regressions
-crash ~ complex + standing_water
-slope ~ crash + min
+crash ~ complex
+slope ~ crash
 '
 fit1 <- sem(model1, data = df_to_model)
 summary(fit1, fit.measures = TRUE, standardized = TRUE)

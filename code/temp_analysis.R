@@ -376,13 +376,25 @@ group_by(site) %>%
 filter(n_distinct(period) == 2) %>% 
 ungroup()
 
+mean_count <- mean(df1$count, na.rm = TRUE)
+sd_count <- sd(df1$count, na.rm = TRUE)
+
 df1 <- data1 %>% 
-mutate(site_numeric = as.numeric(factor(site), levels = unique(site))) %>% 
-select(site, site_numeric, period, year, min, max, mean_temp, count) %>% 
-mutate(period = factor(period, levels = c("before", "after"))) %>% 
-group_by(site) %>% 
-filter(n_distinct(period) == 2) %>% 
-ungroup()
+  mutate(site_numeric = as.numeric(factor(site, levels = unique(site)))) %>%
+  select(site, site_numeric, period, year, min, max, mean_temp, count, passage_length, 
+  shafts, levels, ore, temp_diff, standing_water, year) %>%
+  mutate(period = factor(period, levels = c("before", "after")),
+  log_passage = log(passage_length)) %>%
+  group_by(site, period) %>%
+  filter(n() >= 2) %>% 
+  group_by(site) %>% 
+  filter(n_distinct(period) == 2) %>% 
+  ungroup() %>% 
+  mutate(standardized_count = (count - mean_count) / sd_count)
+
+min_standardized_count <- min(df1$standardized_count, na.rm = TRUE)
+df1 <- df1 %>% 
+mutate(positive_standardized_count = standardized_count - min_standardized_count + 1)
 
 # Load necessary libraries
 library(brms)
@@ -393,14 +405,22 @@ Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
                         sep = ";"))
 
 # Define the formula including weights
-formula <- bf(mean_temp ~ period + (1 | site_numeric))
+# Survey weights are not considered fully Bayesian
+# Weighting function in brm is essentially frequency weight, and therefore parameters estimated using survey weights
+# have accuarate point estimates. 
+# By weighting the mean temp by the count of bats, you give more influence to observations with higher counts, 
+# This is because such observations represent more data points, and should have greater impact on the parameter estimate
+# Could use count as a covariate, this could help to understand dhow the number of bats correlates with the mean temp
 
+formula <- bf(mean_temp | weights(count) ~ period)
+formula1 <- bf(mean_temp | weights(positive_standardized_count) ~ period)
+formula2 <- bf(count ~ period + mean_temp + (1 | site_numeric))
 # Fit the Bayesian model
-fit <- brm(formula, 
+fit <- brm(formula2, 
            data = df1, family = poisson(),
            prior = c(set_prior("normal(0, 10)", class = "b")),
            iter = 4000, warmup = 1000, chains = 4, seed = 123,
-           control = list(adapt_delta = 0.95))
+           control = list(adapt_delta = 0.95, max_treedepth = 10))
 
 # Print the summary of the model
 summary(fit)
@@ -417,6 +437,49 @@ ggplot(df1, aes(x = mean_temp, fill = period)) +
        x = "Mean Temperature",
        y = "Density") +
   theme_minimal()
+
+
+df1_before <- df1 %>% filter(period == "before")
+df1_after <- df1 %>% filter(period == "after")
+
+# Try a path anaylsis using count before as response
+library(lavaan)
+
+before.model <- '
+# latent variable
+complex =~ log_passage + levels + shafts
+# regresssions
+count ~ max + standing_water + complex
+'
+
+fit.before <- sem(before.model, data = df1_before)
+summary(fit.before, fit.measures = TRUE, standardized = TRUE)
+fitMeasures(fit.before, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr"))
+parameterEstimates(fit.before, standardized = TRUE)
+
+after.model <- '
+# latent variable
+complex =~ log_passage + levels + shafts
+# regresssions
+count ~ min + standing_water + complex
+'
+
+fit.after <- sem(after.model, data = df1_after)
+summary(fit.after, fit.measures = TRUE, standardized = TRUE)
+fitMeasures(fit.after, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr"))
+parameterEstimates(fit.after, standardized = TRUE)
+
+
+fm_before <- bf(count ~ max + standing_water + (1 | site_numeric))
+fm_after <- bf(count ~ mean_temp + (1 | site_numeric))
+# Fit the before and after models
+fit <- brm(fm_before, 
+           data = df1_before, family = poisson(),
+           prior = c(set_prior("normal(0, 10)", class = "b")),
+           iter = 4000, warmup = 1000, chains = 4, seed = 123,
+           control = list(adapt_delta = 0.95, max_treedepth = 10))
+
+
 
 # Create a new data frame for predictions
 pred_data <- expand.grid(period = unique(df1$period),

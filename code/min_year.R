@@ -25,8 +25,6 @@ ungroup()
 #View(min_max_counts)
 #View(model_data)
 
-
-
 # Merge the min and max counts back into the original data
 model_data_with_min_max <- model_data %>% 
 left_join(min_max_counts, by = "site")

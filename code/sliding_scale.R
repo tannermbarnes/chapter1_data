@@ -14,39 +14,36 @@ pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998
 
 # Subset data from the minimum count value for each site and year combination
 # Identify the minimum count value for each site
-data1 <- data %>% drop_na(count)
-#View(data1)
-
 # Get the minimum and maximum count data to normalize the counts
 min_max_count <- data %>% 
 group_by(site) %>% 
-summarize(min_count = min(count, na.rm = TRUE), max_count = max(count, na.rm = TRUE)) %>% 
+summarize(min_count = min(count, na.rm = TRUE), max_count = max((count/1.5), na.rm = TRUE),
+real_max_count = max(count, na.rm = TRUE)) %>% 
 ungroup()
 
+# Merge the min and max counts back into the orginal data
 data_with_min_max <- data %>% 
 left_join(min_max_count, by = "site")
 
 # Normalize the count data
 normalize_count <- data_with_min_max %>% 
-mutate(normalize_count = (count - min_count) / (max_count - min_count))
+mutate(normalize_count = (count - min_count) / (max_count - min_count)) %>% 
+mutate(normalize_to_min = count / (min_count + 1))
 
 # To get the normalized count and relative year of max decrease for sliding scale
-max_decrease_year <- normalize_count %>% 
+min_count_year1 <- normalize_count%>% 
 drop_na(count) %>% 
 group_by(site) %>% 
-arrange(site, year) %>% 
-mutate(diff = count - lag(count, order_by = year)) %>% # Calculate year-over-year differences
-filter(!is.na(diff)) %>% 
-slice(which.min(diff)) %>% 
+filter(normalize_count == min(normalize_count)) %>% 
+slice(1) %>% # in case of ties, take the first occurence
 ungroup() %>% 
 select(site, min_year = year) %>% 
-mutate(min_year = as.numeric(min_year)) %>% 
-subset(min_year >= 2013)
+mutate(min_year = as.numeric(min_year))
 
-# Merge the max decrease year back into the normalized data
+# Merge the minimum count year back into the normalized data
 data_with_decrease_year <- normalize_count %>% 
 mutate(year = as.numeric(year)) %>% 
-left_join(max_decrease_year, by = "site") %>% 
+left_join(min_count_year1, by = "site") %>% 
 mutate(relative_year = year - min_year)
 
 # Filter original data to keep counts from the year of max decrease onwards
@@ -58,13 +55,13 @@ select(site, relative_year, normalize_count)
 #View(filter_data)
 
 # Filter sites with at least 2 years of data after the minimum count year
-sites_with_sufficient_data <- filter_data %>% 
-group_by(site) %>% 
-filter(n() >= 2) %>% 
-ungroup()
+# sites_with_sufficient_data <- filter_data %>% 
+# group_by(site) %>% 
+# filter(n() >= 2) %>% 
+# ungroup()
 
 # Nest the data by site
-nested_data <- sites_with_sufficient_data %>% 
+nested_data <- filter_data %>% 
 group_by(site) %>% 
 nest()
 
@@ -99,14 +96,17 @@ tidied_data <- nested_data %>%
 # Step 5: Filter and select the slope for the 'year' term
 regression_results <- tidied_data %>%
   filter(term == "year") %>%
-  select(site, slope = estimate)
+  select(site, slope = estimate) %>% 
+  mutate(slope = ifelse(is.na(slope), 0, slope))
+
+
 
 # Check the regression results
 #print("Regression results:")
 #print(regression_results)
 
 # Step 6: Add the slope to the original data frame
-final_data <- sites_with_sufficient_data %>%
+final_data <- filter_data %>%
   left_join(regression_results, by = "site")
 
 #View(final_data)
@@ -125,9 +125,14 @@ summarize(min_count = min(min_count), max_count = max(max_count)) %>%
 inner_join(model_data1, by = "site") %>% 
 ungroup()
 
-sites_to_remove <- c("Collin's Adit", "Douglas Houghton Adit #1", "Eagle River Adit 2 (Lake Superior & Phoenix)",
-"North American Adit", "Ohio Traprock Mine #59 (Norwich Adit)", "Rockport Quarry South Tunnel",
-"Randville Quarry Mine")
+ sites_to_remove <- c("Adventure Shaft", "Algonquin Adit #2 (Mark's Adit)", "Collin's Adit", "Copper Falls Mine", "Douglas Houghton Adit #1", "Jackson Mine, B Working",
+ "Jackson Mine, Tram Tunnel Exit", "Merchant's Adit North", "Merchant's Adit South", "National Mine #7",
+ "North American Adit", "Ohio Traprock Mine #1", "Ohio Traprock Mine #2", "Ohio Traprock Mine #3",
+ "Ridge Adit", "Rockland Mine, Shaft 3", "Seneca Mine #3", "Trader's Mine", "Unknown Keweenaw",
+ "West Vein Adit (Robin's Ore)", "White Pine Mine", "Cushman Adit", "Jackson Mine, Tram Tunnel", "West Evergreen Bluff Mine",
+ "Caledonia Mine Complex", "Michigan (A Shaft)", "Ogimaw Mine", "Owl Creek Fissure (Old Copper Falls)",
+ "Pewabic Mine (Iron Mountain)", "Piscatauqau Adit", "Nassau Mine", "Goodrich Adit B", "Aztec Mine",
+ "Bumblebee Mine", "Millie Mine", "Toltec Mine")
 
 filtered_data1 <- model_data2 %>%
   filter(!site %in% sites_to_remove)
@@ -163,8 +168,8 @@ ungroup()
 add_last_count2 <- add_last_count1 %>% 
 pivot_wider(names_from = year, values_from = count)
 
-df_slide_scale <- add_last_count2 %>% 
-filter(!site %in% sites_to_remove)
+df_slide_scale <- add_last_count2 #%>% 
+#filter(!site %in% sites_to_remove)
 
 # Add crash intensity
 df_slide_scale$crash <- 1 - (df_slide_scale$min_count/df_slide_scale$max_count)
@@ -176,10 +181,13 @@ df_slide_scale$log_passage <- log(df_slide_scale$passage_length)
 df_slide_scale <- df_slide_scale %>% 
 mutate(min_value = min + 1, 
       max_value = max + 1) %>% 
-mutate(min_value = ifelse(min_value < 0, 1, min_value))
+mutate(min_value = ifelse(min_value < 0, 1, min_value)) %>% 
+mutate(bin = ifelse(slope > 0, 1, 0)) %>% 
+subset(max_count > 6)
 
 df_slide_scale$log_min_value <- log(df_slide_scale$min_value)
 df_slide_scale$log_max_value <- log(df_slide_scale$max_value)
+
 
 
 # Check the final data
