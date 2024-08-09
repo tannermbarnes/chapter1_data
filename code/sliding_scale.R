@@ -15,11 +15,16 @@ pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998
 # Subset data from the minimum count value for each site and year combination
 # Identify the minimum count value for each site
 # Get the minimum and maximum count data to normalize the counts
-min_max_count <- data %>% 
-group_by(site) %>% 
-summarize(min_count = min(count, na.rm = TRUE), max_count = max((count/1.5), na.rm = TRUE),
-real_max_count = max(count, na.rm = TRUE)) %>% 
-ungroup()
+min_max_count <- data %>%
+  group_by(site) %>%
+  reframe(
+    min_count = if (any(year > 2012 & !is.na(count))) min(count[year > 2012], na.rm = TRUE) else NA, 
+    mini_year = if (any(year > 2012 & !is.na(count))) year[year > 2012][which.min(count[year > 2012])] else NA,  
+    max_count = max(count / 1.5, na.rm = TRUE), 
+    max_year = year[which.max(count / 1.5)],  
+    real_max_count = max(count, na.rm = TRUE),
+    real_max_year = year[which.max(count)]  
+  )
 
 # Merge the min and max counts back into the orginal data
 data_with_min_max <- data %>% 
@@ -31,7 +36,7 @@ mutate(normalize_count = (count - min_count) / (max_count - min_count)) %>%
 mutate(normalize_to_min = count / (min_count + 1))
 
 # To get the normalized count and relative year of max decrease for sliding scale
-min_count_year1 <- normalize_count%>% 
+min_count_year1 <- normalize_count %>% 
 drop_na(count) %>% 
 group_by(site) %>% 
 filter(normalize_count == min(normalize_count)) %>% 
@@ -120,10 +125,16 @@ left_join(data_wide3, by = "site")
 
 
 model_data2 <- data_with_decrease_year %>% 
-group_by(site) %>% 
-summarize(min_count = min(min_count), max_count = max(max_count)) %>% 
-inner_join(model_data1, by = "site") %>% 
-ungroup()
+  group_by(site) %>%
+  reframe(
+    min_count = if (any(year > 2012 & !is.na(count))) min(count[year > 2012], na.rm = TRUE) else NA, 
+    mini_year = if (any(year > 2012 & !is.na(count))) year[year > 2012][which.min(count[year > 2012])] else NA,  
+    max_count = max(count / 1.5, na.rm = TRUE), 
+    max_year = year[which.max(count / 1.5)],  
+    real_max_count = max(count, na.rm = TRUE),
+    real_max_year = year[which.max(count)]  
+  ) %>% 
+  left_join(model_data1, by = "site")
 
  sites_to_remove <- c("Adventure Shaft", "Algonquin Adit #2 (Mark's Adit)", "Collin's Adit", "Copper Falls Mine", "Douglas Houghton Adit #1", "Jackson Mine, B Working",
  "Jackson Mine, Tram Tunnel Exit", "Merchant's Adit North", "Merchant's Adit South", "National Mine #7",
@@ -143,16 +154,7 @@ filtered_data1$levels <- as.factor(filtered_data1$levels)
 filtered_data1$shafts <- as.factor(filtered_data1$shafts)
 
 
-model_with_complexity <- filtered_data1 %>% 
-  mutate(levels = ifelse(is.na(levels), 1, levels)) %>% 
-  mutate(shafts = ifelse(is.na(shafts), 1, shafts)) %>% 
-  mutate(complexity = case_when(
-    passage_length > 600 & levels == 1 & shafts == 1 ~ 4,
-    passage_length > 200 & shafts >= 2 & levels == 1 ~ 3,
-    passage_length > 200 & shafts >= 1 & levels >= 2 ~ 4,
-    passage_length >= 200 & shafts >= 1 & levels >= 1 ~ 2,
-    TRUE ~ 1  # Default to 1 if no other conditions are met
-  ))
+model_with_complexity <- filtered_data1
 
 add_last_count <- model_with_complexity %>% 
 pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
@@ -162,7 +164,8 @@ pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998
 add_last_count1 <- add_last_count %>% 
 group_by(site) %>% 
 arrange(site, desc(year)) %>% 
-mutate(last_count = first(na.omit(count))) %>% 
+mutate(last_count = first(na.omit(count)),
+last_year = first(year[!is.na(count)])) %>% 
 ungroup()
 
 add_last_count2 <- add_last_count1 %>% 
@@ -172,23 +175,19 @@ df_slide_scale <- add_last_count2 #%>%
 #filter(!site %in% sites_to_remove)
 
 # Add crash intensity
-df_slide_scale$crash <- 1 - (df_slide_scale$min_count/df_slide_scale$max_count)
+df_slide_scale$crash <- 1 - (df_slide_scale$min_count/df_slide_scale$real_max_count)
 df_slide_scale$log_max_count <- log(df_slide_scale$max_count)
 df_slide_scale$log_passage <- log(df_slide_scale$passage_length)
 
 # LN of explantory variables to get Pseduothreshold
 # Add 1 all min values to avoid log(0)
 df_slide_scale <- df_slide_scale %>% 
-mutate(min_value = min + 1, 
-      max_value = max + 1) %>% 
-mutate(min_value = ifelse(min_value < 0, 1, min_value)) %>% 
+mutate(slope = ifelse(slope < 0, 0, slope)) %>% 
 mutate(bin = ifelse(slope > 0, 1, 0)) %>% 
-subset(max_count > 6)
-
-df_slide_scale$log_min_value <- log(df_slide_scale$min_value)
-df_slide_scale$log_max_value <- log(df_slide_scale$max_value)
-
-
+mutate(crash = ifelse(crash < 0, 0, crash)) %>% 
+subset(max_count > 6) %>% 
+mutate(last_year = as.numeric(last_year), 
+recovery_years = last_year - mini_year)
 
 # Check the final data
 #print("Final data with slopes:")
@@ -271,3 +270,10 @@ df_slide_scale$log_max_value <- log(df_slide_scale$max_value)
 # geom_smooth(method = "lm", show.legend = FALSE, se = FALSE)
 
 # ggsave("E:/chapter1_data/figures/sliding_normalize_slope_by_mine.png", width = 6, height=4)
+
+
+
+
+
+
+
