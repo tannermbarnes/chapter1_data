@@ -7,27 +7,11 @@ library(lmtest)
 library(caTools)
 library(quantmod)
 library(MASS)
+library(nlme)
 library(corrplot)
+library(blavaan)
 ##################################### Models for mines on the sliding scale method ###################################
 source("sliding_scale.R")
-
-#View(df_slide_scale)
-
-#Path anaylsis
-model_df <- df_slide_scale %>% 
-mutate(recovery_status = ifelse(bin == 1, "recovering", "not recovering")) %>% 
-mutate(recovery_status = as.factor(recovery_status)) %>% 
-mutate(site_numeric = as.numeric(factor(site))) %>% 
-select(site, site_numeric, bin, recovery_status, recovery_years, mini_year, max_year, last_year, slope, standing_water, passage_length, log_passage, levels, shafts, 
-crash, min, max, median_temp, mean_temp, temp_diff, ore) %>% 
-mutate(temp_diff_sqrt = sqrt(temp_diff),
-temp_diff_log = log(temp_diff),
-bin_numeric = as.numeric(bin),
-ore = as.factor(ore),
-levels = as.factor(levels),
-shafts = as.factor(shafts)) %>% 
-mutate(levels_numeric = as.numeric(levels), 
-shafts_numeric = as.numeric(shafts))
 
 # Some adjustments 
 model_df$standing_water[28] <- "yes"
@@ -36,28 +20,91 @@ model_df$standing_water[is.na(model_df$standing_water)] <- "no"
 model_df$mean_temp_ranked <- rank(model_df$mean_temp)
 model_df$mean_temp_transformed <- scale(model_df$mean_temp_ranked)
 
-model_df_crash <- model_df %>% mutate(new_crash = ifelse(slope > 0, crash, 1))
-
 # CFI = comparative fit index = models greater than 0.9, conservatively 0.95 indicate good fit
 # TLI = values greater than 0.9 indicating good fit. CFI is always greater than TLI
 # RMSEA <= 0.05 close-fit, >= 0.10 poor fit, between 0.5 & 0.8 reasonable approximate fit does not compare to baseline model
 # The baseline model is the worst fitting model assumes no covariances between variables wanna compare our model to baseline model
 # Saturated model is best model df = 0
 # Your model is somewhere between baseline and saturated model
-model_df_filter <- model_df %>% filter(site != "Tippy Dam")
+model_df_filter <- model_df %>% mutate(min_temp_squared = min^2, median_temp_squared = median_temp^2,
+max_temp_squared = max^2)
 
-summary(lm(slope ~ recovery_years, data = model_df_filter))
 
-model_df_filter %>% 
-ggplot(aes(x = recovery_years, y = slope)) +
-geom_point() + 
-geom_smooth(method = "lm")
+# Fit the mixed-effects model first
+mixed_model <- lme(slope ~ log_passage + levels_numeric + shafts_numeric + mean_temp, random = ~ 1 | recovery_years, data = model_df_filter)
+null_model <- lme(slope ~ 1, random = ~ 1 | recovery_years, model_df_filter)
+reduced_model <- lme(slope ~ crash, random = ~ 1 | recovery_years, model_df_filter)
+bin_model <- lme(slope ~ mean_temp + crash, random = ~ 1 | recovery_years, model_df_filter)
+quadratic_model <- lme(slope ~ median_temp + median_temp_squared,
+                       random = ~1 | recovery_years,
+                       data = model_df_filter)
+quadratic_model1 <- lme(slope ~ mean_temp + mean_temp_squared,
+                       random = ~1 | recovery_years,
+                       data = model_df_filter)
+
+quadratic_model2 <- lme(slope ~ min + min_temp_squared,
+                       random = ~1 | recovery_years,
+                       data = model_df_filter)
+
+quadratic_model3 <- lme(slope ~ max + max_temp_squared,
+                       random = ~1 | recovery_years,
+                       data = model_df_filter)
+
+summary(null_m)
+summary(null_model)
+summary(reduced_model)
+summary(bin_model)
+summary(quadratic_model)
+summary(quadratic_model1)
+summary(quadratic_model2)
+summary(quadratic_model3)
+
+# Calculate the optimal minimum temperature
+#median 4.762434
+coef_median_temp <- coef(summary(quadratic_model))["median_temp", "Value"]
+coef_median_temp_squared <- coef(summary(quadratic_model))["median_temp_squared", "Value"]
+
+optimal_temp <- -coef_median_temp / (2 * coef_median_temp_squared)
+print(optimal_temp)
+
+
+model_df %>% 
+ggplot(aes(x=recovery_years, y = slope)) +
+geom_point(aes(fill = median_temp), shape = 21, color = "black", stroke = 0.5) +
+geom_smooth(method = "lm") +
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+labs(title = "How does min temp, and complexity affect qualified slope",
+x = "minimum temperature",
+y = "Qualified recovery (slope x pop crash)") + 
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
+)
+
+model_df %>%
+  ggplot(aes(x = median_temp, y = slope)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "blue") + 
+  labs(x = "Median Temperature", y = "Recovery Speed", title = "Effect of Temperature on Recovery Speed") +
+  theme_minimal()
+
+
+# Bayesian SEM model with random intercept
+binary_model <- '
+complex =~ log_passage + levels_numeric + shafts_numeric
+slope ~ recovery_years + mean_temp + crash
+'
+
+fit <- blavaan(binary_model, data = model_df)
+summary(fit)
+
 
 binary_model <- '
 # Latent variable (measurement model)
 complex =~ log_passage + levels + shafts
 # Regressions (structured models)
-slope ~ complex
+crash ~ complex
+slope ~ mean_temp + recovery_years + complex + crash
 '
 
 fit1 <- sem(binary_model, data = model_df, ordered = c("bin", "levels", "shafts"))

@@ -7,13 +7,8 @@ library(lme4)
 library(car)
 library(lmtest)
 
-df_min_value$qualified_recovery <- df_min_value$slope * df_min_value$crash
-#View(df_min_value)
-
-df_min_value$normalized_count1 <- df_min_value$last_count / df_min_value$max_count
-
-model <- lm(normalized_count1 ~ complexity + min + crash, df_min_value)
-summary(model)
+source("sliding_scale.R")
+colors <- c("blue", "white", "red")
 
 # Check for Multicolinearity
 lim <- lm(slope ~ crash + min, data = df_min_value)
@@ -22,10 +17,6 @@ print(vif_values)
 
 crash_by_min <- lm(crash ~ min, data = df_min_value)
 summary(crash_by_min)
-
-colors <- c("blue", "white", "red")
-
-
 
 complexity_colors <- c("1" = "#56B4E9", "2" = "#E69F00", "3" = "#009E73", "4" = "#CC79A7")
 df_min_value$complexity <- factor(df_min_value$complexity, levels = 1:4)
@@ -69,9 +60,10 @@ theme(
 )
 ggsave("E:/chapter1_data/figures/normalzied_recovery.png", width = 6, height=4)
 
-df_min_value %>% filter(passage_length < 7000) %>% 
-ggplot(aes(x=passage_length, y = qualified_recovery)) +
-geom_point(aes(fill = min), shape = 21, color = "black", stroke = 0.5) +
+
+model_df %>% filter(slope > 0) %>% 
+ggplot(aes(x=recovery_years, y = slope)) +
+geom_point(aes(fill = mean_temp), shape = 21, color = "black", stroke = 0.5) +
 geom_smooth(method = "lm") +
 scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
 labs(title = "How does min temp, and complexity affect qualified slope",
@@ -82,7 +74,7 @@ theme(
   plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
 )
 
-ggsave("E:/chapter1_data/figures/q-slope_by_min_length.png", width = 6, height=4)
+ggsave("E:/chapter1_data/figures/test.png", width = 6, height=4)
 
 df_slide_scale %>%
 ggplot(aes(x= crash, y = slope)) +

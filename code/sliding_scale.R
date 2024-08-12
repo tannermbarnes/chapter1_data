@@ -143,7 +143,7 @@ model_data2 <- data_with_decrease_year %>%
  "West Vein Adit (Robin's Ore)", "White Pine Mine", "Cushman Adit", "Jackson Mine, Tram Tunnel", "West Evergreen Bluff Mine",
  "Caledonia Mine Complex", "Michigan (A Shaft)", "Ogimaw Mine", "Owl Creek Fissure (Old Copper Falls)",
  "Pewabic Mine (Iron Mountain)", "Piscatauqau Adit", "Nassau Mine", "Goodrich Adit B", "Aztec Mine",
- "Bumblebee Mine", "Millie Mine", "Toltec Mine")
+ "Bumblebee Mine", "Millie Mine", "Toltec Mine", "Randville Quarry Mine")
 
 filtered_data1 <- model_data2 %>%
   filter(!site %in% sites_to_remove)
@@ -188,6 +188,23 @@ mutate(crash = ifelse(crash < 0, 0, crash)) %>%
 subset(max_count > 6) %>% 
 mutate(last_year = as.numeric(last_year), 
 recovery_years = last_year - mini_year)
+
+model_df <- df_slide_scale %>% 
+mutate(recovery_status = ifelse(bin == 1, "recovering", "not recovering")) %>% 
+mutate(recovery_status = as.factor(recovery_status)) %>% 
+mutate(site_numeric = as.numeric(factor(site))) %>% 
+select(site, site_numeric, bin, min_count, max_count, real_max_count, recovery_status, recovery_years, mini_year, max_year, last_year, slope, standing_water, passage_length, log_passage, levels, shafts, 
+crash, min, max, median_temp, mean_temp, temp_diff, ore) %>% 
+mutate(temp_diff_sqrt = sqrt(temp_diff),
+temp_diff_log = log(temp_diff),
+bin_numeric = as.numeric(bin),
+ore = as.factor(ore),
+levels = as.factor(levels),
+shafts = as.factor(shafts)) %>% 
+mutate(levels_numeric = as.numeric(levels), 
+shafts_numeric = as.numeric(shafts)) %>% 
+filter(site != "Tippy Dam") %>% 
+mutate(mean_temp_squared = mean_temp^2)
 
 # Check the final data
 #print("Final data with slopes:")
