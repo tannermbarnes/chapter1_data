@@ -167,7 +167,8 @@ df_slide_scale <- add_last_count1 %>%
 pivot_wider(names_from = year, values_from = count)
 
 # Add crash intensity
-df_slide_scale$crash <- 1 - (df_slide_scale$min_count/df_slide_scale$mean_count)
+df_slide_scale$crash_mean <- 1 - (df_slide_scale$min_count/df_slide_scale$mean_count)
+df_slide_scale$crash_max <- 1 - (df_slide_scale$min_count/df_slide_scale$max_count)
 df_slide_scale$log_max_count <- log(df_slide_scale$max_count)
 df_slide_scale$log_passage <- log(df_slide_scale$passage_length)
 
@@ -176,7 +177,7 @@ df_slide_scale$log_passage <- log(df_slide_scale$passage_length)
 df_slide_scale <- df_slide_scale %>% 
 mutate(slope = ifelse(slope < 0, 0, slope)) %>% 
 mutate(bin = ifelse(slope > 0, 1, 0)) %>% 
-mutate(crash = ifelse(crash < 0, 0, crash)) %>% 
+mutate(crash_mean = ifelse(crash_mean < 0, 0, crash_mean)) %>% 
 subset(max_count > 6) %>% 
 mutate(last_year = as.numeric(last_year), 
 recovery_years = last_year - mini_year)
@@ -185,8 +186,8 @@ model_df <- df_slide_scale %>%
 mutate(recovery_status = ifelse(slope > 0 & (last_count / max_count > 0.05), "recovering", "not recovering")) %>% 
 mutate(recovery_status = as.factor(recovery_status)) %>% 
 mutate(site_numeric = as.numeric(factor(site))) %>% 
-select(site, site_numeric, bin, min_count, max_count, mean_count, recovery_status, recovery_years, mini_year, max_year, last_year, last_count, slope, standing_water, passage_length, log_passage, levels, shafts, 
-crash, min, max, median_temp, mean_temp, temp_diff, ore) %>% 
+select(site, site_numeric, bin, min_count, max_count, mean_count, last_count, recovery_status, recovery_years, mini_year, max_year, last_year, slope, standing_water, passage_length, log_passage, levels, shafts, 
+crash_max, crash_mean, min, max, median_temp, mean_temp, temp_diff, ore) %>% 
 mutate(temp_diff_sqrt = sqrt(temp_diff),
 temp_diff_log = log(temp_diff),
 bin_numeric = as.numeric(bin),
@@ -251,20 +252,31 @@ min_year1 <- data %>%
 data_with_min <- data %>% 
 left_join(min_year1, by = "site")
 
-data_with_relative_year <- data_with_min %>% 
-group_by(site) %>% 
- mutate(relative_year = year - first_year,
- normalized_count = (count - min_count) / (max(count) - min_count)) %>% 
- filter(relative_year >= 0) %>% 
- filter(n() >= 2) %>% 
- filter(!site %in% c("Aztec East Adit", "Aztec Mine", "Aztec Upper Drift", "B-95 (cave)", "Copper Peak Adit",
- "Copper Peak Adit", "County Line Adit", "Glen Adit #2", "Glen Adit #3", "Hilton Ohio (Hilton #5 Adit)", "Indiana Mine",
- "Kochab Cave", "Lafayette East Adit", "Ohio Traprock #61", "Scott Falls Cave", "Silas Doty Cave", "Spider Cave", 
- "Vivian Adit")) %>% 
- ungroup()
+data_with_count <- data_with_min %>% 
+  group_by(site) %>% 
+  mutate(normalized_count = (count - min_count) / (max(count) - min_count)) %>%
+  filter(n() >= 3) %>% 
+  filter(!site %in% c("Aztec East Adit", "Aztec Mine", "Aztec Upper Drift", 
+                      "Copper Peak Adit", "County Line Adit", "Glen Adit #2",
+                      "Indiana Mine", "Kochab Cave", "Lafayette East Adit",
+                      "Silas Doty Cave", "Spider Cave", "Vivian Adit", "Algonquin Adit #2 (Mark's Adit)",
+                      "Child's Adit", "Collin's Adit", "Glen Adit #3", "Hilton Ohio (Hilton #5 Adit)",
+                      "Ohio Traprock #61", "Scott Falls Cave", "Eagle River Adit 3 (Lake Superior & Phoenix)",
+                      "Eagle River Adit 2 (Lake Superior & Phoenix)", "Hilton (Shaft 1)", "Ohio Traprock Mine #59 (Norwich Adit)", 
+                      "Rockport Quarry South Tunnel", "Randville Quarry Mine")) %>%
+  arrange(site, year) %>% 
+  mutate(rank = dense_rank(year)) %>%
+  mutate(normalized_zero_rank = ifelse(normalized_count == 0, rank, NA)) %>% 
+  group_by(site) %>% 
+  mutate(min_zero_rank = min(normalized_zero_rank, na.rm = TRUE)) %>% 
+  filter(rank <= min_zero_rank) %>% 
+  top_n(3, rank) %>% 
+  arrange(site, rank) %>% 
+  mutate(relative_year = row_number() - 1) %>% 
+  ungroup()
 
 # Nest the data by site
-nested_data1 <- data_with_relative_year %>% 
+nested_data1 <- data_with_count %>% 
 group_by(site) %>% 
 nest()
 
@@ -276,11 +288,15 @@ nested_data1 <- nested_data1 %>%
   mutate(model = map(data, ~ {
     df <- .x
     # Ensure 'year' and 'count' are numeric
+    if(nrow(df) >= 2) {
     df <- df %>%
       mutate(year = as.numeric(relative_year),
              count = as.numeric(normalized_count))
     # Fit the linear model
     lm(count ~ year, data = df)
+    } else {
+      NULL
+    }
   }))
 
 # Check the models
@@ -289,6 +305,7 @@ nested_data1 <- nested_data1 %>%
 
 # Step 4: Tidy the model outputs
 tidied_data1 <- nested_data1 %>%
+  filter(!is.null(model)) %>% 
   mutate(tidied = map(model, tidy)) %>%
   unnest(tidied)
 
@@ -302,14 +319,13 @@ regression_results1 <- tidied_data1 %>%
   select(site, crash = estimate) %>% 
   mutate(crash = ifelse(is.na(crash), 0, crash))
 
-
-
 # Check the regression results
 #print("Regression results:")
 #print(regression_results)
 
 # Step 6: Add the slope to the original data frame
-final_datax1 <- data_with_relative_year %>%
-  left_join(regression_results, by = "site")
+final_datax1 <- data_with_count %>%
+  left_join(regression_results1, by = "site")
 
-View(final_datax1)
+model_df <- model_df %>% 
+left_join(regression_results1, by = "site")

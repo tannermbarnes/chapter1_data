@@ -19,49 +19,101 @@ model_df$standing_water[is.na(model_df$standing_water)] <- "no"
 # Change row 37 to yes
 model_df$mean_temp_ranked <- rank(model_df$mean_temp)
 model_df$mean_temp_transformed <- scale(model_df$mean_temp_ranked)
-
-model_df_recover <- model_df %>% filter(slope > 0)
-
 model_df$median_temp_squared <- model_df$median_temp^2
 model_df$mean_temp_squared <- model_df$mean_temp^2
+model_df_recover <- model_df %>% filter(slope > 0)
 # CFI = comparative fit index = models greater than 0.9, conservatively 0.95 indicate good fit
 # TLI = values greater than 0.9 indicating good fit. CFI is always greater than TLI
 # RMSEA <= 0.05 close-fit, >= 0.10 poor fit, between 0.5 & 0.8 reasonable approximate fit does not compare to baseline model
 # The baseline model is the worst fitting model assumes no covariances between variables wanna compare our model to baseline model
 # Saturated model is best model df = 0
 # Your model is somewhere between baseline and saturated model
-correlation <- cor(model_df$crash, model_df$population_crash, use = "complete.obs")
-print(correlation)
+m1 <- lm(slope ~ crash, model_df_recover)
+summary(m1)
 
-ggplot(model_df_recover, aes(x=population_crash, y=slope)) + geom_point() + geom_smooth(method = "lm")
+colors <- c("blue", "white", "red")
 
+ggplot(model_df_recover, aes(x=crash, y=slope)) + 
+geom_point(aes(fill = median_temp, size = last_count), shape = 21, color = "black", stroke = 0.5) + 
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Median\nTemperature") +
+scale_size_continuous(name = "Last Survey\nPopulation Count") + 
+labs(title = "The recovery rate and the population crash are related",
+x = "Slope (Population Crash)",
+y = "Slope (Recovery Rate") + 
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)) +
+  annotate("text", x = Inf, y = Inf, label = "Adjusted R² = 0.465", 
+           hjust = 2.5, vjust = 2, size = 3, color = "black", fontface = "italic")
 
+ggsave("E:/chapter1_data/figures/final/recovery_rate_population_crash.png", width = 6, height=4)
 
-model_df_recover <- model_df %>% filter(slope > 0)
-# Fit the mixed-effects model first
-mixed_model <- lme(slope ~ log_passage + levels_numeric + shafts_numeric + mean_temp, random = ~ 1 | recovery_years, data = model_df_filter)
+ggplot(model_df_recover, aes(x=recovery_years, y=slope)) + 
+geom_point(aes(fill = median_temp, size = mean_count), shape = 21, color = "black", stroke = 0.5) + 
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Median\nTemperature") +
+scale_size_continuous(name = "Mean Population\nSize (before WNS)") + 
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8))
 
-null_model <- glm(slope ~ 1 + offset(log(recovery_years)), 
-                  data = model_df_recover, 
-                  family = gaussian(),
-                  weights = mean_count)
+# BAYESIAN MODELING ####################################################
+library(brms)
+library(rstan)
+Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
+                        "E:/rtools44/usr/bin", 
+                        Sys.getenv("PATH"), 
+                        sep = ";"))
+# Define the prior
+prior <- c(
+  prior(normal(-1, 0.5), class = "b", coef = "median_temp"),
+  prior(normal(0,1), class = "Intercept"))
 
-reduced_model <- glm(slope ~ median_temp + offset(log(recovery_years)),
-                     data = model_df_recover, 
-                     family = gaussian(),
-                     weights = mean_count)
+prior1 <- prior(normal(0,1), class = "Intercept")
+# Fit the Bayesian model
+null_model <- brm(
+  formula = slope | weights(mean_count) ~ 1,  # Only the intercept
+  data = model_df_recover,
+  family = gaussian(),
+  prior = prior1,
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
 
-quadratic_model <- glm(slope ~ median_temp + median_temp_squared,
-                       offset = log(recovery_years),
-                       data = model_df_recover,
-                       weights = mean_count)
+slope_model <- brm(
+  formula = slope | weights(last_count) ~ median_temp,
+  data = model_df_recover,
+  family = gaussian(),
+  prior = prior,
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+summary(slope_model)
 
+#############
+model_df_crash <- model_df %>%  filter(crash <= 0) %>% 
+mutate(new = ifelse(slope > 0, "recovering", "not recovering"))
+# Fit the second Bayesian model
+crash_model <- brm(
+  formula = crash | weights(mean_count) ~ median_temp,
+  data = model_df_crash,
+  family = gaussian(),
+  prior = prior,
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+summary(crash_model)
 
-summary(null_model)
-summary(reduced_model)
-summary(quadratic_model)
-confint(reduced_model, level = 0.95)
-confint(quadratic_model, level = 0.95)
+bayes_R2(slope_model)
+bayes_R2(crash_model)
+
 # Calculate the optimal minimum temperature
 #median 4.762434
 coef_temp <- coef(summary(quadratic_model))["median_temp", "Value"]
@@ -74,16 +126,60 @@ colors <- c("blue", "white", "red")
 
 # Create a new dataframe for predictions
 prediction_data <- model_df_recover %>%
-  mutate(predicted_slope = predict(quadratic_model, type = "response"))
+  mutate(predicted_slope = fitted(slope_model)[, "Estimate"])
 
-# Plot the data
+# Plot the slope model
 ggplot(model_df_recover, aes(x = median_temp, y = slope)) +
-  geom_point(aes(size = mean_count), alpha = 0.5) +  # Plot observed data with size scaled by weights
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "blue") +  # Add the quadratic curve
-  labs(title = "Quadratic Model: Slope vs. Mean Temperature",
-       x = "Mean Temperature",
+  geom_point(aes(size = last_count), alpha = 0.5) +  # Plot observed data
+  geom_line(data = prediction_data, aes(x = median_temp, y = predicted_slope), color = "black") +  # Add regression line
+  scale_size_continuous(name = "Last Survey\nPopulation Count") + 
+  labs(title = "Mines with colder median temperatures have higher\nrecovery rates for Little Brown Bats",
+       x = "Median Temperature",
        y = "Slope (Recovery Rate)") +
-  theme_minimal()
+         annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² = 0.344"), 
+           hjust = 2.75, vjust = 1.5, size = 4, color = "black") +
+  theme_bw() +
+    theme(
+    plot.title = element_text(size = 12),        # Title font size
+    axis.title.x = element_text(size = 10),      # X-axis title font size
+    axis.title.y = element_text(size = 10),      # Y-axis title font size
+    axis.text.x = element_text(size = 8),       # X-axis text font size
+    axis.text.y = element_text(size = 8),       # Y-axis text font size
+    legend.title = element_text(size = 10),      # Legend title font size
+    legend.text = element_text(size = 8)        # Legend text font size
+  )
+
+ggsave("E:/chapter1_data/figures/final/recovery_rate_median_temp.png", width = 6, height=4)
+
+
+# Create a new dataframe for predictions (crash)
+prediction_data2 <- model_df_crash %>%
+  mutate(predicted_slope1 = fitted(crash_model)[, "Estimate"])
+# Plot the crash model
+ggplot(model_df_crash, aes(x = median_temp, y = crash)) +
+  geom_point(aes(size = mean_count, color = new), alpha = 0.5) +  # Plot observed data
+  geom_line(data = prediction_data2, aes(x = median_temp, y = predicted_slope1), color = "black") +  # Add regression line
+    scale_color_manual(values = c("recovering" = "blue", "not recovering" = "red"), 
+                     name = "Recovering Status") +
+  scale_size_continuous(name = "Mean Population\nBefore WNS") + 
+  labs(title = "Mines with colder median temperatures had slightly less severe\npopulation crashes of Little Brown Bats",
+       x = "Median Temperature",
+       y = "Slope (Population Crash)") +
+         annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² = 0.16"), 
+           hjust = 2.75, vjust = 1.5, size = 4, color = "black") +
+  theme_bw() +
+    theme(
+    plot.title = element_text(size = 12),        # Title font size
+    axis.title.x = element_text(size = 10),      # X-axis title font size
+    axis.title.y = element_text(size = 10),      # Y-axis title font size
+    axis.text.x = element_text(size = 8),       # X-axis text font size
+    axis.text.y = element_text(size = 8),       # Y-axis text font size
+    legend.title = element_text(size = 10),      # Legend title font size
+    legend.text = element_text(size = 8)        # Legend text font size
+  )
+
+ggsave("E:/chapter1_data/figures/final/pop_crash_median_temp.png", width = 6, height=4)
+
 
 model_df %>% 
 ggplot(aes(x=recovery_years, y = slope)) +
