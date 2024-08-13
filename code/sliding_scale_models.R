@@ -20,94 +20,120 @@ model_df$standing_water[is.na(model_df$standing_water)] <- "no"
 model_df$mean_temp_ranked <- rank(model_df$mean_temp)
 model_df$mean_temp_transformed <- scale(model_df$mean_temp_ranked)
 
+model_df_recover <- model_df %>% filter(slope > 0)
+
+model_df$median_temp_squared <- model_df$median_temp^2
+model_df$mean_temp_squared <- model_df$mean_temp^2
 # CFI = comparative fit index = models greater than 0.9, conservatively 0.95 indicate good fit
 # TLI = values greater than 0.9 indicating good fit. CFI is always greater than TLI
 # RMSEA <= 0.05 close-fit, >= 0.10 poor fit, between 0.5 & 0.8 reasonable approximate fit does not compare to baseline model
 # The baseline model is the worst fitting model assumes no covariances between variables wanna compare our model to baseline model
 # Saturated model is best model df = 0
 # Your model is somewhere between baseline and saturated model
-model_df_filter <- model_df %>% mutate(min_temp_squared = min^2, median_temp_squared = median_temp^2,
-max_temp_squared = max^2)
+correlation <- cor(model_df$crash, model_df$population_crash, use = "complete.obs")
+print(correlation)
+
+ggplot(model_df_recover, aes(x=population_crash, y=slope)) + geom_point() + geom_smooth(method = "lm")
 
 
+
+model_df_recover <- model_df %>% filter(slope > 0)
 # Fit the mixed-effects model first
 mixed_model <- lme(slope ~ log_passage + levels_numeric + shafts_numeric + mean_temp, random = ~ 1 | recovery_years, data = model_df_filter)
-null_model <- lme(slope ~ 1, random = ~ 1 | recovery_years, model_df_filter)
-reduced_model <- lme(slope ~ crash, random = ~ 1 | recovery_years, model_df_filter)
-bin_model <- lme(slope ~ mean_temp + crash, random = ~ 1 | recovery_years, model_df_filter)
-quadratic_model <- lme(slope ~ median_temp + median_temp_squared,
-                       random = ~1 | recovery_years,
-                       data = model_df_filter)
-quadratic_model1 <- lme(slope ~ mean_temp + mean_temp_squared,
-                       random = ~1 | recovery_years,
-                       data = model_df_filter)
 
-quadratic_model2 <- lme(slope ~ min + min_temp_squared,
-                       random = ~1 | recovery_years,
-                       data = model_df_filter)
+null_model <- glm(slope ~ 1 + offset(log(recovery_years)), 
+                  data = model_df_recover, 
+                  family = gaussian(),
+                  weights = mean_count)
 
-quadratic_model3 <- lme(slope ~ max + max_temp_squared,
-                       random = ~1 | recovery_years,
-                       data = model_df_filter)
+reduced_model <- glm(slope ~ median_temp + offset(log(recovery_years)),
+                     data = model_df_recover, 
+                     family = gaussian(),
+                     weights = mean_count)
 
-summary(null_m)
+quadratic_model <- glm(slope ~ median_temp + median_temp_squared,
+                       offset = log(recovery_years),
+                       data = model_df_recover,
+                       weights = mean_count)
+
+
 summary(null_model)
 summary(reduced_model)
-summary(bin_model)
 summary(quadratic_model)
-summary(quadratic_model1)
-summary(quadratic_model2)
-summary(quadratic_model3)
-
+confint(reduced_model, level = 0.95)
+confint(quadratic_model, level = 0.95)
 # Calculate the optimal minimum temperature
 #median 4.762434
-coef_median_temp <- coef(summary(quadratic_model))["median_temp", "Value"]
-coef_median_temp_squared <- coef(summary(quadratic_model))["median_temp_squared", "Value"]
-
-optimal_temp <- -coef_median_temp / (2 * coef_median_temp_squared)
+coef_temp <- coef(summary(quadratic_model))["median_temp", "Value"]
+coef_temp_squared <- coef(summary(quadratic_model))["median_temp_squared", "Value"]
+optimal_temp <- -coef_temp / (2 * coef_temp_squared)
 print(optimal_temp)
 
 
+colors <- c("blue", "white", "red")
+
+# Create a new dataframe for predictions
+prediction_data <- model_df_recover %>%
+  mutate(predicted_slope = predict(quadratic_model, type = "response"))
+
+# Plot the data
+ggplot(model_df_recover, aes(x = median_temp, y = slope)) +
+  geom_point(aes(size = mean_count), alpha = 0.5) +  # Plot observed data with size scaled by weights
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "blue") +  # Add the quadratic curve
+  labs(title = "Quadratic Model: Slope vs. Mean Temperature",
+       x = "Mean Temperature",
+       y = "Slope (Recovery Rate)") +
+  theme_minimal()
+
 model_df %>% 
 ggplot(aes(x=recovery_years, y = slope)) +
-geom_point(aes(fill = median_temp), shape = 21, color = "black", stroke = 0.5) +
+geom_jitter(aes(fill = median_temp), shape = 21, color = "black", stroke = 0.5) +
 geom_smooth(method = "lm") +
 scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
 labs(title = "How does min temp, and complexity affect qualified slope",
-x = "minimum temperature",
-y = "Qualified recovery (slope x pop crash)") + 
+x = "recovery years",
+y = "recovery rate") + 
 theme_bw() +
 theme(
   plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)
 )
 
-model_df %>%
-  ggplot(aes(x = median_temp, y = slope)) +
+ggsave("E:/chapter1_data/figures/test.png", width = 6, height=4)
+
+model_df_recover %>%
+  ggplot(aes(x = mean_temp, y = slope)) +
   geom_point(alpha = 0.5) +
   geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "blue") + 
   labs(x = "Median Temperature", y = "Recovery Speed", title = "Effect of Temperature on Recovery Speed") +
   theme_minimal()
 
+model_df_recover %>%
+  ggplot(aes(x = m, y = slope)) +
+  geom_point(aes(size = max_count), alpha = 0.5) +  # Point size reflects weight
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, color = "blue", aes(weight = max_count)) + 
+  labs(x = "Min Temperature", y = "Recovery Speed", title = "Effect of Temperature on Recovery Speed (Weighted by max_count)") +
+  theme_minimal()
 
+model_df_filter <- model_df %>% filter(recovery_years > 0)
 # Bayesian SEM model with random intercept
 binary_model <- '
 complex =~ log_passage + levels_numeric + shafts_numeric
-slope ~ recovery_years + mean_temp + crash
+recovery_status ~ median_temp + complex + recovery_years + crash
 '
 
-fit <- blavaan(binary_model, data = model_df)
+fit <- sem(binary_model, data = model_df_filter, ordered = "recovery_status")
 summary(fit)
 
 
 binary_model <- '
 # Latent variable (measurement model)
-complex =~ log_passage + levels + shafts
+complex =~ log_passage + levels_numeric + shafts_numeric
 # Regressions (structured models)
 crash ~ complex
-slope ~ mean_temp + recovery_years + complex + crash
+slope ~ recovery_years + complex + crash
 '
 
-fit1 <- sem(binary_model, data = model_df, ordered = c("bin", "levels", "shafts"))
+fit1 <- sem(binary_model, data = model_df_filter)
 summary(fit1, fit.measures = TRUE)
 fitMeasures(fit1, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr"))
 parameterEstimates(fit1, standardized = TRUE)

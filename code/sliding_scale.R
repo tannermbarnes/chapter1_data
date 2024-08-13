@@ -20,10 +20,9 @@ min_max_count <- data %>%
   reframe(
     min_count = if (any(year > 2012 & !is.na(count))) min(count[year > 2012], na.rm = TRUE) else NA, 
     mini_year = if (any(year > 2012 & !is.na(count))) year[year > 2012][which.min(count[year > 2012])] else NA,  
-    max_count = max(count / 1.5, na.rm = TRUE), 
-    max_year = year[which.max(count / 1.5)],  
-    real_max_count = max(count, na.rm = TRUE),
-    real_max_year = year[which.max(count)]  
+    max_count = max(count, na.rm = TRUE), 
+    max_year = year[which.max(count)],
+    mean_count = if (!is.na(mini_year)) mean(count[year < mini_year], na.rm = TRUE) else NA
   )
 
 # Merge the min and max counts back into the orginal data
@@ -32,7 +31,7 @@ left_join(min_max_count, by = "site")
 
 # Normalize the count data
 normalize_count <- data_with_min_max %>% 
-mutate(normalize_count = (count - min_count) / (max_count - min_count)) %>% 
+mutate(normalize_count = (count - min_count) / (mean_count - min_count)) %>% 
 mutate(normalize_to_min = count / (min_count + 1))
 
 # To get the normalized count and relative year of max decrease for sliding scale
@@ -129,10 +128,9 @@ model_data2 <- data_with_decrease_year %>%
   reframe(
     min_count = if (any(year > 2012 & !is.na(count))) min(count[year > 2012], na.rm = TRUE) else NA, 
     mini_year = if (any(year > 2012 & !is.na(count))) year[year > 2012][which.min(count[year > 2012])] else NA,  
-    max_count = max(count / 1.5, na.rm = TRUE), 
-    max_year = year[which.max(count / 1.5)],  
-    real_max_count = max(count, na.rm = TRUE),
-    real_max_year = year[which.max(count)]  
+    max_count = max(count, na.rm = TRUE), 
+    max_year = year[which.max(count / 1.5)], 
+    mean_count = if (!is.na(mini_year)) mean(count[year < mini_year], na.rm = TRUE) else NA
   ) %>% 
   left_join(model_data1, by = "site")
 
@@ -143,7 +141,7 @@ model_data2 <- data_with_decrease_year %>%
  "West Vein Adit (Robin's Ore)", "White Pine Mine", "Cushman Adit", "Jackson Mine, Tram Tunnel", "West Evergreen Bluff Mine",
  "Caledonia Mine Complex", "Michigan (A Shaft)", "Ogimaw Mine", "Owl Creek Fissure (Old Copper Falls)",
  "Pewabic Mine (Iron Mountain)", "Piscatauqau Adit", "Nassau Mine", "Goodrich Adit B", "Aztec Mine",
- "Bumblebee Mine", "Millie Mine", "Toltec Mine", "Randville Quarry Mine")
+ "Bumblebee Mine", "Millie Mine", "Toltec Mine", "Randville Quarry Mine", "Indiana Mine")
 
 filtered_data1 <- model_data2 %>%
   filter(!site %in% sites_to_remove)
@@ -153,10 +151,7 @@ filtered_data1$standing_water <- as.factor(filtered_data1$standing_water)
 filtered_data1$levels <- as.factor(filtered_data1$levels)
 filtered_data1$shafts <- as.factor(filtered_data1$shafts)
 
-
-model_with_complexity <- filtered_data1
-
-add_last_count <- model_with_complexity %>% 
+add_last_count <- filtered_data1 %>% 
 pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
 "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
 "2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
@@ -168,14 +163,11 @@ mutate(last_count = first(na.omit(count)),
 last_year = first(year[!is.na(count)])) %>% 
 ungroup()
 
-add_last_count2 <- add_last_count1 %>% 
+df_slide_scale <- add_last_count1 %>% 
 pivot_wider(names_from = year, values_from = count)
 
-df_slide_scale <- add_last_count2 #%>% 
-#filter(!site %in% sites_to_remove)
-
 # Add crash intensity
-df_slide_scale$crash <- 1 - (df_slide_scale$min_count/df_slide_scale$real_max_count)
+df_slide_scale$crash <- 1 - (df_slide_scale$min_count/df_slide_scale$mean_count)
 df_slide_scale$log_max_count <- log(df_slide_scale$max_count)
 df_slide_scale$log_passage <- log(df_slide_scale$passage_length)
 
@@ -190,10 +182,10 @@ mutate(last_year = as.numeric(last_year),
 recovery_years = last_year - mini_year)
 
 model_df <- df_slide_scale %>% 
-mutate(recovery_status = ifelse(bin == 1, "recovering", "not recovering")) %>% 
+mutate(recovery_status = ifelse(slope > 0 & (last_count / max_count > 0.05), "recovering", "not recovering")) %>% 
 mutate(recovery_status = as.factor(recovery_status)) %>% 
 mutate(site_numeric = as.numeric(factor(site))) %>% 
-select(site, site_numeric, bin, min_count, max_count, real_max_count, recovery_status, recovery_years, mini_year, max_year, last_year, slope, standing_water, passage_length, log_passage, levels, shafts, 
+select(site, site_numeric, bin, min_count, max_count, mean_count, recovery_status, recovery_years, mini_year, max_year, last_year, last_count, slope, standing_water, passage_length, log_passage, levels, shafts, 
 crash, min, max, median_temp, mean_temp, temp_diff, ore) %>% 
 mutate(temp_diff_sqrt = sqrt(temp_diff),
 temp_diff_log = log(temp_diff),
@@ -206,91 +198,118 @@ shafts_numeric = as.numeric(shafts)) %>%
 filter(site != "Tippy Dam") %>% 
 mutate(mean_temp_squared = mean_temp^2)
 
-# Check the final data
-#print("Final data with slopes:")
-#View(final_data)
 
-# #Graph the regression lines
-# ggplot(final_data, aes(x = year, y = count, color = site)) +
-# geom_point() +
-# geom_smooth(method = "lm", se = FALSE, aes(group = site)) + # Regression line per site
-# theme_minimal() +
-# labs(title = "Yearly Count Data with Regression Lines per Site",
-# x = "Year", 
-# y = "Count", 
-# color = "Site") + 
-# theme(legend.position = "none")
-
-#  ggsave("E:/chapter1_data/figures/slide_scale_regressions.jpg", width = 8, height=4)
-
-# # Filter out tippy dam for better viewing purposes
-# final_data %>% filter(count < 5000) %>% filter(year > 2013) %>% 
-# ggplot(aes(x = year, y = count, color = site)) +
-# geom_point() +
-# geom_smooth(method = "lm", se = FALSE, aes(group = site)) + # Regression line per site
-# theme_minimal() +
-# labs(title = "Yearly Count Data with Regression Lines per Site",
-# x = "Year", 
-# y = "Count", 
-# color = "Site") + 
-# theme(legend.position = "none")
-
-# ggsave("E:/chapter1_data/figures/slide_scale_regressions.jpg", width = 8, height=4)
-
-# model_this_data <- final_data %>% 
-# pivot_wider(names_from = relative_year, 
-#             values_from = normalize_count) %>% 
-# select(site, slope) %>% 
-# left_join(data_wide2, by = "site")
-
-#View(model_this_data)
+data <- data_wide3 %>%
+pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
+"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
+"2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count") %>% 
+mutate(year = as.numeric(year), count = as.numeric(count)) %>% drop_na(count)
 
 
 
-# # ################################# Test normalized_counts for normality ##########################################
-# # # Plot histogram
-# ggplot(final_data, aes(x = normalize_count)) +
-#   geom_histogram(bins = 30, color = "black", fill = "blue") +
-#   ggtitle("Histogram of Normalized Count") +
-#   xlab("Normalized Count") +
-#   ylab("Frequency")
+# Function to calculate the population crash slope
+calculate_population_crash <- function(data) {
+  data <- data %>%
+    arrange(year) %>%
+    filter(year <= year[which.min(count)])
+  
+  if (nrow(data) > 1) {
+    # Normalize count to the range [0, 1]
+    data <- data %>%
+      mutate(
+        normalized_count = (count - min(count)) / (max(count) - min(count)),
+        standardized_year = scale(year, center = TRUE, scale = TRUE)
+      )
+    
+    # Fit linear model and extract the slope
+    fit <- lm(normalized_count ~ standardized_year, data = data)
+    slope <- coef(fit)[["standardized_year"]]
+    
+    return(slope)
+  } else {
+    return(NA)  # If not enough data points, return NA
+  }
+}
 
-# # Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
-# ggplot(final_data, aes(sample = normalize_count)) +
-#   geom_qq() +
-#   geom_qq_line() +
-#   ggtitle("Q-Q Plot of Normalized Count")
+# Apply to each site
+population_crash_slopes <- data %>%
+  group_by(site) %>%
+  summarize(population_crash = calculate_population_crash(cur_data())) %>% 
+  drop_na(population_crash) %>% filter(!site %in% sites_to_remove)
 
-# # Shapiro-Wilk test A small p-value indicates the null hypothesis can be rejected, meaning the data is not normally distributed
-# shapiro_test <- shapiro.test(final_data$normalize_count)
-# print(shapiro_test)
+model_df <- model_df %>% 
+left_join(population_crash_slopes, by = "site")
 
-# ################## Test slope for normality ###############################
-# ggplot(final_data, aes(x = slope)) +
-#   geom_histogram(bins = 30, color = "black", fill = "blue") +
-#   ggtitle("Histogram of Normalized Count") +
-#   xlab("Normalized Count") +
-#   ylab("Frequency")
+min_year1 <- data %>%
+  group_by(site) %>%
+  reframe(
+    min_count = if (any(year > 2012 & !is.na(count))) min(count[year > 2012], na.rm = TRUE) else NA, 
+    min_year = if (any(year > 2012 & !is.na(count))) year[year > 2012][which.min(count[year > 2012])] else NA,
+    first_year = min(year, na.rm = TRUE))
 
-# shapiro_test <- shapiro.test(final_data$slope)
-# print(shapiro_test)
+# Merge the min and max counts back into the orginal data
+data_with_min <- data %>% 
+left_join(min_year1, by = "site")
 
-# # Plot Q-Q plot (Quantile-Quantile plot) compares the quantiles of the normalized count with that of a normal distribution
-# ggplot(final_data, aes(sample = slope)) +
-#   geom_qq() +
-#   geom_qq_line() +
-#   ggtitle("Q-Q Plot of Normalized Count")
+data_with_relative_year <- data_with_min %>% 
+group_by(site) %>% 
+ mutate(relative_year = year - first_year,
+ normalized_count = (count - min_count) / (max(count) - min_count)) %>% 
+ filter(relative_year >= 0) %>% 
+ filter(n() >= 2) %>% 
+ filter(!site %in% c("Aztec East Adit", "Aztec Mine", "Aztec Upper Drift", "B-95 (cave)", "Copper Peak Adit",
+ "Copper Peak Adit", "County Line Adit", "Glen Adit #2", "Glen Adit #3", "Hilton Ohio (Hilton #5 Adit)", "Indiana Mine",
+ "Kochab Cave", "Lafayette East Adit", "Ohio Traprock #61", "Scott Falls Cave", "Silas Doty Cave", "Spider Cave", 
+ "Vivian Adit")) %>% 
+ ungroup()
 
-# final_data %>% filter(!site %in% "Tippy Dam") %>% 
-# ggplot(aes(x=relative_year, y=normalize_count, color = site)) +
-# geom_point(show.legend = FALSE) +
-# geom_smooth(method = "lm", show.legend = FALSE, se = FALSE)
+# Nest the data by site
+nested_data1 <- data_with_relative_year %>% 
+group_by(site) %>% 
+nest()
 
-# ggsave("E:/chapter1_data/figures/sliding_normalize_slope_by_mine.png", width = 6, height=4)
+#print("Nested data:")
+#print(nested_data)
+
+# Fit a linear regression model for each site
+nested_data1 <- nested_data1 %>%
+  mutate(model = map(data, ~ {
+    df <- .x
+    # Ensure 'year' and 'count' are numeric
+    df <- df %>%
+      mutate(year = as.numeric(relative_year),
+             count = as.numeric(normalized_count))
+    # Fit the linear model
+    lm(count ~ year, data = df)
+  }))
+
+# Check the models
+# print("Nested data with models:")
+# print(nested_data)
+
+# Step 4: Tidy the model outputs
+tidied_data1 <- nested_data1 %>%
+  mutate(tidied = map(model, tidy)) %>%
+  unnest(tidied)
+
+# Check the tidied data
+#print("Tidied data:")
+#print(tidied_data)
+
+# Step 5: Filter and select the slope for the 'year' term
+regression_results1 <- tidied_data1 %>%
+  filter(term == "year") %>%
+  select(site, crash = estimate) %>% 
+  mutate(crash = ifelse(is.na(crash), 0, crash))
 
 
 
+# Check the regression results
+#print("Regression results:")
+#print(regression_results)
 
+# Step 6: Add the slope to the original data frame
+final_datax1 <- data_with_relative_year %>%
+  left_join(regression_results, by = "site")
 
-
-
+View(final_datax1)
