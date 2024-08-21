@@ -1,4 +1,4 @@
-##### Making models for sliding scales ######
+### THIS CODE MAKES THE DATAFRAME FOR SLIDING_SCALE_MODELS.R #
 rm(list = ls())
 setwd("E:/chapter1_data/code")
 source("raw_data.R")

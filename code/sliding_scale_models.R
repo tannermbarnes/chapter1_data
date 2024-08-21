@@ -1,3 +1,4 @@
+# THIS CODE IS MODELS FOR SLOPE OF RECOVERY AND POPULATION CRASH IT PRODUCEs ESTIMATES AND FIGURES
 rm(list = ls())
 setwd("E:/chapter1_data/code")
 library(lavaan)
@@ -22,6 +23,8 @@ model_df$mean_temp_transformed <- scale(model_df$mean_temp_ranked)
 model_df$median_temp_squared <- model_df$median_temp^2
 model_df$mean_temp_squared <- model_df$mean_temp^2
 model_df_recover <- model_df %>% filter(slope > 0)
+model_df_crash <- model_df %>%  filter(crash <= 0) %>% 
+mutate(new = ifelse(slope > 0, "recovering", "not recovering"))
 # CFI = comparative fit index = models greater than 0.9, conservatively 0.95 indicate good fit
 # TLI = values greater than 0.9 indicating good fit. CFI is always greater than TLI
 # RMSEA <= 0.05 close-fit, >= 0.10 poor fit, between 0.5 & 0.8 reasonable approximate fit does not compare to baseline model
@@ -58,7 +61,23 @@ theme_bw() +
 theme(
   plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8))
 
-# BAYESIAN MODELING ####################################################
+###################################################################################################################
+#################### First plot Frequentist #######################################################################
+###################################################################################################################
+#########################################################################################################################
+#######################################################################################################################
+null_f <- glm(slope ~ 1 + offset(recovery_years), family = gaussian, weights = last_count, data = model_df_recover)
+summary(null_f)
+
+slope_f <- glm(slope ~ median_temp + offset(recovery_years), family = gaussian, weights = last_count, data = model_df_recover)
+summary(slope_f)
+
+crash_f <- glm(crash ~ median_temp, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_f)
+
+################################# BAYESIAN MODELING ################################################################
+####################################################################################################################
+####################################################################################################################
 library(brms)
 library(rstan)
 Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
@@ -67,7 +86,7 @@ Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
                         sep = ";"))
 # Define the prior
 prior <- c(
-  prior(normal(-1, 0.5), class = "b", coef = "median_temp"),
+  prior(normal(0, 1), class = "b", coef = "median_temp"),
   prior(normal(0,1), class = "Intercept"))
 
 prior1 <- prior(normal(0,1), class = "Intercept")
@@ -84,7 +103,7 @@ null_model <- brm(
 )
 
 slope_model <- brm(
-  formula = slope | weights(last_count) ~ median_temp,
+  formula = slope | weights(last_count) ~ median_temp + offset(recovery_years),
   data = model_df_recover,
   family = gaussian(),
   prior = prior,
@@ -93,6 +112,7 @@ slope_model <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
+
 summary(slope_model)
 
 #############
@@ -124,9 +144,9 @@ print(optimal_temp)
 
 colors <- c("blue", "white", "red")
 
-# Create a new dataframe for predictions
+# Generate predictions using the median or mean of the posterior draws
 prediction_data <- model_df_recover %>%
-  mutate(predicted_slope = fitted(slope_model)[, "Estimate"])
+  mutate(predicted_slope = apply(posterior_epred(slope_model, newdata = model_df_recover), 2, median))
 
 # Plot the slope model
 ggplot(model_df_recover, aes(x = median_temp, y = slope)) +
@@ -136,18 +156,19 @@ ggplot(model_df_recover, aes(x = median_temp, y = slope)) +
   labs(title = "Mines with colder median temperatures have higher\nrecovery rates for Little Brown Bats",
        x = "Median Temperature",
        y = "Slope (Recovery Rate)") +
-         annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² = 0.344"), 
+  annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² = 0.344"), 
            hjust = 2.75, vjust = 1.5, size = 4, color = "black") +
   theme_bw() +
-    theme(
+  theme(
     plot.title = element_text(size = 12),        # Title font size
     axis.title.x = element_text(size = 10),      # X-axis title font size
     axis.title.y = element_text(size = 10),      # Y-axis title font size
-    axis.text.x = element_text(size = 8),       # X-axis text font size
-    axis.text.y = element_text(size = 8),       # Y-axis text font size
+    axis.text.x = element_text(size = 8),        # X-axis text font size
+    axis.text.y = element_text(size = 8),        # Y-axis text font size
     legend.title = element_text(size = 10),      # Legend title font size
-    legend.text = element_text(size = 8)        # Legend text font size
+    legend.text = element_text(size = 8)         # Legend text font size
   )
+
 
 ggsave("E:/chapter1_data/figures/final/recovery_rate_median_temp.png", width = 6, height=4)
 

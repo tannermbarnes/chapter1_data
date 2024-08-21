@@ -1,3 +1,4 @@
+# THIS CODE PRODUCES DIFFERENT FIGURES BASED ON WHAT WE ARE INTERESTED IN #
 rm(list = ls())
 setwd("E:/chapter1_data/code")
 library(dplyr)

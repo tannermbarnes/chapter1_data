@@ -60,7 +60,7 @@ dat$passage_length[dat$passage_length == "> 10,000"] <- 10000
 dat$passage_length[dat$passage_length == ">1,000"] <- 1000
 
 #Fix the spots that temperature format is messed up
-dat$internal_ta[dat$internal_ta == "-3.9to6.7(2nd level)"] <- -3.9
+dat$internal_ta[dat$internal_ta == "-3.9to6.7(2nd level)"] <- -3.9-6.7
 dat$internal_ta[dat$internal_ta == "<32"] <- 32
 dat$internal_ta[dat$internal_ta == "≤33"] <- 33
 dat$internal_ta[dat$internal_ta == "<49.2"] <- 49.2

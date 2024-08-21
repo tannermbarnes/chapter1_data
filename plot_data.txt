@@ -1,0 +1,16 @@
+colors <- c("blue", "white", "red")
+
+ggplot(model_df_recover, aes(x=crash, y=slope)) + 
+geom_point(aes(fill = median_temp, size = last_count), shape = 21, color = "black", stroke = 0.5) + 
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Median\nTemperature") +
+scale_size_continuous(name = "Last Survey\nPopulation Count") + 
+labs(title = "The recovery rate and the population crash are related",
+x = "Slope (Population Crash)",
+y = "Slope (Recovery Rate") + 
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)) +
+  annotate("text", x = Inf, y = Inf, label = "Adjusted R² = 0.465", 
+           hjust = 2.5, vjust = 2, size = 3, color = "black", fontface = "italic")
+
