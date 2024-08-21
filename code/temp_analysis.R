@@ -8,40 +8,73 @@ library(purrr)
 library(broom)
 library(lme4)
 library(patchwork)
-before_data <- fin_filter %>% filter(period == "before") %>% 
-filter(site != "Tippy Dam") %>% 
- mutate(mean_count = mean(count),
- sd = sd(count), 
- z_value = (count - mean_count) / sd) %>% 
- group_by(site) %>% 
- mutate(mean_count_site = mean(count),
- sd_site = sd(count), 
- z_value_site = (count - mean_count_site) / sd_site,
- z_overall = sum(z_value), 
- mean_temp_site = mean(mean_temp)) %>% 
- ungroup()
+library(dplyr)
 
-after_data <- fin_filter %>% filter(period == "after") %>% 
-filter(site != "Tippy Dam") %>% 
- mutate(mean_count = mean(count),
- sd = sd(count), 
- z_value = (count - mean_count) / sd) %>% 
- group_by(site) %>% 
- mutate(mean_count_site = mean(count),
- sd_site = sd(count), 
- z_value_site = (count - mean_count_site) / sd_site, 
- z_overall = sum(z_value), 
- mean_temp_site = mean(mean_temp)) %>% 
- ungroup()
+# Step 1: Calculate overall mean and standard deviation for each period
+overall_stats <- fin_filter %>%
+  filter(site != "Tippy Dam") %>%
+  group_by(period) %>%
+  summarise(
+    overall_mean_count = mean(count, na.rm = TRUE),
+    overall_sd_count = sd(count, na.rm = TRUE)
+  )
 
-combined <- before_data %>% group_by(site) %>% slice(1) %>% 
-select(site, mean_temp_site, z_overall, mean_count_site)
-combinedx <- after_data %>% group_by(site) %>% slice(1) %>% 
-select(site, mean_temp_site, z_overall, mean_count_site) %>% left_join(combined, by = "site")
+# Step 2: Merge overall stats with the site-specific data
+combined_data <- fin_filter %>%
+  filter(site != "Tippy Dam") %>%
+  group_by(site, period) %>%
+  summarise(
+    mean_count_site = mean(count, na.rm = TRUE),  # Mean count for the site and period
+    site_mean_temp = first(site_mean_temp)  # Assuming site_mean_temp is constant per site
+  ) %>%
+  left_join(overall_stats, by = "period") %>%  # Join overall mean and SD
+  mutate(
+    z_value = (mean_count_site - overall_mean_count) / overall_sd_count  # Z-score calculation
+  ) %>%
+  ungroup()
+
+# Step 3: Pivot wider so each site has one row, with separate columns for each period's stats
+combined <- combined_data %>%
+  pivot_wider(
+    names_from = period,
+    values_from = c(mean_count_site, z_value, site_mean_temp, overall_mean_count, overall_sd_count),
+    names_prefix = "period_"
+  ) %>% 
+  mutate(z_value = z_value_period_after - z_value_period_before) %>% 
+  select(site, mean_count_before = mean_count_site_period_before, mean_count_after = mean_count_site_period_after, 
+  z_value_before = z_value_period_before, z_value_after = z_value_period_after, z_value, mean_temp = site_mean_temp_period_before, 
+  )
+
+important <- combined %>% filter(z_value > 0.35 | z_value < -0.35)
+
+# graph it
+model <- lm(z_value ~ mean_temp, data = important)
+adj_r_squared <- summary(model)$adj.r.squared
+adj_r_squared_text <- paste0("Adjusted R² = ", round(adj_r_squared, 4))
 
 
-ggplot(data = combined, aes(x = mean_temp_site.x, y = z_both)) +
-geom_point()
+ggplot(data = important, aes(x = mean_temp, y = z_value, size = mean_count_before)) +
+geom_point(alpha = 0.7) +
+geom_smooth(method = "lm", se = FALSE, color = "darkorange", size = 1.2) +
+labs(
+  title = "Mine Importance Decreases as Mean Temperature Increases",
+  x = "Mean Temperature", 
+  y = "Z-value-After WNS - Z-value-Before WNS)", 
+  size = "Mean Count\n(Before WNS)"
+) + 
+  annotate("text", x = Inf, y = Inf, label = adj_r_squared_text, 
+           hjust = 1.1, vjust = 1.5, size = 5, color = "black") +
+  theme_bw() +  # Base theme
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),  # Centered and bold title
+    axis.title = element_text(size = 12),  # Larger axis titles
+    legend.title = element_text(size = 10),  # Larger legend title
+    legend.text = element_text(size = 8),  # Larger legend text
+    panel.grid = element_blank(),  # Remove grid lines
+  )
+
+ggsave("E:/chapter1_data/figures/final/z-value-important-sites.png", width = 8, height = 8)
+
 # Plot points from both before_data and after_data on the same graph
 # Plot points and overlay bell-shaped curves (density plots)
 ggplot() +
@@ -55,6 +88,41 @@ ggplot() +
   xlab("Mean Temperature") +
   ylab("Z-value") +
   theme_minimal()
+
+##################################################################################
+# z-value after - z-value before #
+#####################################################
+bs <- before_data %>% group_by(site) %>% slice(1) %>% 
+select(site, site_mean_temp, mean_count_site) %>% ungroup()
+
+bs <- bs %>% 
+mutate(mean_overall_b = mean(mean_count_site), 
+       sd_overall_b = sd(mean_count_site), 
+       z_value_overall_b = (mean_count_site - mean_overall_b) / (sd_overall_b)) %>% 
+select(site, site_mean_temp, z_value_overall_b)
+
+as <- after_data %>% group_by(site) %>% slice(1) %>% 
+select(site, site_mean_temp, mean_count_site) %>% ungroup()
+
+as <- as %>% 
+mutate(mean_overall_a = mean(mean_count_site), 
+       sd_overall_a = sd(mean_count_site), 
+       z_value_overall_a = (mean_count_site - mean_overall_a) / (sd_overall_a)) %>% 
+select(site, z_value_overall_a)
+
+cs <- bs %>% left_join(as, by = "site") %>% 
+ mutate(z_value_c = z_value_overall_a - z_value_overall_b)
+
+ggplot(data = cs, aes(x = site_mean_temp, y = z_value_c)) +
+geom_point() +
+geom_smooth(method = "lm")
+
+summary(lm(z_value_c ~ site_mean_temp, data = cs))
+
+
+
+
+
 
 
 # Correct the period based on the year: if year is before 2013, set period to "before"

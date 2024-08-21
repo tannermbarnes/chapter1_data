@@ -125,3 +125,4 @@ period = ifelse(site == "South Bluff Adit" & year >= 2017, "after", period),
     ) %>% 
 ungroup()
 
+View(fin_filter)
