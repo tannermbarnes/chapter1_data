@@ -45,7 +45,7 @@ combined <- combined_data %>%
   z_value_before = z_value_period_before, z_value_after = z_value_period_after, z_value, mean_temp = site_mean_temp_period_before, 
   )
 
-important <- combined %>% filter(z_value > 0.35 | z_value < -0.35)
+important <- combined %>% filter(mean_count_before > 5000)
 
 # graph it
 model <- lm(z_value ~ mean_temp, data = important)
@@ -73,7 +73,10 @@ labs(
     panel.grid = element_blank(),  # Remove grid lines
   )
 
-ggsave("E:/chapter1_data/figures/final/z-value-important-sites.png", width = 8, height = 8)
+ggsave("E:/chapter1_data/figures/final/z-value-important-5000.png", width = 8, height = 8)
+
+pop_proportions <- combined %>% reframe(site, sum_before = sum(mean_count_before), proportion_before = (mean_count_before / sum_before),
+sum_after = sum(mean_count_after), proportion_after = (mean_count_after / sum_after))
 
 # Plot points from both before_data and after_data on the same graph
 # Plot points and overlay bell-shaped curves (density plots)
