@@ -40,27 +40,32 @@ combined <- combined_data %>%
     values_from = c(mean_count_site, z_value, site_mean_temp, overall_mean_count, overall_sd_count),
     names_prefix = "period_"
   ) %>% 
-  mutate(z_value = z_value_period_after - z_value_period_before) %>% 
+    mutate(
+    z_value = ifelse(
+      z_value_period_before < 0, 
+      z_value_period_after + z_value_period_before,  # If before is negative, add
+      z_value_period_after - z_value_period_before   # If before is positive, subtract
+    )) %>% 
   select(site, mean_count_before = mean_count_site_period_before, mean_count_after = mean_count_site_period_after, 
   z_value_before = z_value_period_before, z_value_after = z_value_period_after, z_value, mean_temp = site_mean_temp_period_before, 
   )
 
-important <- combined %>% filter(mean_count_before > 5000)
+important <- combined %>% filter(mean_count_after > 200)
 
 # graph it
-model <- lm(z_value ~ mean_temp, data = important)
+model <- lm(z_value ~ mean_temp, data = combined)
 adj_r_squared <- summary(model)$adj.r.squared
 adj_r_squared_text <- paste0("Adjusted R² = ", round(adj_r_squared, 4))
 
 
-ggplot(data = important, aes(x = mean_temp, y = z_value, size = mean_count_before)) +
+ggplot(data = combined, aes(x = mean_temp, y = z_value, size = mean_count_after)) +
 geom_point(alpha = 0.7) +
 geom_smooth(method = "lm", se = FALSE, color = "darkorange", size = 1.2) +
 labs(
   title = "Mine Importance Decreases as Mean Temperature Increases",
   x = "Mean Temperature", 
   y = "Z-value-After WNS - Z-value-Before WNS)", 
-  size = "Mean Count\n(Before WNS)"
+  size = "Mean Count\n(After WNS)"
 ) + 
   annotate("text", x = Inf, y = Inf, label = adj_r_squared_text, 
            hjust = 1.1, vjust = 1.5, size = 5, color = "black") +
@@ -72,11 +77,46 @@ labs(
     legend.text = element_text(size = 8),  # Larger legend text
     panel.grid = element_blank(),  # Remove grid lines
   )
+ggsave("E:/chapter1_data/figures/final/z-value.png", width = 8, height = 8)
 
-ggsave("E:/chapter1_data/figures/final/z-value-important-5000.png", width = 8, height = 8)
+pop_proportions <- combined %>% reframe(site, mean_temp, sum_before = sum(mean_count_before), proportion_before = (mean_count_before / sum_before),
+sum_after = sum(mean_count_after), proportion_after = (mean_count_after / sum_after), mean_count_before, mean_count_after) %>% 
+mutate(props = (proportion_after - proportion_before), mean_temp_squared = mean_temp^2)
 
-pop_proportions <- combined %>% reframe(site, sum_before = sum(mean_count_before), proportion_before = (mean_count_before / sum_before),
-sum_after = sum(mean_count_after), proportion_after = (mean_count_after / sum_after))
+im <- pop_proportions %>% filter(mean_count_before > 300) %>% filter(site != "Millie Mine")
+# Fit your custom model
+model1 <- lm(props ~ mean_temp + I(mean_temp^2), data = im)
+
+# Extract adjusted R-squared value
+adj_r_squared1 <- summary(model1)$adj.r.squared
+adj_r_squared_text1 <- paste0("Adjusted R² = ", round(adj_r_squared1, 4))
+
+# Create the plot using the custom model
+ggplot(data = im, aes(x = mean_temp, y = props)) +
+  geom_point(aes(color = ifelse(props > 0, "positive", "negative")), alpha = 0.7) +  # Color points by positive/negative values
+  # Add a line using the custom model fitted values
+  stat_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE, color = "#e100ffca", size = 1.2) +
+  labs(
+    title = "Proportionally more bats in cold sites after WNS",
+    x = "Mean Temperature", 
+    y = "Proportion of bats (After WNS - Before WNS)", 
+    size = "Mean Count\n(After WNS)",
+    color = "Proportions\n(After WNS -\nBefore WNS)"  # Legend title for color
+  ) + 
+  annotate("text", x = Inf, y = Inf, label = adj_r_squared_text1, 
+           hjust = 1.1, vjust = 1.5, size = 5, color = "black") +
+  theme_bw() +  # Base theme
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),  # Centered and bold title
+    axis.title = element_text(size = 12),  # Larger axis titles
+    legend.title = element_text(size = 10),  # Larger legend title
+    legend.text = element_text(size = 8),  # Larger legend text
+    panel.grid = element_blank()  # Remove grid lines
+  ) +
+  scale_color_manual(values = c("positive" = "blue", "negative" = "red"))  # Custom color scale
+
+ggsave("E:/chapter1_data/figures/final/proportions_bats-important.png", width = 8, height = 8)
+
 
 # Plot points from both before_data and after_data on the same graph
 # Plot points and overlay bell-shaped curves (density plots)
