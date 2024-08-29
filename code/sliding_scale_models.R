@@ -6,31 +6,26 @@ library(lme4)
 library(car)
 library(lmtest)
 library(caTools)
-library(quantmod)
-library(MASS)
 library(nlme)
 library(corrplot)
-library(blavaan)
 ##################################### Models for mines on the sliding scale method ###################################
 source("sliding_scale.R")
 
-# Some adjustments 
-model_df$standing_water[28] <- "yes"
-model_df$standing_water[is.na(model_df$standing_water)] <- "no"
-# Change row 37 to yes
-model_df$mean_temp_ranked <- rank(model_df$mean_temp)
-model_df$mean_temp_transformed <- scale(model_df$mean_temp_ranked)
-model_df$median_temp_squared <- model_df$median_temp^2
-model_df$mean_temp_squared <- model_df$mean_temp^2
-model_df_recover <- model_df %>% filter(slope > 0)
-model_df_crash <- model_df %>%  filter(crash <= 0) %>% 
+# only include sites that are recovering 
+model_df_recover <- model_df %>% filter(slope > 0) %>% filter(site != "Rockport Quarry North Tunnel")
+# remove unimportant sites from population crash they could fluctuate for other reasons
+model_df_crash <- model_df %>% filter(mean_count > 300) %>% 
 mutate(new = ifelse(slope > 0, "recovering", "not recovering"))
-# CFI = comparative fit index = models greater than 0.9, conservatively 0.95 indicate good fit
-# TLI = values greater than 0.9 indicating good fit. CFI is always greater than TLI
-# RMSEA <= 0.05 close-fit, >= 0.10 poor fit, between 0.5 & 0.8 reasonable approximate fit does not compare to baseline model
-# The baseline model is the worst fitting model assumes no covariances between variables wanna compare our model to baseline model
-# Saturated model is best model df = 0
-# Your model is somewhere between baseline and saturated model
+
+# weight the response variables before modeling
+model_df_recover$weight_sqrt <- sqrt(model_df_recover$last_count)
+model_df$weight_sqrt <- sqrt(model_df_crash$mean_count)
+model_df_recover$slope_weighted <- model_df_recover$slope * model_df_recover$weight_sqrt
+model_df_recover$recovery_years_weighted <- model_df_recover$recovery_years * model_df_recover$weight_sqrt
+model_df$crash_weighted <- model_df_crash$crash_intensity * model_df_crash$weight_sqrt
+
+
+
 m1 <- lm(slope ~ crash, model_df_recover)
 summary(m1)
 
@@ -69,11 +64,26 @@ theme(
 null_f <- glm(slope ~ 1 + offset(recovery_years), family = gaussian, weights = last_count, data = model_df_recover)
 summary(null_f)
 
-slope_f <- glm(slope ~ median_temp + offset(recovery_years), family = gaussian, weights = last_count, data = model_df_recover)
-summary(slope_f)
+slope_1 <- glm(slope ~ mean_temp + offset(recovery_years), family = gaussian, weights = last_count, data = model_df_recover)
+summary(slope_1)
 
-crash_f <- glm(crash ~ median_temp, weights = mean_count, family = gaussian, data = model_df_crash)
-summary(crash_f)
+slope_2 <- glm(slope ~ mean_temp + log_passage + offset(recovery_years), family = gaussian, weights = last_count, data = model_df_recover)
+summary(slope_2)
+
+slope_3 <- glm(slope ~ mean_temp + log_passage + standing_water + offset(recovery_years), family = gaussian, weights = last_count, data = model_df_recover)
+summary(slope_3)
+
+crash_null <- glm(crash_intensity ~ 1, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_null)
+
+crash_1 <- glm(crash_intensity ~ mean_temp, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_1)
+
+crash_2 <- glm(crash_intensity ~ mean_temp + log_passage, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_2)
+
+crash_3 <- glm(crash_intensity ~ mean_temp + log_passage + standing_water, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_3)
 
 ################################# BAYESIAN MODELING ################################################################
 ####################################################################################################################
@@ -86,13 +96,15 @@ Sys.setenv(PATH = paste("E:/rtools44/x86_64-w64-mingw32.static.posix/bin",
                         sep = ";"))
 # Define the prior
 prior <- c(
-  prior(normal(0, 1), class = "b", coef = "median_temp"),
+  prior(normal(0, 1), class = "b", coef = "mean_temp"),
   prior(normal(0,1), class = "Intercept"))
 
 prior1 <- prior(normal(0,1), class = "Intercept")
+
+
 # Fit the Bayesian model
 null_model <- brm(
-  formula = slope | weights(mean_count) ~ 1,  # Only the intercept
+  formula = slope | weights(last_count) ~ 1,  # Only the intercept
   data = model_df_recover,
   family = gaussian(),
   prior = prior1,
@@ -101,12 +113,13 @@ null_model <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
+summary(null_model)
+
 
 slope_model <- brm(
-  formula = slope | weights(last_count) ~ median_temp + offset(recovery_years),
+  formula = slope_weighted ~ mean_temp + offset(recovery_years),
   data = model_df_recover,
   family = gaussian(),
-  prior = prior,
   chains = 4,
   iter = 4000,
   warmup = 1000,
@@ -120,7 +133,7 @@ model_df_crash <- model_df %>%  filter(crash <= 0) %>%
 mutate(new = ifelse(slope > 0, "recovering", "not recovering"))
 # Fit the second Bayesian model
 crash_model <- brm(
-  formula = crash | weights(mean_count) ~ median_temp,
+  formula = crash_intensity | weights(mean_count) ~ mean_temp + log_passage + standing_water,
   data = model_df_crash,
   family = gaussian(),
   prior = prior,
@@ -134,29 +147,136 @@ summary(crash_model)
 bayes_R2(slope_model)
 bayes_R2(crash_model)
 
-# Calculate the optimal minimum temperature
-#median 4.762434
-coef_temp <- coef(summary(quadratic_model))["median_temp", "Value"]
-coef_temp_squared <- coef(summary(quadratic_model))["median_temp_squared", "Value"]
-optimal_temp <- -coef_temp / (2 * coef_temp_squared)
-print(optimal_temp)
+#########################################################################################################
+library(rstan) # USE STAN CODE INSTEAD OF BRMS
+#############################################################################################
+# Stan model code
+stan_code <- "
+data {
+  int<lower=0> N;              // Number of observations
+  vector[N] mean_temp;          // Predictor
+  vector[N] slope;              // Response variable
+  vector[N] last_count;         // Weights
+  vector[N] recovery_years;     // Offset
+}
+parameters {
+  real alpha;                   // Intercept
+  real beta_mean_temp;          // Slope for mean_temp
+  real<lower=0> sigma;          // Standard deviation
+}
+model {
+  slope ~ normal(alpha + beta_mean_temp * mean_temp + recovery_years, sigma);
+}
+"
+
+# Data preparation
+stan_data <- list(
+  N = nrow(model_df_recover),
+  mean_temp = model_df_recover$mean_temp,
+  slope = model_df_recover$slope,
+  last_count = model_df_recover$last_count,
+  recovery_years = model_df_recover$recovery_years
+)
+
+# Fit the model using rstan
+fit <- stan(model_code = stan_code, data = stan_data, chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99))
+
+# Print the fit summary
+print(fit)
+
+
+#########################################################################################################
+library(MCMCglmm)
+# Does not directly support weights so you can scale the response by the square root of the weights which is an 
+# approximation often used when working with weighted models in packages that do not natievly support weights
+
+
+prior <- list(R = list(V = 1, nu = 0.002))
+
+# Fit the model using MCMCglmm with the transformed response and offset
+slope_model <- MCMCglmm(
+  fixed = slope_weighted ~ mean_temp + offset(recovery_years),  # Adjusted formula
+  data = model_df_recover,
+  family = "gaussian",
+  nitt = 50000,  # Iterations
+  burnin = 10000,  # Burn-in
+  thin = 10,  # Thinning interval
+  prior = prior
+)
+
+# Summary of the model
+summary(slope_model)
+
+crash_model <- MCMCglmm(
+  fixed = crash_weighted ~ mean_temp + offset(recovery_years), 
+  data = model_df_crash, 
+  family = "gaussian",
+    nitt = 50000,  # Iterations
+  burnin = 10000,  # Burn-in
+  thin = 10,  # Thinning interval
+  prior = prior
+)
+
+summary(crash_model)
+
+
+#########################################################################################################
+library(rstanarm) # USE R-STAN CODE INSTEAD OF BRMS
+#############################################################################################
+# Fit the model using rstanarm
+model_df_recover$log_slope <- log(model_df_recover$slope)
+
+slope_model <- stan_glm(
+  formula = log_slope ~ mean_temp,
+  data = model_df_recover,
+  family = gaussian(),
+  weights = model_df_recover$last_count,
+  chains = 4,
+  prior = normal(0, 10),
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+
+# Summary of the fit
+summary(slope_model)
+bayesian_r2 <- bayes_R2(slope_model)
+print(bayesian_r2)
+bayesian_r2_mean <- mean(bayesian_r2)
+bayesian_r2_ci <- quantile(bayesian_r2, probs = c(0.025, 0.975))
+
+# Print the results
+cat("Bayesian R²: ", round(bayesian_r2_mean, 4), "\n")
+cat("95% Credible Interval: [", round(bayesian_r2_ci[1], 4), ", ", round(bayesian_r2_ci[2], 4), "]\n")
+
+
+colin <- model_df_recover %>% select(slope, recovery_years, mean_temp)
+cor(colin)
+summary(colin)
+
+
+
+
+
 
 
 colors <- c("blue", "white", "red")
 
 # Generate predictions using the median or mean of the posterior draws
 prediction_data <- model_df_recover %>%
-  mutate(predicted_slope = apply(posterior_epred(slope_model, newdata = model_df_recover), 2, median))
+  mutate(predicted_slope = apply(posterior_epred(slope_model, newdata = model_df_recover), 2, mean))
+
+prediction_data <- prediction_data %>% arrange(mean_temp)
 
 # Plot the slope model
-ggplot(model_df_recover, aes(x = median_temp, y = slope)) +
+ggplot(model_df_recover, aes(x = mean_temp, y = log_slope)) +
   geom_point(aes(size = last_count), alpha = 0.5) +  # Plot observed data
-  geom_line(data = prediction_data, aes(x = median_temp, y = predicted_slope), color = "black") +  # Add regression line
+  geom_line(data = prediction_data, aes(x = mean_temp, y = predicted_slope), color = "black") +  # Add regression line
   scale_size_continuous(name = "Last Survey\nPopulation Count") + 
   labs(title = "Mines with colder median temperatures have higher\nrecovery rates for Little Brown Bats",
-       x = "Median Temperature",
+       x = "Mean Temperature",
        y = "Slope (Recovery Rate)") +
-  annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² = 0.344"), 
+  annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² =", round(bayesian_r2_mean, 4)), 
            hjust = 2.75, vjust = 1.5, size = 4, color = "black") +
   theme_bw() +
   theme(

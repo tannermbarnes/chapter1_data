@@ -145,8 +145,8 @@ ungroup()
 df_slide_scale <- add_last_count1 %>% 
 pivot_wider(names_from = year, values_from = count)
 
-# Add maximum crash from maximum to minimum 
-df_slide_scale$crash_mean <- 1 - (df_slide_scale$min_count/df_slide_scale$mean_count)
+# Add crash intensity
+df_slide_scale$crash_mean <- 1 - (df_slide_scale$min_count/df_slide_scale$mean_count) 
 df_slide_scale$crash_max <- 1 - (df_slide_scale$min_count/df_slide_scale$max_count)
 df_slide_scale$log_max_count <- log(df_slide_scale$max_count)
 df_slide_scale$log_passage <- log(df_slide_scale$passage_length)
@@ -184,6 +184,7 @@ pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998
 "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
 "2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count") %>% 
 mutate(year = as.numeric(year), count = as.numeric(count)) %>% drop_na(count)
+
 
 
 # Function to calculate the population crash slope
@@ -229,35 +230,155 @@ min_year1 <- data %>%
     mean_count = if (!is.na(min_year)) mean(count[year < min_year], na.rm = TRUE) else NA,
     first_year = min(year, na.rm = TRUE))
 
+
 # Merge the min and max counts back into the orginal data
 data_with_min <- data %>% 
 left_join(min_year1, by = "site") %>% 
 mutate(normalized_count = (count - min_count) / (max_count - min_count))
 
-### THIS SHOULD NOT BE NEEDED BECAUSE WE AREN'T CALCULATING A ESTIMATE BUT ACTUAL A YEAR TO YEAR DIFFERENCE ######
-
-# data_with_count <- data_with_min %>%
-#   filter(!site %in% c("Aztec East Adit", "Aztec Mine", "Aztec Upper Drift", 
-#                       "Copper Peak Adit", "County Line Adit", "Glen Adit #2",
-#                       "Indiana Mine", "Kochab Cave", "Lafayette East Adit",
-#                       "Silas Doty Cave", "Spider Cave", "Vivian Adit", "Algonquin Adit #2 (Mark's Adit)",
-#                       "Child's Adit", "Collin's Adit", "Glen Adit #3", "Hilton Ohio (Hilton #5 Adit)",
-#                       "Ohio Traprock #61", "Scott Falls Cave", "Eagle River Adit 3 (Lake Superior & Phoenix)",
-#                       "Eagle River Adit 2 (Lake Superior & Phoenix)", "Hilton (Shaft 1)", "Ohio Traprock Mine #59 (Norwich Adit)", 
-#                       "Rockport Quarry South Tunnel", "Randville Quarry Mine", "B-95 (cave)", "Douglas Houghton Adit #1")) %>%
-#   group_by(site) %>%
-#   mutate(normalized_count = (count - min_count) / (max(count) - min_count)) %>%
-#   filter(n() >= 3) %>%
-#   arrange(site, year) %>%
-#   mutate(min_year_norm1 = min(year[normalized_count == 1], na.rm = TRUE), 
-#          max_year_norm1 = max(year[normalized_count == 0], na.rm =TRUE)) %>%
-#   filter(year >= min_year_norm1 & year <= max_year_norm1) %>%
-#   mutate(relative_year = year - 1996) %>%
+# IN TESTING
+data_with_count <- data_with_min %>%
+  filter(!site %in% c("Aztec East Adit", "Aztec Mine", "Aztec Upper Drift", 
+                      "Copper Peak Adit", "County Line Adit", "Glen Adit #2",
+                      "Indiana Mine", "Kochab Cave", "Lafayette East Adit",
+                      "Silas Doty Cave", "Spider Cave", "Vivian Adit", "Algonquin Adit #2 (Mark's Adit)",
+                      "Child's Adit", "Collin's Adit", "Glen Adit #3", "Hilton Ohio (Hilton #5 Adit)",
+                      "Ohio Traprock #61", "Scott Falls Cave", "Eagle River Adit 3 (Lake Superior & Phoenix)",
+                      "Eagle River Adit 2 (Lake Superior & Phoenix)", "Hilton (Shaft 1)", "Ohio Traprock Mine #59 (Norwich Adit)", 
+                      "Rockport Quarry South Tunnel", "Randville Quarry Mine", "B-95 (cave)", "Douglas Houghton Adit #1")) %>%
+  group_by(site) %>%
+  mutate(normalized_count = (count - min_count) / (max(count) - min_count)) %>%
+  filter(n() >= 3) %>%
+  arrange(site, year) %>%
+  mutate(min_year_norm1 = min(year[normalized_count == 1], na.rm = TRUE), 
+         max_year_norm1 = max(year[normalized_count == 0], na.rm =TRUE)) %>%
+  filter(year >= min_year_norm1 & year <= max_year_norm1) %>%
+  mutate(relative_year = year - 1996) %>%
+  ungroup()
+#   filter(relative_year %in% tail(unique(relative_year), 4)) %>% 
+#   mutate(relative_year = dense_rank(relative_year) - 1) %>% 
+#   ungroup()
+#   mutate(normalized_zero_rank = ifelse(normalized_count == 0, rank, NA)) %>% 
+#   group_by(site) %>% 
+#   mutate(min_zero_rank = min(normalized_zero_rank, na.rm = TRUE)) %>% 
+#   filter(rank <= min_zero_rank) %>% 
+#   top_n(3, rank) %>% 
+#   arrange(site, rank) %>% 
+#   mutate(relative_year = row_number() - 1) %>% 
 #   ungroup()
 
-#######################################################################################################
-######################### CRASH INTENSITY FROM SURVEY TO SURVEY ###############################################
-# create the variable crash intensity by site and find the maximum crash intensity (most negative)
+
+# Nest the data by site
+nested_data1 <- data_with_count %>% 
+group_by(site) %>% 
+nest()
+
+
+# Fit a linear regression model for each site
+nested_data1 <- nested_data1 %>%
+  mutate(model = map(data, ~ {
+    df <- .x
+    # Ensure 'year' and 'count' are numeric
+    if(nrow(df) >= 2) {
+    df <- df %>%
+      mutate(year = as.numeric(relative_year),
+             count = as.numeric(normalized_count))
+    # Fit the linear model
+    lm(count ~ year, data = df)
+    } else {
+      NULL
+    }
+  }))
+
+# Step 4: Tidy the model outputs
+tidied_data1 <- nested_data1 %>%
+  filter(!is.null(model)) %>% 
+  mutate(tidied = map(model, tidy)) %>%
+  unnest(tidied)
+
+# Check the tidied data
+#print("Tidied data:")
+#print(tidied_data)
+
+# Step 5: Filter and select the slope for the 'year' term
+regression_results1 <- tidied_data1 %>%
+  filter(term == "year") %>%
+  select(site, crash = estimate) %>% 
+  mutate(crash = ifelse(is.na(crash), 0, crash))
+
+# Check the regression results
+#print("Regression results:")
+#print(regression_results)
+
+# Step 6: Add the slope to the original data frame
+final_datax1 <- data_with_count %>%
+  left_join(regression_results1, by = "site")
+
+model_df <- model_df %>% 
+left_join(regression_results1, by = "site")
+
+
+# Some adjustments 
+model_df$standing_water[28] <- "yes"
+model_df$standing_water[is.na(model_df$standing_water)] <- "no"
+
+# Add dataset for recovering mines and a dataset for all the crashed mines
+model_df_recover <- model_df %>% filter(slope > 0) %>% filter(site != "Rockport Quarry North Tunnel")
+model_df_crash <- model_df %>%  filter(crash <= 0) %>% 
+mutate(new = ifelse(slope > 0, "recovering", "not recovering"))
+
+
+
+
+model_df_crash %>% filter(max_count > 300) %>% 
+  ggplot(aes(x = mean_temp, y = crash)) + 
+  geom_point(aes(size = mean_count), alpha = 0.7) +  # Add transparency to points for better visibility
+  geom_smooth(method = "lm", color = "darkred", se = TRUE) +  # Linear model with confidence interval
+  scale_size_continuous(name = "Mean Count") +  # Clean up the legend title for size
+  labs(
+    title = "Mines that are colder experienced a slower population crash",
+    x = "Mean Temperature (°C)",  # X-axis title
+    y = "Estimate of population crash (slope)",  # Y-axis title
+    size = "Mean Bat Count"  # Cleaned up legend title
+  ) +
+  theme_bw() +  # Clean and minimal theme
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),  # Centered and bold title
+    axis.title.x = element_text(size = 12),  # X-axis title font size
+    axis.title.y = element_text(size = 12),  # Y-axis title font size
+    axis.text = element_text(size = 10),  # X and Y-axis text font size
+    legend.title = element_text(size = 10),  # Legend title font size
+    legend.text = element_text(size = 8),  # Legend text font size
+    panel.grid = element_blank(),  # Remove grid lines for a cleaner look
+    panel.background = element_rect(fill = "white", color = NA),  # White background
+    legend.position = "right"  # Position the legend on the right
+  )
+
+ggsave("E:/chapter1_data/figures/final/1996_plot_important.png", width = 8, height = 6)
+
+
+crash_null <- glm(crash ~ 1, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_null)
+
+
+crash_f <- glm(crash ~ mean_temp, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_f)
+
+crash_2 <- glm(crash ~ mean_temp + log_passage, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_2)
+
+crash_3 <- glm(crash ~ log_passage, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_3)
+
+crash_4 <- glm(crash ~ mean_temp + log_passage + standing_water, weights = mean_count, family = gaussian, data = model_df_crash)
+summary(crash_4)
+
+
+
+
+
+######### STUFF TRIED WITH JOE ################# CRASH INTENSITY BUT NEED TO DIVIDE BY YEARS
+
 data_with_changes <- data_with_min %>% 
 arrange(site, year) %>% 
 group_by(site) %>%
@@ -269,15 +390,45 @@ mutate(
   crash_intensity_year = if(all(is.na(crash_intensity / lag_year))) NA_real_ else min(crash_intensity/lag_year, na.rm = TRUE))%>% 
 ungroup()
 
-# only need one per site slice 1 by site
+View(data_with_changes)
+
 slice <- data_with_changes %>% 
-  group_by(site) %>% slice(1) %>% filter(crash_intensity < 0) %>% select(site, crash_intensity)
+  group_by(site) %>% slice(1) %>% filter(crash_intensity_year < 0)
 
-# add crash intensity to model dataframe
-model_df <- model_df %>%
-left_join(slice, by = "site")
 
-# Some adjustments before modeling
-model_df$standing_water[28] <- "yes"
-model_df$standing_water[is.na(model_df$standing_water)] <- "no"
+slice %>%
+  ggplot(aes(x = mean_temp, y = crash_intensity_year)) + 
+  geom_point(aes(size = max_count), alpha = 0.7) +  # Add transparency to points for better visibility
+  geom_smooth(method = "lm", color = "#6c07ac", se = TRUE) +  # Linear model with confidence interval
+  scale_size_continuous(name = "Max Count") +  # Clean up the legend title for size
+  labs(
+    title = "Mines that are colder experienced a slower population crash",
+    x = "Mean Temperature (°C)",  # X-axis title
+    y = "Crash intensity year to year",  # Y-axis title
+    size = "Max Bat Count"  # Cleaned up legend title
+  ) +
+  theme_bw() +  # Clean and minimal theme
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),  # Centered and bold title
+    axis.title.x = element_text(size = 12),  # X-axis title font size
+    axis.title.y = element_text(size = 12),  # Y-axis title font size
+    axis.text = element_text(size = 10),  # X and Y-axis text font size
+    legend.title = element_text(size = 10),  # Legend title font size
+    legend.text = element_text(size = 8),  # Legend text font size
+    panel.grid = element_blank(),  # Remove grid lines for a cleaner look
+    panel.background = element_rect(fill = "white", color = NA),  # White background
+    legend.position = "right"  # Position the legend on the right
+  )
 
+ggsave("E:/chapter1_data/figures/final/crash_intensity_plot_important.png", width = 8, height = 10)
+
+slice$log_passage <- log(slice$passage_length)
+
+crash_f <- glm(crash_intensity ~ mean_temp, weights = mean_count, family = gaussian, data = slice)
+summary(crash_f)
+
+crash_2 <- glm(crash_intensity ~ mean_temp + log_passage, weights = mean_count, family = gaussian, data = slice)
+summary(crash_2)
+
+crash_3 <- glm(crash_intensity ~ mean_temp + log_passage + standing_water, weights = mean_count, family = gaussian, data = slice)
+summary(crash_3)

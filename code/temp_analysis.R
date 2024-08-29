@@ -50,15 +50,15 @@ combined <- combined_data %>%
   z_value_before = z_value_period_before, z_value_after = z_value_period_after, z_value, mean_temp = site_mean_temp_period_before, 
   )
 
-important <- combined %>% filter(mean_count_after > 200)
+important <- combined %>% filter(mean_count_before > 300)
 
 # graph it
-model <- lm(z_value ~ mean_temp, data = combined)
+model <- lm(z_value ~ mean_temp * I(mean_temp^2), data = important)
 adj_r_squared <- summary(model)$adj.r.squared
 adj_r_squared_text <- paste0("Adjusted R² = ", round(adj_r_squared, 4))
+summary(model)
 
-
-ggplot(data = combined, aes(x = mean_temp, y = z_value, size = mean_count_after)) +
+ggplot(data = important, aes(x = mean_temp, y = z_value, size = mean_count_after)) +
 geom_point(alpha = 0.7) +
 geom_smooth(method = "lm", se = FALSE, color = "darkorange", size = 1.2) +
 labs(
@@ -79,6 +79,37 @@ labs(
   )
 ggsave("E:/chapter1_data/figures/final/z-value.png", width = 8, height = 8)
 
+###############################################################################################################
+###
+##################### Quadratic z-value ############################################################
+########################################################################################################
+ggplot(data = combined, aes(x = mean_temp, y = z_value, size = mean_count_before)) +
+  geom_point(aes(color = ifelse(z_value > 0, "positive", "negative")), alpha = 0.7) +  # Color points by positive/negative values
+  # Add a line using the custom model fitted values
+  stat_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE, color = "#e100ffca", size = 1.2) +
+  labs(
+    title = "Cooler mines are more important to bats post WNS",
+    x = "Mean Temperature", 
+    y = "Proportion of bats (After WNS - Before WNS)", 
+    size = "Z-value-After WNS -\nZ-value-Before WNS",
+    color = "Z-value\n(After WNS -\nBefore WNS)"  # Legend title for color
+  ) + 
+  annotate("text", x = Inf, y = Inf, label = adj_r_squared_text, 
+           hjust = 1.1, vjust = 1.5, size = 5, color = "black") +
+  theme_bw() +  # Base theme
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),  # Centered and bold title
+    axis.title = element_text(size = 12),  # Larger axis titles
+    legend.title = element_text(size = 10),  # Larger legend title
+    legend.text = element_text(size = 8),  # Larger legend text
+    panel.grid = element_blank()  # Remove grid lines
+  ) +
+  scale_color_manual(values = c("positive" = "blue", "negative" = "red"))  # Custom color scale
+
+ggsave("E:/chapter1_data/figures/final/z-value-quadratic.png", width = 8, height = 8)
+
+############################## Population Proportions before and after WNS #####################################
+
 pop_proportions <- combined %>% reframe(site, mean_temp, sum_before = sum(mean_count_before), proportion_before = (mean_count_before / sum_before),
 sum_after = sum(mean_count_after), proportion_after = (mean_count_after / sum_after), mean_count_before, mean_count_after) %>% 
 mutate(props = (proportion_after - proportion_before), mean_temp_squared = mean_temp^2)
@@ -86,11 +117,9 @@ mutate(props = (proportion_after - proportion_before), mean_temp_squared = mean_
 im <- pop_proportions %>% filter(mean_count_before > 300) %>% filter(site != "Millie Mine")
 # Fit your custom model
 model1 <- lm(props ~ mean_temp + I(mean_temp^2), data = im)
-
-# Extract adjusted R-squared value
 adj_r_squared1 <- summary(model1)$adj.r.squared
 adj_r_squared_text1 <- paste0("Adjusted R² = ", round(adj_r_squared1, 4))
-
+summary(model1)
 # Create the plot using the custom model
 ggplot(data = im, aes(x = mean_temp, y = props)) +
   geom_point(aes(color = ifelse(props > 0, "positive", "negative")), alpha = 0.7) +  # Color points by positive/negative values
@@ -120,18 +149,21 @@ ggsave("E:/chapter1_data/figures/final/proportions_bats-important.png", width = 
 
 # Plot points from both before_data and after_data on the same graph
 # Plot points and overlay bell-shaped curves (density plots)
-ggplot() +
-  geom_point(data = before_data, aes(x = mean_temp, y = z_value), color = "blue") +
-  geom_point(data = after_data, aes(x = mean_temp, y = z_value), color = "red") +
-  geom_histogram(data = before_data, aes(x = mean_temp, weight = z_value), binwidth = 0.5, fill = "blue", color = "black", alpha = 0.7) +
-  geom_histogram(data = after_data, aes(x = mean_temp, weight = z_value), binwidth = 0.5, fill = "red", color = "black", alpha = 0.7) +
-  geom_smooth(data = before_data, aes(x = mean_temp, y = z_value), color = "blue", method = "loess", se = FALSE) +
-  geom_smooth(data = after_data, aes(x = mean_temp, y = z_value), color = "red", method = "loess", se = FALSE) +
+# Assuming combined has the z_value for both before and after periods
+# Join z_value for the "before" period
+before_data <- combined_data %>% filter(period == "before")
+after_data <- combined_data %>% filter(period == "after")
+
+ggplot(data = pop_proportions) +
+  geom_point(aes(x = mean_temp, y = proportion_before), color = "blue") +
+  geom_point(aes(x = mean_temp, y = proportion_after), color = "red") +
+  geom_histogram(aes(x = mean_temp, weight = proportion_before), binwidth = 0.5, fill = "blue", color = "black", alpha = 0.7) +
+  geom_histogram(aes(x = mean_temp, weight = proportion_after), binwidth = 0.5, fill = "red", color = "black", alpha = 0.7) +
   ggtitle("Z-values with Bell-Shaped Curves for Before and After Periods") +
   xlab("Mean Temperature") +
   ylab("Z-value") +
   theme_minimal()
-
+~wZa
 ##################################################################################
 # z-value after - z-value before #
 #####################################################

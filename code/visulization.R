@@ -240,22 +240,30 @@ geom_point(aes(color = site), show.legend = FALSE)
 
 
 # Define the sites to remove
-sites_to_remove <- c("Site1", "Site2", "Site3")  # Replace with actual site names you want to remove
+source("survey_data.R")
+sites_to_remove <- c("Algonquin Adit #2 (Mark's Adit)", "Child's Adit", "Cushman Adit", "Eagle River Adit 2 (Lake Superior & Phoenix)",
+"Eagle River Adit 3 (Lake Superior & Phoenix)", "Indiana Mine", "Lafayette East Adit", "Lafayette West Adit", 
+"North American Adit", "North Belt Mine", "Ohio Traprock Mine #59 (Norwich Adit)", "Rockport Quarry South Tunnel", 
+"Scott Falls Cave", "Washburn Mine", "Toltec Mine", "Aztec Mine", "Collin's Adit", "Douglas Houghton Adit", 
+"Glen Adit #2", "Glen Adit #3", "Hilton (Shaft 1)", "Hilton Ohio (Hilton #5 Adit)", "Ohio Traprock #61", 
+"Ohio Traprock Mine #2", "Ohio Traprock Mine #3", "Ridge Adit", "Randville Quarry Mine", "Merchant's Adit North", 
+"Merchant's Adit South")
 
-filtered_data <- model_data %>%
+filtered_data <- dat1 %>%
   filter(!site %in% sites_to_remove) %>%
   group_by(site) %>% 
-  mutate(year = as.numeric(year)) %>% 
-  drop_na(count)
+  mutate(year = as.numeric(year), 
+         count = as.numeric(myotis_count)) %>% 
+  drop_na(myotis_count)
 
 filtered_data %>%
-filter(year > 1998) %>% 
+filter(year > 1997) %>% 
 filter(n() > 2) %>% 
   ggplot(aes(x = year, y = count, color = site, group = site)) +
   geom_line(show.legend = FALSE) +
   facet_wrap(~site, scales = "free_y") +  # Facet by site with free y-axis scales
   scale_x_continuous(
-    breaks = seq(min(filtered_data$year), max(filtered_data$year), by = 3),
+    breaks = seq(min(filtered_data$year), max(filtered_data$year), by = 4),
     labels = function(x) sprintf("%02d", x %% 100)
   ) +
   geom_vline(xintercept = 2014, color = "red", linetype = "dashed", size = 0.5) +  # Adjust size here
@@ -264,22 +272,18 @@ filter(n() > 2) %>%
        x = "Year",
        y = "Count")
 
-ggsave("E:/chapter1_data/figures/final/to_show/all_mines.png", width = 12, height=12)
+ggsave("E:/chapter1_data/figures/final/to_show/crash_mines.png", width = 12, height=12)
 
-pivoted_data <- df_min_value %>% 
-pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
-"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
-"2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
 
-pivoted_data %>%
+filtered_data %>%
+group_by(site) %>% 
 mutate(year = as.numeric(year)) %>% 
 filter(!is.na(count)) %>% 
-filter(year > 1998) %>% 
   ggplot(aes(x = year, y = count, color = site, group = site)) +
   geom_line(show.legend = FALSE) +
   facet_wrap(~site, scales = "free_y") +  # Facet by site with free y-axis scales
   scale_x_continuous(
-    breaks = seq(min(pivoted_data$year), max(pivoted_data$year), by = 3),
+    breaks = seq(min(filtered_data$year), max(filtered_data$year), by = 3),
     labels = function(x) sprintf("%02d", x %% 100)
   ) +
   geom_vline(xintercept = 2014, color = "red", linetype = "dashed", size = 0.5) +  # Adjust size here
