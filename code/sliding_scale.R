@@ -281,3 +281,14 @@ left_join(slice, by = "site")
 model_df$standing_water[28] <- "yes"
 model_df$standing_water[is.na(model_df$standing_water)] <- "no"
 
+# only include sites that are recovering 
+model_df_recover <- model_df %>% filter(slope > 0) %>% filter(site != "Rockport Quarry North Tunnel")
+
+# weight the response variables before modeling
+model_df_recover$weight_sqrt <- sqrt(model_df_recover$last_count)
+model_df$weight_sqrt1 <- sqrt(model_df$mean_count)
+model_df_recover$slope_weighted <- model_df_recover$slope * model_df_recover$weight_sqrt
+model_df_recover$recovery_years_weighted <- model_df_recover$recovery_years * model_df_recover$weight_sqrt
+model_df$crash_weighted <- model_df$crash_intensity * model_df$weight_sqrt1
+model_df$crash_mean_weighted <- model_df$crash_mean * model_df$weight_sqrt1
+model_df_recover$percent_crash <- model_df_recover$crash_mean * 100

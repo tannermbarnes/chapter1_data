@@ -10,6 +10,10 @@ library(lme4)
 library(patchwork)
 library(dplyr)
 
+# before <- fin_filter %>% filter(period == "before")
+# after <- fin_filter %>% filter(period == "after")
+# View(after)
+
 # Step 1: Calculate overall mean and standard deviation for each period
 overall_stats <- fin_filter %>%
   filter(site != "Tippy Dam") %>%
