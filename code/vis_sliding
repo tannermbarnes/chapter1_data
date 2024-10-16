@@ -1,0 +1,68 @@
+rm(list = ls())
+setwd("E:/chapter1_data/code")
+source("sliding_scale.R")
+
+p1 <- before_data %>%
+filter(site != "Tippy Dam") %>% 
+  ggplot(aes(x = mean_temp, y = max_count)) +
+  geom_point() +
+  geom_smooth(method = "loess", color = "green") +
+  labs(title = "Relationship between Mean Temperature and Max Count (LOESS)",
+       x = "Mean Temperature",
+       y = "Max Count") +
+  theme_bw()
+
+
+
+
+
+############################# Visualize sliding scale models n = 39 ###############################################
+
+colors <- c("blue", "white", "red")
+complexity_colors <- c("1" = "#56B4E9", "2" = "#E69F00", "3" = "#009E73", "4" = "#CC79A7")
+df_slide_scale$complexity <- factor(df_slide_scale$complexity, levels = 1:4)
+df_slide_scale$mean_temp <- as.numeric(df_slide_scale$mean_temp)
+
+model_df <- df_slide_scale %>% 
+select(site, slope, max_count, last_count, standing_water, complexity, passage_length, levels, shafts, 
+crash, min, max, median_temp, mean_temp, temp_diff, ore)
+
+View(model_df)
+
+model_df %>%
+ggplot(aes(x= crash, y = slope)) +
+geom_point(aes(fill = median_temp, size = complexity), shape = 21, color = "black", stroke = 0.5) +
+geom_smooth(method = "lm") +
+labs(title = "",
+x = "Population Crash",
+y = "Recovery Rate",
+fill = "mean temperature",
+size = "complexity") + 
+scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1))) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8),
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank()
+)
+
+ggsave("E:/chapter1_data/figures/final/test.png", width = 6, height=4)
+
+model_df %>%
+ggplot(aes(x= standing_water, y = slope)) +
+geom_point(aes(color = complexity)) +
+geom_smooth(method = "lm") +
+labs(title = "",
+x = "Complexity",
+y = "Population Crash") + 
+scale_color_manual(values = complexity_colors) +
+theme_bw() +
+theme(
+  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1)
+#   legend.position = c(0.95, 0.95), 
+#   legend.justification = c(1,1), 
+#   legend.text = element_text(size = 8),
+#   legend.key.size = unit(0.5, "cm")
+)
+
+ggsave("E:/chapter1_data/figures/final/test.png", width = 6, height=4)
