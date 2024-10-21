@@ -1,0 +1,14 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+host=x86_64-w64-mingw32.static.posix
+api_version=1
+
+Name: gpgme
+Description: GnuPG Made Easy to access GnuPG
+Requires.private: gpg-error, libassuan
+Version: 1.23.2
+Cflags: -I${includedir}
+Libs: -L${libdir} -lgpgme
+URL: https://www.gnupg.org/software/gpgme/index.html

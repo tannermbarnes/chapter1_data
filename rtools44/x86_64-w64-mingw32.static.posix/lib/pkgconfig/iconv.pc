@@ -1,0 +1,4 @@
+Name: iconv
+Version: 1.17
+Description: libiconv
+Libs: -liconv

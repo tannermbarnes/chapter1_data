@@ -1,0 +1,17 @@
+###########################################################################
+# libssh2 installation details
+###########################################################################
+
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libssh2
+URL: https://www.libssh2.org/
+Description: Library for SSH-based communication
+Version: 1.11.0
+Requires.private: zlib
+Libs: -L${libdir} -lssh2 -L${prefix}/lib -lgcrypt -lgpg-error -lws2_32 -L${prefix}/lib -lgcrypt -L${prefix}/lib -lgpg-error -L${prefix}/lib -lws2_32
+Libs.private: -L${prefix}/lib -lgcrypt -lgpg-error -lws2_32 -L${prefix}/lib -lgcrypt -L${prefix}/lib -lgpg-error -L${prefix}/lib -lws2_32
+Cflags: -I${includedir}

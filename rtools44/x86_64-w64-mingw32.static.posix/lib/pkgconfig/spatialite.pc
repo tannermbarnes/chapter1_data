@@ -1,0 +1,12 @@
+# Package Information for pkg-config
+
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: spatialite
+Description: Spatial SQL database engine based on SQLite
+Version: 5.1.0
+Libs: -L${libdir} -lspatialite -lz -lproj -lstdc++ -lsqlite3 -ltiff -L${prefix} -lLerc -lstdc++ -lwebp -lm -lsharpyuv -llzma -ljpeg -ldeflate -lcurl -lssh2 -lgcrypt -lgpg-error -lbcrypt -ladvapi32 -lssl -lcrypto -lcrypt32 -lgdi32 -lwldap32 -lzstd -lz -lpsl -lws2_32 -lidn2 -lunistring -liconv -lcharset -lbrotlidec -lbrotlicommon -lpthread -lidn2 -lunistring -liconv -lcharset -lssh2 -lssh2 -lgcrypt -lgpg-error -lws2_32 -lgcrypt -lgpg-error -lws2_32 -lgcrypt -lgpg-error -lws2_32 -lz -lbcrypt -ladvapi32 -lcrypt32 -lssl -lcrypto -lz -lws2_32 -lgdi32 -lcrypt32 -lcrypto -lz -lws2_32 -lgdi32 -lcrypt32 -lgdi32 -lwldap32 -lzstd -lbrotlidec -lbrotlidec -lbrotlicommon -lz -lpsl -lunistring -lws2_32 -lidn2 -lunistring -liconv -lcharset -lbrotlidec -lbrotlicommon -lpthread -lpsl -lunistring -lws2_32 -lidn2 -lunistring -lcharset -lminizip -lbz2 -lbz2 -llzma -lzstd -lbcrypt -lz -lz -lws2_32 -lgdi32 -lcrypt32 -lcrypto -lz -lws2_32 -lgdi32 -lcrypt32 -lfreexl -liconv -lm -lminizip -lbz2 -lbz2 -llzma -lzstd -lbcrypt -lz -lssl -lz -lws2_32 -lgdi32 -lcrypt32 -lcrypto -lz -lws2_32 -lgdi32 -lcrypt32 -lexpat -lm  -L${prefix}/lib -L${prefix}/lib -lgeos_c -lgeos -lstdc++ -lm -lxml2 -lz -liconv -lm -lws2_32 -llzma  -lsqlite3 -lz  -lm
+Cflags: -I${includedir}

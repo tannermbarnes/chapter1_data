@@ -1,0 +1,9 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+includedir=${prefix}/include
+Name: libmariadbclient
+Version: 3.2.7
+Description: MariaDB Client
+Libs: -lmariadbclient
+Requires.private: cfitsio zlib
+Libs.private: -lsspicli -lsecurity -lsecur32 -lschannel -ldigest -lcfitsio -lncrypt -lksecdd -lcrypt32 -lbcrypt -lwsock32 -lws2_32 -lshlwapi
+Cflags: -I${includedir}/mariadb

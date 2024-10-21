@@ -1,0 +1,12 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+modules=1
+
+Name: libXML
+Version: 2.12.5
+Description: libXML library version2.
+Requires:  liblzma liblzma
+Libs: -L${libdir} -lxml2   -L${prefix}/lib -lz  -liconv -lm  -lws2_32 
+Cflags: -I${includedir}/libxml2  -DLIBXML_STATIC

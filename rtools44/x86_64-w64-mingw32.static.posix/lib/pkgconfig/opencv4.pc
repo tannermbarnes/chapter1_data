@@ -1,0 +1,14 @@
+# Package Information for pkg-config
+
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include/opencv4
+
+Name: OpenCV
+Description: Open Source Computer Vision Library
+Version: 4.9.0
+Libs: -L${exec_prefix}/lib -lopencv_highgui490 -lopencv_ml490 -lopencv_objdetect490 -lopencv_photo490 -lopencv_stitching490 -lopencv_video490 -lopencv_calib3d490 -lopencv_features2d490 -lopencv_dnn490 -lopencv_flann490 -lopencv_videoio490 -lopencv_imgcodecs490 -lopencv_imgproc490 -lopencv_core490
+Libs.private: -L${exec_prefix}/lib/opencv4/3rdparty -llibopenjp2 -lIlmImf -L${prefix}/lib -lprotobuf -lcomctl32 -lcomdlg32 -lgdi32 -lole32 -lsetupapi -lws2_32 -lvfw32 -lstrmiids -loleaut32 -luuid -lopengl32 -lglu32 -ljpeg -lwebp -lpng -ltiff -lLerc -lstdc++ -lsharpyuv -lm -lzstd -llzma -ldeflate -lz -lpthread
+Cflags: -I${includedir}
+Requires.private: libavdevice libtiff-4

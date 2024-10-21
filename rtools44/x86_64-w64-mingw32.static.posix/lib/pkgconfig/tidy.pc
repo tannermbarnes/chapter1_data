@@ -1,0 +1,11 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: tidy
+Description: tidy - HTML syntax checker
+URL: https://www.html-tidy.org
+Version: 5.9.14
+Libs: -L${libdir} -ltidy
+Cflags: -I${includedir}

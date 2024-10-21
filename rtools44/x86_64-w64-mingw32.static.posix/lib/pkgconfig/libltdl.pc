@@ -1,0 +1,5 @@
+Name: libltdl
+Version: 2.4.6
+Description: GNU Libtool Library (libltdl)
+Libs: -lltdl
+Requires.private: dlfcn

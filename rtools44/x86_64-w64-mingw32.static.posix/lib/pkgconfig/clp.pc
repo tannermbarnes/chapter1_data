@@ -1,0 +1,12 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include/coin
+
+Name: CLP
+Description: COIN-OR Linear Programming Solver
+URL: https://projects.coin-or.org/Clp
+Version: 1.17.0
+Libs: -L${libdir} -lClpSolver -lClp 
+Cflags: -I${includedir}
+Requires: coinutils 

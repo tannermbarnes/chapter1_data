@@ -1,0 +1,61 @@
+# NetCDF C Configuration Summary
+==============================
+
+# General
+-------
+NetCDF Version:		4.9.2
+Dispatch Version:       5
+Configured On:		Thu Mar  7 22:38:21 CET 2024
+Host System:		x86_64-Linux-5.15.0-53-generic
+Build Directory: 	/root/mxe/tmp-netcdf-x86_64-w64-mingw32.static.posix/netcdf-c-4.9.2.build_
+Install Prefix:         /usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+Plugin Install Prefix:  N.A.
+
+# Compiling Options
+-----------------
+C Compiler:		/usr/lib/mxe/usr/x86_64-pc-linux-gnu/bin/x86_64-w64-mingw32.static.posix-gcc
+CFLAGS:			-DLIBXML_STATIC -fmacro-prefix-map='/root/mxe/tmp-netcdf-x86_64-w64-mingw32.static.posix/netcdf-c-4.9.2'=. -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -O3 -DNDEBUG
+CPPFLAGS:		 
+LDFLAGS:		 
+AM_CFLAGS:		
+AM_CPPFLAGS:		
+AM_LDFLAGS:		
+Shared Library:		no
+Static Library:		yes
+Extra libraries:	-lmfhdf -ldf -lhdf5_hl -lhdf5 -lz -ldebug -lblosc -loptimized -lzstd -lbz2 -lcurl -lxml2
+XML Parser:             libxml2
+
+# Features
+--------
+Benchmarks:		no
+NetCDF-2 API:		yes
+HDF4 Support:		yes
+HDF5 Support:		yes
+NetCDF-4 API:		yes
+CDF5 Support:		yes
+NC-4 Parallel Support:	no
+PnetCDF Support:	no
+
+DAP2 Support:		yes
+DAP4 Support:		yes
+Byte-Range Support:	yes
+
+S3 Support:	        no
+
+NCZarr Support:		yes
+NCZarr Zip Support:     no
+
+Diskless Support:	yes
+MMap Support:		no
+JNA Support:		no
+ERANGE Fill Support:	yes
+Relaxed Boundary Check:	yes
+
+Multi-Filter Support:	yes
+Quantization:		yes
+Logging:     		no
+SZIP Write Support:     yes
+Standard Filters:       deflate szip blosc zstd bz2
+ZSTD Support:           yes
+Parallel Filters:       no
+

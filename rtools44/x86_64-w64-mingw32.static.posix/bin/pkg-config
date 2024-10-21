@@ -1,0 +1,7 @@
+#!/bin/sh
+PTDIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if [ "$#" -eq 1 ] && [ "X$1" = "X--version" ] ; then
+  PKG_CONFIG_PATH="$PTDIR/qt5/lib/pkgconfig":"$PKG_CONFIG_PATH_x86_64_w64_mingw32_static_posix" PKG_CONFIG_SYSROOT_DIR= PKG_CONFIG_LIBDIR="$PTDIR/lib/pkgconfig" PKG_CONFIG_SYSTEM_INCLUDE_PATH="/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix/include" PKG_CONFIG_SYSTEM_LIBRARY_PATH="/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix/lib" exec "$PTDIR/bin/pkgconf" --version
+else
+  PKG_CONFIG_PATH="$PTDIR/qt5/lib/pkgconfig":"$PKG_CONFIG_PATH_x86_64_w64_mingw32_static_posix" PKG_CONFIG_SYSROOT_DIR= PKG_CONFIG_LIBDIR="$PTDIR/lib/pkgconfig" PKG_CONFIG_SYSTEM_INCLUDE_PATH="/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix/include" PKG_CONFIG_SYSTEM_LIBRARY_PATH="/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix/lib" exec "$PTDIR/bin/pkgconf" --static "$@"
+fi

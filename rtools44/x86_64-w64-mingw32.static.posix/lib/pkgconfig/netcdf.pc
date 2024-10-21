@@ -1,0 +1,15 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+ccompiler=/usr/lib/mxe/usr/x86_64-pc-linux-gnu/bin/x86_64-w64-mingw32.static.posix-gcc
+
+Name: netCDF
+Description: NetCDF Client Library for C
+URL: https://www.unidata.ucar.edu/netcdf
+Version: 4.9.2
+Requires.private: libcurl df mfhdf hdf5 hdf5_hl
+Libs: -L${libdir} -lnetcdf
+Libs.private: -lcurl
+Cflags: -I${includedir}
+Requires: libxml-2.0

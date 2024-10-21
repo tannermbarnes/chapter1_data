@@ -1,0 +1,4 @@
+Name: glpk
+Version: 5.0
+Description: GNU Linear Programming Kit
+Libs: -lglpk

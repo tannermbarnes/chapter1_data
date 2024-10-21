@@ -1,0 +1,26 @@
+# This file is part of MXE. See LICENSE.md for licensing information.
+
+[binaries]
+c = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-gcc'
+cpp = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-g++'
+ar = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-ar'
+ranlib = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-ranlib'
+ld = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-ld'
+strip = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-strip'
+windres = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-windres'
+windmc = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-windmc'
+pkgconfig = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-pkg-config'
+cmake = '/usr/lib/mxe/usr/bin/x86_64-w64-mingw32.static.posix-cmake'
+# MXE forbids this
+# exe_wrapper = 'wine'
+
+[properties]
+needs_exe_wrapper = true
+sys_root = '/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix'
+pkg_config_libdir = '/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix/lib/pkgconfig'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'

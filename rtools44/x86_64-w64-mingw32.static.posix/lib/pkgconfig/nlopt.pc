@@ -1,0 +1,11 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: NLopt
+Description: nonlinear optimization libary
+Version: 2.7.1
+Libs: -L${libdir} -lnlopt
+Libs.private: -lm
+Cflags: -I${includedir}

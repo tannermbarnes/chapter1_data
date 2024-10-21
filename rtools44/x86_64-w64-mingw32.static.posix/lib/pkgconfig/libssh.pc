@@ -1,0 +1,7 @@
+Name: libssh
+Version: 0.10.6
+Description: libssh
+Requires: libgcrypt zlib
+Libs: -lssh
+Libs.private: -liphlpapi -lws2_32 -pthread
+Cflags.private: -DLIBSSH_STATIC

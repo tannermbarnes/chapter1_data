@@ -1,0 +1,13 @@
+Name: libSBML
+Description: A library for reading/writing/manipulating SBML
+URL: http://sbml.org/Software/libSBML
+Version: 5.20.2
+
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Libs: -L${libdir} -lsbml
+Libs.private:        -lxml2 -lbz2 -lz -lstdc++ -lm
+Cflags: -I${includedir}
+Requires.private: libxml-2.0 >= 2.6.22

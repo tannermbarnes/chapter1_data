@@ -1,0 +1,13 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+install_libdir=${prefix}/lib
+exec_prefix=${prefix}
+libdir=${exec_prefix}/${install_libdir}
+includedir=${prefix}/include
+pkgincludedir=${includedir}/hiredis
+
+Name: hiredis_ssl
+Description: SSL Support for hiredis.
+Version: 1.2.0
+Requires: hiredis
+Libs: -L${libdir} -lhiredis_ssl -lws2_32 -lcrypt32
+Libs.private: -lssl -lcrypto

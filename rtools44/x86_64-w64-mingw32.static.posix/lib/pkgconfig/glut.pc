@@ -1,0 +1,10 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: glut
+Description: A freely licensed and improved alternative to the GLUT library
+Version: 3.4.0
+Libs: -L${libdir} -lglut
+Libs.private: -lopengl32 -lwinmm -lgdi32
+Cflags: -I${includedir} -DFREEGLUT_STATIC

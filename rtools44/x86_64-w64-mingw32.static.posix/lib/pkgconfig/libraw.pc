@@ -1,0 +1,15 @@
+prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libraw
+Description: Raw image decoder library (non-thread-safe)
+Requires: lcms2
+Version: 0.21.2
+Libs: -L${libdir} -lraw -lstdc++ -fopenmp
+Libs.private: -ljasper -ljpeg 
+Cflags: -I${includedir}/libraw -I${includedir}
+
+Libs.private: -lws2_32 -ljasper
+Cflags.private: -DLIBRAW_NODLL

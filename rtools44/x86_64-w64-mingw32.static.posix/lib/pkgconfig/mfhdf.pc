@@ -1,0 +1,6 @@
+Name: hdf4
+Version: 4.2.13
+Description: HDF4
+Requires.private: df
+Libs: -lmfhdf
+Libs.private: -lportablexdr -lws2_32
