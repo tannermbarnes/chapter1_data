@@ -55,7 +55,7 @@ min_max_count <- data %>%
     TRUE ~ NA_real_
   ))
   
-  
+
 min_max_count <- min_max_count %>% mutate(mean_count_year = as.numeric(mean_count_year),
 mini_year = as.numeric(mini_year), 
 mean_count_year = if_else(
@@ -146,19 +146,7 @@ model_data1 <- final_data %>%
 pivot_wider(names_from = relative_year, 
             values_from = normalize_count) %>% 
 select(site, slope) %>% 
-left_join(data_wide3, by = "site")
-
-
-model_data2 <- data_with_decrease_year %>% 
-  group_by(site) %>%
-  reframe(
-    min_count = if (any(year > 2012 & !is.na(count))) min(count[year > 2012], na.rm = TRUE) else NA, 
-    mini_year = if (any(year > 2012 & !is.na(count))) year[year > 2012][which.min(count[year > 2012])] else NA,  
-    max_count = max(count, na.rm = TRUE), 
-    max_year = year[which.max(count / 1.5)], 
-    mean_count = if (!is.na(mini_year)) mean(count[year < mini_year], na.rm = TRUE) else NA
-  ) %>% 
-  left_join(model_data1, by = "site")
+left_join(data_with_decrease_year, by = "site")
 
  sites_to_remove <- c("Adventure Shaft", "Algonquin Adit #2 (Mark's Adit)", "Collin's Adit", "Copper Falls Mine", "Douglas Houghton Adit #1", "Jackson Mine, B Working",
  "Jackson Mine, Tram Tunnel Exit", "Merchant's Adit North", "Merchant's Adit South", "National Mine #7",
@@ -169,7 +157,7 @@ model_data2 <- data_with_decrease_year %>%
  "Pewabic Mine (Iron Mountain)", "Piscatauqau Adit", "Nassau Mine", "Goodrich Adit B", "Aztec Mine",
  "Bumblebee Mine", "Millie Mine", "Toltec Mine", "Randville Quarry Mine", "Indiana Mine")
 
-filtered_data1 <- model_data2 %>%
+filtered_data1 <- model_data1 %>%
   filter(!site %in% sites_to_remove)
 
 # Change water to a factor
@@ -177,19 +165,14 @@ filtered_data1$standing_water <- as.factor(filtered_data1$standing_water)
 filtered_data1$levels <- as.factor(filtered_data1$levels)
 filtered_data1$shafts <- as.factor(filtered_data1$shafts)
 
-add_last_count <- filtered_data1 %>% 
-pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
-"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
-"2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
-
-add_last_count1 <- add_last_count %>% 
+add_last_count1 <- filtered_data1 %>% 
 group_by(site) %>% 
 arrange(site, desc(year)) %>% 
 mutate(last_count = first(na.omit(count)),
 last_year = first(year[!is.na(count)])) %>% 
 ungroup()
 
-df_slide_scale <- add_last_count1 %>% 
+df_slide_scale <- add_last_count1 %>% group_by(site) %>% select(!c(normalize_count, relative_year)) %>% 
 pivot_wider(names_from = year, values_from = count)
 
 # Add maximum crash from maximum to minimum 
@@ -225,105 +208,6 @@ shafts_numeric = as.numeric(shafts)) %>%
 filter(site != "Tippy Dam") %>% 
 mutate(mean_temp_squared = mean_temp^2)
 
-
-data <- data_wide3 %>%
-pivot_longer(cols=c("1980", "1981", "1993","1994", "1995", "1996", "1997", "1998", "1999", "2000", "2001", "2002", 
-"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
-"2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count") %>% 
-mutate(year = as.numeric(year), count = as.numeric(count)) %>% drop_na(count)
-
-
-# Function to calculate the population crash slope
-calculate_population_crash <- function(data) {
-  data <- data %>%
-    arrange(year) %>%
-    filter(year <= year[which.min(count)])
-  
-  if (nrow(data) > 1) {
-    # Normalize count to the range [0, 1]
-    data <- data %>%
-      mutate(
-        normalized_count = (count - min(count)) / (max(count) - min(count)),
-        standardized_year = scale(year, center = TRUE, scale = TRUE)
-      )
-    
-    # Fit linear model and extract the slope
-    fit <- lm(normalized_count ~ standardized_year, data = data)
-    slope <- coef(fit)[["standardized_year"]]
-    
-    return(slope)
-  } else {
-    return(NA)  # If not enough data points, return NA
-  }
-}
-
-# Apply to each site
-population_crash_slopes <- data %>%
-  group_by(site) %>%
-  summarize(population_crash = calculate_population_crash(cur_data())) %>% 
-  drop_na(population_crash) %>% filter(!site %in% sites_to_remove)
-
-model_df <- model_df %>% 
-left_join(population_crash_slopes, by = "site")
-
-min_year1 <- data %>%
-  group_by(site) %>%
-  reframe(
-    min_count = if (any(year > 2012 & !is.na(count))) min(count[year > 2012], na.rm = TRUE) else NA, 
-    min_year = if (any(year > 2012 & !is.na(count))) year[year > 2012][which.min(count[year > 2012])] else NA,
-    max_count = if (any(!is.na(count))) max(count, na.rm = TRUE) else NA,
-    max_year = if (any(! is.na(count))) year[which.max(count)] else NA,
-    mean_count = if (!is.na(min_year)) mean(count[year < min_year], na.rm = TRUE) else NA,
-    first_year = min(year, na.rm = TRUE))
-
-# Merge the min and max counts back into the orginal data
-data_with_min <- data %>% 
-left_join(min_year1, by = "site") %>% 
-mutate(normalized_count = (count - min_count) / (max_count - min_count))
-
-### THIS SHOULD NOT BE NEEDED BECAUSE WE AREN'T CALCULATING A ESTIMATE BUT ACTUAL A YEAR TO YEAR DIFFERENCE ######
-
-# data_with_count <- data_with_min %>%
-#   filter(!site %in% c("Aztec East Adit", "Aztec Mine", "Aztec Upper Drift", 
-#                       "Copper Peak Adit", "County Line Adit", "Glen Adit #2",
-#                       "Indiana Mine", "Kochab Cave", "Lafayette East Adit",
-#                       "Silas Doty Cave", "Spider Cave", "Vivian Adit", "Algonquin Adit #2 (Mark's Adit)",
-#                       "Child's Adit", "Collin's Adit", "Glen Adit #3", "Hilton Ohio (Hilton #5 Adit)",
-#                       "Ohio Traprock #61", "Scott Falls Cave", "Eagle River Adit 3 (Lake Superior & Phoenix)",
-#                       "Eagle River Adit 2 (Lake Superior & Phoenix)", "Hilton (Shaft 1)", "Ohio Traprock Mine #59 (Norwich Adit)", 
-#                       "Rockport Quarry South Tunnel", "Randville Quarry Mine", "B-95 (cave)", "Douglas Houghton Adit #1")) %>%
-#   group_by(site) %>%
-#   mutate(normalized_count = (count - min_count) / (max(count) - min_count)) %>%
-#   filter(n() >= 3) %>%
-#   arrange(site, year) %>%
-#   mutate(min_year_norm1 = min(year[normalized_count == 1], na.rm = TRUE), 
-#          max_year_norm1 = max(year[normalized_count == 0], na.rm =TRUE)) %>%
-#   filter(year >= min_year_norm1 & year <= max_year_norm1) %>%
-#   mutate(relative_year = year - 1996) %>%
-#   ungroup()
-
-#######################################################################################################
-######################### CRASH INTENSITY FROM SURVEY TO SURVEY ###############################################
-# create the variable crash intensity by site and find the maximum crash intensity (most negative)
-data_with_changes <- data_with_min %>% 
-arrange(site, year) %>% 
-group_by(site) %>%
-mutate(
-  change_in_bats = (normalized_count - lag(normalized_count))) %>% 
-mutate(crash_intensity = if(all(is.na(change_in_bats))) NA_real_ else min(change_in_bats, na.rm = TRUE)) %>%
-mutate(
-  lag_year = year - lag(year), 
-  crash_intensity_year = if(all(is.na(crash_intensity / lag_year))) NA_real_ else min(crash_intensity/lag_year, na.rm = TRUE))%>% 
-ungroup()
-
-# only need one per site slice 1 by site
-slice <- data_with_changes %>% 
-  group_by(site) %>% slice(1) %>% filter(crash_intensity < 0) %>% select(site, crash_intensity)
-
-# add crash intensity to model dataframe
-model_df <- model_df %>%
-left_join(slice, by = "site")
-
 # Some adjustments before modeling
 model_df$standing_water[28] <- "yes"
 model_df$standing_water[is.na(model_df$standing_water)] <- "no"
@@ -336,5 +220,4 @@ model_df_recover$weight_sqrt <- sqrt(model_df_recover$last_count)
 model_df$weight_sqrt1 <- sqrt(model_df$mean_count)
 model_df_recover$slope_weighted <- model_df_recover$slope * model_df_recover$weight_sqrt
 model_df_recover$recovery_years_weighted <- model_df_recover$recovery_years * model_df_recover$weight_sqrt
-model_df$crash_weighted <- model_df$crash_intensity * model_df$weight_sqrt1
 model_df$crash_mean_weighted <- model_df$crash_mean * model_df$weight_sqrt1
