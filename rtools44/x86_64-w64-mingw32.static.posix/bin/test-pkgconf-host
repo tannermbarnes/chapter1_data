@@ -1,4 +1,0 @@
-#!/bin/sh
-export PATH=../bin:ATH
-gcc -v -W -Wall -Werror -ansi -pedantic test-pkgconf-host.c -o test-pkgconf-host.exe `pkg-config --cflags --libs libffi`
-test-pkgconf-host.exe

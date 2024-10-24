@@ -1,5 +1,0 @@
-Name: kealib
-Version: 1.5.3
-Description: KEALib
-Requires: hdf5_cpp
-Libs: -lkea

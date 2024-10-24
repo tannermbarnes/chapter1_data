@@ -1,9 +1,0 @@
-prefix=/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix
-datadir=${prefix}/share/coin/Data/Sample
-
-Name: Sample
-Description: Sample models
-URL: https://projects.coin-or.org/svn/Data/Sample
-Version: 1.2.11
-Libs:
-Cflags:

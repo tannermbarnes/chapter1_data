@@ -1,7 +1,0 @@
-Name: libzmq
-Version: 3b26401
-Description: ZeroMQ core engine in C++, implements ZMTP/3.0
-Requires: libsodium
-Libs: -lzmq
-Libs.private: -lws2_32 -lrpcrt4 -liphlpapi
-Cflags.private: -DZMQ_STATIC

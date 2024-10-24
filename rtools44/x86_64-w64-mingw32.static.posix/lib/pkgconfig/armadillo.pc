@@ -1,5 +1,0 @@
-Name: armadillo
-Version: 12.8.0
-Description: Armadillo C++ linear algebra library
-Requires: hdf5 openblas
-Libs: -larmadillo

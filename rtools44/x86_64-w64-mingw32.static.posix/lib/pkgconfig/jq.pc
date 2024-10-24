@@ -1,6 +1,0 @@
-Name: jq
-Version: 1.6
-Description: Jq command-line JSON processor
-Requires.private: oniguruma
-Libs: -ljq
-Libs.private: -lshlwapi

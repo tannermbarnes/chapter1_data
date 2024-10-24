@@ -1,4 +1,0 @@
-Name: pthreads
-Version: POSIX 1003.1-2001
-Description: Posix Threads (pthreads)
-Libs: -lpthread

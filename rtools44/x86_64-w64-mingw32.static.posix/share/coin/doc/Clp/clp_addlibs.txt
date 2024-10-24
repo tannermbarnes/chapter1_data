@@ -1,1 +1,0 @@
--L/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix/lib -lClp -L/usr/lib/mxe/usr/x86_64-w64-mingw32.static.posix/lib -lCoinUtils -lbz2 -lz -lblas -lm

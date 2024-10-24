@@ -1,6 +1,0 @@
-Name: libgcrypt
-Version: 1.10.3
-Description: libgcrypt
-Libs:  -L${prefix}/lib -lgcrypt -lgpg-error
-Cflags:  -I${prefix}/include
-Libs: -lws2_32

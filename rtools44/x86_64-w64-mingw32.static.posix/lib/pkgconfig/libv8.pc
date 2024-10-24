@@ -1,5 +1,0 @@
-Name: libv8
-Version: 7.0.276.38
-Description: V8 Library (from Node.js)
-Libs: -lv8_libplatform -lv8_base -lv8_init -lv8_nosnapshot -lv8_libsampler -lv8_libbase -lv8_initializers
-Libs.private: -lwinmm -limagehlp -ldbghelp -lshlwapi

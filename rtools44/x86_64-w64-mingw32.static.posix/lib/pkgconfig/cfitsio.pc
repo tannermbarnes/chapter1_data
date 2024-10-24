@@ -1,5 +1,0 @@
-Name: cfitsio
-Version: 3450
-Description: A FITS File Subroutine Library
-Requires: libcurl
-Libs: -lcfitsio

@@ -1,5 +1,0 @@
-Name: libidn2
-Version: 2.3.0
-Description: implementation of IDNA2008/TR46 internationalized domain names
-Libs: -lidn2
-Libs.private: -lunistring -liconv -lcharset
