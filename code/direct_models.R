@@ -53,7 +53,7 @@ ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter
 library(readxl)
 df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx")
 
-nest <- df %>% filter(year >= min_year) %>% select(site, count, relative_year) %>% group_by(site) %>% nest()
+nest <- df %>% filter(year >= decrease_year) %>% select(site, count, relative_year) %>% group_by(site) %>% nest()
 
 # STEP 2: Fit a linear regression model for each site
 nested_data <- nest %>%
@@ -110,11 +110,15 @@ filter(!is.na(count)) %>%
   scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Mean\nTemperature") +
   facet_wrap(~site, scales = "free_y") +  # Facet by site with free y-axis scales
   scale_x_continuous(
-    breaks = seq(min(your_data$year), max(your_data$year), by = 3),
+    breaks = seq(min(your_data$year), max(your_data$year), by = 4),
     labels = function(x) sprintf("%02d", x %% 100)
   ) +
   geom_vline(xintercept = 2014, color = "red", linetype = "dashed", size = 0.5) +  # Adjust size here
   theme_dark() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
   labs(title = "Recovering mines with recovery estimate overlayed the normalized count",
        x = "Year",
        y = "Normalized Population Count")
