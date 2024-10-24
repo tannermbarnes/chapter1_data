@@ -293,3 +293,61 @@ filter(!is.na(count)) %>%
        y = "Population Count")
 
 ggsave("E:/chapter1_data/figures/final/mines_used.png", width = 12, height=12)
+
+##################################################################################################################
+########### NORMALIZED COUNT WITH YEAR AND TREND LINES ###############################################
+
+your_data <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx")
+
+# Create the trend line data using slope and intercept
+your_data <- your_data %>%
+  mutate(predicted_count = intercept + slope * relative_year)
+
+colors <- c("blue", "white", "red")
+
+your_data %>%
+group_by(site) %>% 
+mutate(year = as.numeric(year)) %>% 
+filter(!is.na(count)) %>% 
+  ggplot(aes(x = year, y = normalized_count, group = site)) +
+  geom_line(show.legend = FALSE) +
+  geom_line(aes(y=predicted_count, color = mean_temp), size = 1.2, show.legend = FALSE) +
+  scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Mean\nTemperature") +
+  facet_wrap(~site, scales = "free_y") +  # Facet by site with free y-axis scales
+  scale_x_continuous(
+    breaks = seq(min(your_data$year), max(your_data$year), by = 3),
+    labels = function(x) sprintf("%02d", x %% 100)
+  ) +
+  geom_vline(xintercept = 2014, color = "red", linetype = "dashed", size = 0.5) +  # Adjust size here
+  theme_dark() +
+  labs(title = "Recovering mines with recovery estimate overlayed the normalized count",
+       x = "Year",
+       y = "Normalized Population Count")
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/trend_line_test.png", width = 12, height=12)
+
+your_data %>%
+group_by(site) %>% filter(year >= min_year) %>% 
+mutate(year = as.numeric(year)) %>% 
+filter(!is.na(count)) %>% 
+  ggplot(aes(x = year, y = normalized_count, group = site)) +
+  geom_line(show.legend = FALSE) +
+  geom_line(aes(y=predicted_count, color = mean_temp), size = 1.2, show.legend = FALSE) +
+  scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Mean\nTemperature") +
+  facet_wrap(~site, scales = "free_y") +  # Facet by site with free y-axis scales
+  scale_x_continuous(
+    breaks = seq(min(your_data$year), max(your_data$year), by = 3),
+    labels = function(x) sprintf("%02d", x %% 100)
+  ) +
+  geom_vline(xintercept = 2014, color = "red", linetype = "dashed", size = 0.5) +  # Adjust size here
+  theme_dark() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(title = "Recovering mines with recovery estimate overlayed the normalized count",
+       x = "Year",
+       y = "Normalized Population Count")
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/trend_line_test.png", width = 12, height=12)
+

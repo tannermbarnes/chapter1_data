@@ -15,6 +15,7 @@ source("sliding_scale.R")
 model_df_crash <- model_df %>% filter(mean_count > 89) %>% 
 mutate(new = ifelse(slope > 0, "recovering", "not recovering"))
 
+model_df %>% select(site, mean_temp) %>% View()
 ###############################################################################################################
 ############ Hypothesis 1 crash_intensity and slope are related ###############################################
 ###############################################################################################################

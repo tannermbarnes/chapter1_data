@@ -103,12 +103,12 @@ filter(relative_year >= 0) %>%
 filter(normalize_count >= 0) %>% 
 select(site, relative_year, normalize_count)
 
-# Nest the data by site
+# STEP 1: Nest the data by site
 nested_data <- filter_data %>% 
 group_by(site) %>% 
 nest()
 
-# Fit a linear regression model for each site
+# STEP 2: Fit a linear regression model for each site
 nested_data <- nested_data %>%
   mutate(model = map(data, ~ {
     df <- .x
@@ -125,27 +125,35 @@ tidied_data <- nested_data %>%
   mutate(tidied = map(model, tidy)) %>%
   unnest(tidied)
 
-# Step 5: Filter and select the slope for the 'year' term
+# Step 5: Select the slope and intercept for each site and combine them properly
 regression_results <- tidied_data %>%
-  filter(term == "year") %>%
-  select(site, slope = estimate) %>% 
-  mutate(slope = ifelse(is.na(slope), 0, slope))
+  filter(term %in% c("year", "(Intercept)")) %>%  # Keep both slope and intercept terms
+  pivot_wider(names_from = term, values_from = estimate) %>%  # Spread terms into columns
+  select(site, intercept = `(Intercept)`, slope = year)  # Select and rename the columns
 
-# Check the regression results
-#print("Regression results:")
-#print(regression_results)
+# Fix NA values by filling them appropriately
+regression_results <- regression_results %>%
+  group_by(site) %>%
+  summarize(
+    intercept = max(intercept, na.rm = TRUE),
+    slope = max(slope, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+regression_results <- regression_results %>% 
+mutate(slope = ifelse(is.na(slope), 0, slope),
+intercept = ifelse(is.na(intercept), 0, intercept))
+
 
 # Step 6: Add the slope to the original data frame
 final_data <- filter_data %>%
   left_join(regression_results, by = "site")
 
-#View(final_data)
-
 # Merge final slopes with the other metadata in a wide format to model
 model_data1 <- final_data %>% 
 pivot_wider(names_from = relative_year, 
             values_from = normalize_count) %>% 
-select(site, slope) %>% 
+select(site, slope, intercept) %>% 
 left_join(data_with_decrease_year, by = "site")
 
  sites_to_remove <- c("Adventure Shaft", "Algonquin Adit #2 (Mark's Adit)", "Collin's Adit", "Copper Falls Mine", "Douglas Houghton Adit #1", "Jackson Mine, B Working",
@@ -195,11 +203,10 @@ model_df <- df_slide_scale %>%
 mutate(recovery_status = ifelse(slope > 0 & (last_count / max_count > 0.05), "recovering", "not recovering")) %>% 
 mutate(recovery_status = as.factor(recovery_status)) %>% 
 mutate(site_numeric = as.numeric(factor(site))) %>% 
-select(site, site_numeric, bin, min_count, max_count, mean_count, last_count, recovery_status, recovery_years, mini_year, max_year, last_year, slope, standing_water, passage_length, log_passage, levels, shafts, 
+select(site, intercept, site_numeric, min_count, max_count, mean_count, last_count, recovery_status, recovery_years, mini_year, max_year, last_year, slope, standing_water, passage_length, log_passage, levels, shafts, 
 crash_max, crash_mean, min, max, median_temp, mean_temp, temp_diff, ore) %>% 
 mutate(temp_diff_sqrt = sqrt(temp_diff),
 temp_diff_log = log(temp_diff),
-bin_numeric = as.numeric(bin),
 ore = as.factor(ore),
 levels = as.factor(levels),
 shafts = as.factor(shafts)) %>% 
