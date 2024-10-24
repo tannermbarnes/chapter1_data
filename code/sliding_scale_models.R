@@ -83,8 +83,8 @@ summary(crash_3)
 ####################################################################################################################
 library(brms)
 library(rstan)
-Sys.setenv(PATH = paste("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/rtools44/x86_64-w64-mingw32.static.posix/bin",
-                        "C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/rtools44/usr/bin", 
+Sys.setenv(PATH = paste("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/x86_64-w64-mingw32.static.posix/bin",
+                        "C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/usr/bin", 
                         Sys.getenv("PATH"), 
                         sep = ";"))
 # Define the prior
