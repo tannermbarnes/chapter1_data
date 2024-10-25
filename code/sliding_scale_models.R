@@ -15,12 +15,14 @@ source("sliding_scale.R")
 model_df_crash <- model_df %>% filter(mean_count > 89) %>% 
 mutate(new = ifelse(slope > 0, "recovering", "not recovering"))
 
-model_df %>% select(site, mean_temp) %>% View()
+View(model_df_recover)
 ###############################################################################################################
 ############ Hypothesis 1 crash_intensity and slope are related ###############################################
 ###############################################################################################################
 m1 <- lm(slope ~ crash_mean, model_df_recover)
 summary(m1)
+
+model_df_recover %>% select(site, slope, intercept) %>% View()
 
 colors <- c("blue", "white", "red")
 
@@ -106,7 +108,7 @@ null_model_slope <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
-j
+
 slope_model <- brm(
   formula = slope_weighted ~ mean_temp + offset(recovery_years),
   data = model_df_recover,

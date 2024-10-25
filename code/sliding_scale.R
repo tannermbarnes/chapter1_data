@@ -228,3 +228,4 @@ model_df$weight_sqrt1 <- sqrt(model_df$mean_count)
 model_df_recover$slope_weighted <- model_df_recover$slope * model_df_recover$weight_sqrt
 model_df_recover$recovery_years_weighted <- model_df_recover$recovery_years * model_df_recover$weight_sqrt
 model_df$crash_mean_weighted <- model_df$crash_mean * model_df$weight_sqrt1
+

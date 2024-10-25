@@ -292,11 +292,11 @@ filter(!is.na(count)) %>%
        x = "Year",
        y = "Population Count")
 
-ggsave("E:/chapter1_data/figures/final/mines_used.png", width = 12, height=12)
+#ggsave("E:/chapter1_data/figures/final/mines_used.png", width = 12, height=12)
 
 ##################################################################################################################
 ########### NORMALIZED COUNT WITH YEAR AND TREND LINES ###############################################
-
+library(readxl)
 your_data <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx")
 
 # Create the trend line data using slope and intercept
