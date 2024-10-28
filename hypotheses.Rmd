@@ -38,7 +38,7 @@ Step 5: Fix the NA values by filling them appropriately
 Step 6: Add the slope to the original data frame 
 ```{r load-data, include = TRUE}
 
-df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx")
+df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "model_data")
 
 nest <- df %>% filter(year >= decrease_year) %>% select(site, normalized_count, relative_year) %>% group_by(site) %>% nest()
 
@@ -97,6 +97,8 @@ summary(m1)
 ```
 
 ```{r Visulization-1, include = TRUE}
+colors <- c("blue", "white", "red")
+
 ggplot(model_data, aes(x=crash, y=slope)) + 
 geom_point(aes(fill = mean_temp, size = last_count), shape = 21, color = "black", stroke = 0.5) + 
 geom_smooth(method = "lm", se = FALSE, color = "black") +
@@ -144,7 +146,7 @@ bayesian_r2 <- bayes_R2(slope_model)
 print(bayesian_r2)
 ```
 
-```{r Hypothesis-2-visulization, include = TRUE}
+```{r Hypothesis_slope_models, include = TRUE}
 colors <- c("blue", "white", "red")
 b_r2_slope <- bayesian_r2[1, "Estimate"]
 bayesian_r2_ci <- quantile(bayesian_r2, probs = c(0.025, 0.975))
@@ -185,4 +187,124 @@ ggplot(model_data_ungroup, aes(x = mean_temp, y = slope)) +
     legend.text = element_text(size = 8),
     panel.grid = element_blank()
   )
+```
+
+```{r fit_crash_models, include = FALSE}
+  crash_model_linear <- brm(
+  formula = crash ~ mean_temp,
+  data = model_data_recover,
+  family = Beta(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+```
+
+```{r crash_model_summary, include=TRUE}
+summary(crash_model_linear)
+bayesian_r2.1 <- bayes_R2(crash_model_linear)
+print(bayesian_r2.1)
+```
+
+```{r visualize_crash_models, include = TRUE}
+b2_crash <- bayesian_r2.1[1, "Estimate"]
+
+# Step 1: Create a finer grid of mean_temp for smoother prediction lines (without 'site')
+prediction_grid <- tibble(mean_temp = seq(min(model_data_recover$mean_temp), max(model_data_recover$mean_temp), length.out = 100))
+
+# Step 2: Generate predictions using the fitted values from the linear model
+predicted_slope_values1 <- fitted(crash_model_linear, newdata = prediction_grid, summary = TRUE)[, "Estimate"]
+
+# Step 3: Add the predicted values to the dataset
+prediction_grid <- prediction_grid %>%
+  mutate(predicted_crash = predicted_slope_values1)
+
+# Step 4: Plot with a straight line for the linear model
+ggplot(model_data_recover, aes(x = mean_temp, y = crash)) +
+  geom_point(aes(size = mean_count), alpha = 0.5) +  # Plot observed data
+  geom_line(data = prediction_grid, aes(x=mean_temp, y = predicted_crash), color = "darkgreen", linewidth = 1) +
+  scale_size_continuous(name = "Mean\nPopulation\nSize") + 
+  labs(title = "Mines with colder mean temperatures have lower crash rates for Myotis Bats",
+       x = "Mean Temperature (C)",
+       y = "Crash Rate (1 - (minimum count / maximum count))") +
+  annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² =", round(b2_crash, 4)), 
+           hjust = 2.75, vjust = 1.5, size = 4, color = "black") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 12),        # Title font size
+    axis.title.x = element_text(size = 10),      # X-axis title font size
+    axis.title.y = element_text(size = 10),      # Y-axis title font size
+    axis.text.x = element_text(size = 8),        # X-axis text font size
+    axis.text.y = element_text(size = 8),        # Y-axis text font size
+    legend.title = element_text(size = 10),      # Legend title font size
+    legend.text = element_text(size = 8),
+    panel.grid = element_blank()        # Legend text font size
+  )
+```
+
+# Hypothesis 3
+```{r hypothesis 3, include = TRUE}
+df1 <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "proportions")
+
+overall_stats <- df1 %>%
+  group_by(period) %>%
+  summarise(
+    overall_mean_count = mean(count, na.rm = TRUE),
+    overall_sd_count = sd(count, na.rm = TRUE)
+  )
+
+pop_proportions <- df1 %>% group_by(site, period) %>%
+  summarise(
+    mean_count_site = mean(count, na.rm = TRUE),  # Mean count for the site and period
+    site_mean_temp = first(mean_temp)  # Assuming site_mean_temp is constant per site
+  ) %>%
+  left_join(overall_stats, by = "period") %>%  
+  ungroup()
+
+combined <- pop_proportions %>%
+  pivot_wider(
+    names_from = period,
+    values_from = c(mean_count_site, site_mean_temp, overall_mean_count, overall_sd_count),
+    names_prefix = "period_"
+  ) %>% 
+  select(site, mean_count_before = mean_count_site_period_before, mean_count_after = mean_count_site_period_after,
+  mean_temp = site_mean_temp_period_before, 
+  )
+
+mine_proportions <- combined %>% filter(site != "Tippy Dam") %>% 
+reframe(site, mean_temp, sum_before = sum(mean_count_before), 
+proportion_before = (mean_count_before / sum_before), sum_after = sum(mean_count_after), 
+proportion_after = (mean_count_after / sum_after), mean_count_before, mean_count_after) %>% 
+mutate(props = (proportion_after - proportion_before), mean_temp_squared = mean_temp^2)
+
+
+im <- mine_proportions %>% filter(mean_count_before > 300) %>% filter(site != "Millie Mine")
+# Fit your custom model
+model1 <- lm(props ~ mean_temp + I(mean_temp^2), data = im)
+adj_r_squared1 <- summary(model1)$adj.r.squared
+adj_r_squared_text1 <- paste0("Adjusted R² = ", round(adj_r_squared1, 4))
+summary(model1)
+# Create the plot using the custom model
+ggplot(data = im, aes(x = mean_temp, y = props)) +
+  geom_point(aes(color = ifelse(props > 0, "positive", "negative")), alpha = 0.7) +  # Color points by positive/negative values
+  # Add a line using the custom model fitted values
+  stat_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE, color = "#e100ffca", size = 1.2) +
+  labs(
+    title = "Proportionally more bats in cold sites after WNS",
+    x = "Mean Temperature", 
+    y = "Proportion of bats (After WNS - Before WNS)", 
+    size = "Mean Count\n(After WNS)",
+    color = "Proportions\n(After WNS -\nBefore WNS)"  # Legend title for color
+  ) + 
+  annotate("text", x = Inf, y = Inf, label = adj_r_squared_text1, 
+           hjust = 1.1, vjust = 1.5, size = 5, color = "black") +
+  theme_bw() +  # Base theme
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),  # Centered and bold title
+    axis.title = element_text(size = 12),  # Larger axis titles
+    legend.title = element_text(size = 10),  # Larger legend title
+    legend.text = element_text(size = 8),  # Larger legend text
+    panel.grid = element_blank()  # Remove grid lines
+  ) +
+  scale_color_manual(values = c("positive" = "blue", "negative" = "red"))  # Custom color scale
 ```

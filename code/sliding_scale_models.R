@@ -13,9 +13,10 @@ source("sliding_scale.R")
 
 # remove unimportant sites from population crash they could fluctuate for other reasons
 model_df_crash <- model_df %>% filter(mean_count > 89) %>% 
-mutate(new = ifelse(slope > 0, "recovering", "not recovering"))
+mutate(new = ifelse(slope > 0, "recovering", "not recovering"), 
+crash = crash_mean)
 
-View(model_df_recover)
+model_df_crash %>% select(site, crash_mean, mean_temp) %>% View()
 ###############################################################################################################
 ############ Hypothesis 1 crash_intensity and slope are related ###############################################
 ###############################################################################################################
@@ -276,11 +277,14 @@ ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter
 ##################################################################################################################
 ##########################CRASH MODELS #############################################################
 ####################################################################################################
+source("direct_models.R")
+
+model_data_crash <- model_data %>% filter(mean_count > 89)
 
 # Fit the second Bayesian model
 null_model_crash <- brm(
-  formula = crash_mean ~ 1,
-  data = model_df_crash,
+  formula = crash ~ 1,
+  data = model_data,
   family = zero_one_inflated_beta(),
   prior = prior1,
   chains = 4,
@@ -290,8 +294,8 @@ null_model_crash <- brm(
 )
 
 crash_model <- brm(
-  formula = crash_mean ~ mean_temp + I(mean_temp^2),
-  data = model_df_crash,
+  formula = crash ~ mean_temp + I(mean_temp^2),
+  data = model_data_recover,
   family = zero_one_inflated_beta(),
   chains = 4,
   iter = 4000,
@@ -301,9 +305,9 @@ crash_model <- brm(
 summary(crash_model)
 
 crash_model_linear <- brm(
-  formula = crash_mean ~ mean_temp,
-  data = model_df_crash,
-  family = zero_one_inflated_beta(),
+  formula =  crash ~ mean_temp,
+  data = model_data_recover,
+  family = gaussian(),
   chains = 4,
   iter = 4000,
   warmup = 1000,
@@ -312,8 +316,8 @@ crash_model_linear <- brm(
 summary(crash_model_linear)
 
 crash_model1 <- brm(
-  formula = crash_mean ~ mean_temp + log_passage,
-  data = model_df_crash,
+  formula = crash ~ mean_temp + log_passage,
+  data = model_data,
   family = zero_one_inflated_beta(),
   prior = prior,
   chains = 4,
@@ -322,41 +326,37 @@ crash_model1 <- brm(
   control = list(adapt_delta = 0.99)
 )
 
-crash_model2 <- brm(
-  formula = crash_mean ~ mean_temp + log_passage + standing_water,
-  data = model_df_crash,
-  family = zero_one_inflated_beta(),
-  prior = prior,
-  chains = 4,
-  iter = 4000,
-  warmup = 1000,
-  control = list(adapt_delta = 0.99)
-)
+# crash_model2 <- brm(
+#   formula = crash ~ mean_temp + log_passage + standing_water,
+#   data = model_data,
+#   family = zero_one_inflated_beta(),
+#   prior = prior,
+#   chains = 4,
+#   iter = 4000,
+#   warmup = 1000,
+#   control = list(adapt_delta = 0.99)
+# )
 
 ############################################################################################
 ##################### Model Comparison ##################################################
 # LOO-CV tends to be more stable, especially in small datasets or models with influencial observations
 loo_crash_null <- loo(null_model_crash, moment_match = TRUE)
 loo_crash_model <- loo(crash_model, moment_match = TRUE)
-loo_crash_model0.5 <- loo(crash_model_linear, moment_match = TRUE)
+loo_crash_model_linear <- loo(crash_model_linear, moment_match = TRUE)
 loo_crash_model1 <- loo(crash_model1, moment_match = TRUE)
-loo_crash_model2 <- loo(crash_model2, moment_match = TRUE)
-loo_compare(loo_crash_null, loo_crash_model0.5, loo_crash_model, loo_crash_model1, loo_crash_model2)
 
 # Extract ELPD values from each model
 elpd_null_crash <- loo_crash_null$estimates["elpd_loo", "Estimate"]
 elpd_crash_model <- loo_crash_model$estimates["elpd_loo", "Estimate"]
-elpd_crash_model0.5 <- loo_crash_model_linear$estimates["elpd_loo", "Estimate"]
+elpd_crash_model_linear <- loo_crash_model_linear$estimates["elpd_loo", "Estimate"]
 elpd_crash_model1 <- loo_crash_model1$estimates["elpd_loo", "Estimate"]
-elpd_crash_model2 <- loo_crash_model2$estimates["elpd_loo", "Estimate"]
 
 # Get the comparison results (elpd_diff and se_diff)
-loo_comparison1 <- loo_compare(loo_crash_null, loo_crash_model, loo_crash_model0.5, loo_crash_model1, loo_crash_model2)
+loo_comparison1 <- loo_compare(loo_crash_null, loo_crash_model, loo_crash_model_linear, loo_crash_model1)
 
 # Create a summary table with ELPD, elpd_diff, and se_diff
 comparison_table1 <- data.frame(
-  Model = c("null_crash_model", "crash_model", "crash_model0.5", "crash_model1", "crash_model2"),
-  ELPD = c(elpd_null_crash, elpd_crash_model, elpd_crash_model0.5, elpd_crash_model1, elpd_crash_model2),
+  ELPD = c(elpd_null_crash, elpd_crash_model, elpd_crash_model_linear, elpd_crash_model1),
   elpd_diff = loo_comparison1[, "elpd_diff"],
   se_diff = loo_comparison1[, "se_diff"]
 )
@@ -371,7 +371,7 @@ print(bayesian_r2.1)
 b2_crash <- bayesian_r2.1[1, "Estimate"]
 
 # Step 1: Create a finer grid of mean_temp for smoother prediction lines (without 'site')
-prediction_grid <- tibble(mean_temp = seq(min(model_df_crash$mean_temp), max(model_df_crash$mean_temp), length.out = 100))
+prediction_grid <- tibble(mean_temp = seq(min(model_data_recover$mean_temp), max(model_data_recover$mean_temp), length.out = 100))
 
 # Step 2: Generate predictions using the fitted values from the linear model
 predicted_slope_values1 <- fitted(crash_model_linear, newdata = prediction_grid, summary = TRUE)[, "Estimate"]
@@ -381,7 +381,7 @@ prediction_grid <- prediction_grid %>%
   mutate(predicted_crash = predicted_slope_values1)
 
 # Step 4: Plot with a straight line for the linear model
-ggplot(model_df_crash, aes(x = mean_temp, y = crash_mean)) +
+ggplot(model_data_recover, aes(x = mean_temp, y = crash)) +
   geom_point(aes(size = mean_count), alpha = 0.5) +  # Plot observed data
   geom_line(data = prediction_grid, aes(x=mean_temp, y = predicted_crash), color = "darkgreen", linewidth = 1) +
   scale_size_continuous(name = "Mean\nPopulation\nSize") + 

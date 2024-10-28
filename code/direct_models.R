@@ -75,7 +75,7 @@ nested_data <- nest %>%
     # Ensure 'year' and 'count' are numeric
     df <- df %>%
       mutate(year = as.numeric(year_from_min), 
-              count = as.numeric(normalized_count))
+              count = as.numeric(count))
     # Fit the linear model
     lm(count ~ year, data = df)
   }))
@@ -118,7 +118,7 @@ your_data %>%
 group_by(site) %>% 
 mutate(year = as.numeric(year)) %>% 
 filter(!is.na(count)) %>% 
-  ggplot(aes(x = year, y = normalized_count, group = site)) +
+  ggplot(aes(x = year, y = count, group = site)) +
   geom_line(show.legend = FALSE) +
   geom_line(aes(y=predicted_count, color = mean_temp), size = 1.2, show.legend = FALSE) +
   scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Mean\nTemperature") +
@@ -334,9 +334,17 @@ model_data <- df %>%
   group_by(site) %>% slice(1)
 
 model_data_recover <- model_data %>% filter(slope > 0)
+model_data_recover$weight_sqrt <- sqrt(model_data_recover$last_count)
+model_data_recover$slope_weighted <- model_data_recover$slope * model_data_recover$weight_sqrt
+
+
+m1 <- lm(slope ~ crash, model_data)
+summary(m1)
+
+
 
 slope_model <- brm(
-  formula = slope ~ mean_temp + offset(recovery_years),
+  formula = slope_weighted ~ mean_temp + offset(recovery_years),
   data = model_data_recover,
   family = Gamma(link = "log"),
   chains = 4,
@@ -346,7 +354,7 @@ slope_model <- brm(
 )
 
 slope_model1 <- brm(
-  formula = slope ~ mean_temp + I(mean_temp^2) + offset(recovery_years),
+  formula = slope_weighted ~ mean_temp + I(mean_temp^2) + offset(recovery_years),
   data = model_data_recover,
   family = Gamma(link = "log"),
   chains = 4,
@@ -356,7 +364,7 @@ slope_model1 <- brm(
 )
 
 slope_model2 <- brm(
-  formula = slope ~ mean_temp + log_passage + offset(recovery_years),
+  formula = slope_weighted ~ mean_temp + log_passage + offset(recovery_years),
   data = model_data_recover,
   family = Gamma(link = "log"),
   chains = 4,
@@ -366,7 +374,7 @@ slope_model2 <- brm(
 )
 
 no_offset <- brm(
-  formula = slope ~ mean_temp,
+  formula = slope_weighted ~ mean_temp,
   data = model_data_recover,
   family = Gamma(link = "log"),
   chains = 4,
@@ -376,7 +384,7 @@ no_offset <- brm(
 )
 
 no_offset1 <- brm(
-  formula = slope ~ mean_temp + log_passage,
+  formula = slope_weighted ~ mean_temp + log_passage,
   data = model_data_recover,
   family = Gamma(link = "log"),
   chains = 4,
@@ -386,7 +394,7 @@ no_offset1 <- brm(
 )
 
 no_offset2 <- brm(
-  formula = slope ~ mean_temp + I(mean_temp^2),
+  formula = slope_weighted ~ mean_temp + I(mean_temp^2),
   data = model_data_recover,
   family = Gamma(link = "log"),
   chains = 4,
@@ -424,12 +432,8 @@ comparison_table <- data.frame(
 # Print the table
 print(comparison_table)
 
-summary(slope_model)
-bayesian_r2 <- bayes_R2(slope_model)
-print(bayesian_r2)
-
-summary(no_offset)
-bayesian_r2 <- bayes_R2(no_offset)
+summary(no_offset1)
+bayesian_r2 <- bayes_R2(model_beta)
 print(bayesian_r2)
 
 colors <- c("blue", "white", "red")
@@ -446,20 +450,20 @@ prediction_grid_s <- model_data_ungroup %>%
   log_passage = median(model_data_ungroup$log_passage))
 
 # Generate predictions using the fitted values from the model
-predicted_slope_values <- fitted(no_offset, newdata = prediction_grid_s, summary = TRUE)[, "Estimate"]
+predicted_slope_values <- fitted(model_beta, newdata = prediction_grid_s, summary = TRUE)[, "Estimate"]
 
 # Add the predicted values to the dataset
 prediction_grid_s <- prediction_grid_s %>%
   mutate(predicted_slope = predicted_slope_values)
 
   # Plot the slope model
-ggplot(model_data_ungroup, aes(x = mean_temp, y = slope)) +
+ggplot(model_data_ungroup, aes(x = mean_temp, y = crash)) +
   geom_point(alpha = 0.5) +  # Plot observed data
   geom_line(data=prediction_grid_s, aes(mean_temp, y = predicted_slope), color = "darkblue", linewidth = 1) +
   scale_size_continuous(name = "Last Survey\nPopulation Count") + 
   labs(title = "Mines with colder mean temperatures have higher recovery rates for Myotis bats",
        x = "Mean Temperature (C)",
-       y = "Recovery Rate (Slope)") +
+       y = "Crash Rate (1-(minimum count / mean count))") +
   annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² =", round(b_r2_slope, 4)), 
            hjust = 2.75, vjust = 1.5, size = 4, color = "black") +
   theme_bw() +
@@ -473,3 +477,89 @@ ggplot(model_data_ungroup, aes(x = mean_temp, y = slope)) +
     legend.text = element_text(size = 8),
     panel.grid = element_blank()
   )
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/crash_rate_mean_temp.png", width = 8, height=6)
+
+############ USE PP_CHECK() to check each of the families
+# Fit models with different families
+epsilon <- 1e-6  # small constant
+model_data_recover <- model_data_recover %>% 
+mutate(crash_transformed = crash * (1 - 2 * epsilon) + epsilon)
+
+
+model_gaussian <- brm(
+  formula = crash ~ mean_temp,
+  data = model_data_recover,
+  family = gaussian(),
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
+)
+
+model_beta <- brm(
+  formula = crash_transformed ~ mean_temp,
+  data = model_data_recover,
+  family = Beta(),
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
+)
+
+model_zero_one_inflated <- brm(
+  formula = crash ~ mean_temp,
+  data = model_data_recover,
+  family = zero_one_inflated_beta(),
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
+)
+
+model_student <- brm(
+  formula = crash ~ mean_temp,
+  data = model_data_recover,
+  family = student(),
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
+)
+
+# Posterior predictive check for Gaussian model
+pp_check(model_gaussian, type = "dens_overlay") + ggtitle("Gaussian Model")
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/pp_check/gaussian_check.png", width = 6, height = 8)
+# Posterior predictive check for Log-Normal model
+pp_check(model_beta, type = "dens_overlay") + ggtitle("Beta Model")
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/pp_check/log_normal_check.png", width = 6, height = 8)
+# Posterior predictive check for Gamma model
+pp_check(model_zero_one_inflated, type = "dens_overlay") + ggtitle("Zero one inflated model")
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/pp_check/gamma_check.png", width = 6, height = 8)
+# Posterior predictive check for student model
+pp_check(model_student, type = "dens_overlay") + ggtitle("Student Model")
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/pp_check/student_check.png", width = 6, height = 8)
+
+# Step 1: Extract Residuals and fitted values
+# Extract residuals
+residuals <- residuals(model_beta)
+# Extract fitted values
+fitted_values <- fitted(model_beta)
+
+# Create a data frame with residuals and fitted values
+residuals_data <- data.frame(
+  Fitted = fitted_values[, "Estimate"],  # Fitted estimates
+  Residuals = residuals[, "Estimate"]    # Residual estimates
+)
+
+# Residuals vs Fitted plot
+ggplot(residuals_data, aes(x = Fitted, y = Residuals)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "loess", color = "red", se = FALSE) +
+  labs(title = "Residuals vs Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/pp_check/fitted_vs_residuals.png", width = 6, height = 8)
+
+# Histogram of residuals
+ggplot(residuals_data, aes(x = Residuals)) +
+  geom_histogram(bins = 30, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Residuals",
+       x = "Residuals",
+       y = "Frequency") +
+  theme_minimal()
+
+# Q-Q plot of residuals
+ggplot(residuals_data, aes(sample = Residuals)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  labs(title = "Q-Q Plot of Residuals") +
+  theme_minimal()

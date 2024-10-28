@@ -1,6 +1,6 @@
 # THIS CODE IS FOR MODELS LOOKING AT THE DIFFERENCE IN TEMPERATURE SELECTION BETWEEN PERIODS (BEFORE AND AFTERS) WNS
 rm(list = ls())
-setwd("E:/chapter1_data/code")
+setwd("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/code")
 #source("before_WNS.R")
 source("survey_data.R")
 library(tidyr)
@@ -12,7 +12,6 @@ library(dplyr)
 
 # Step 1: Calculate overall mean and standard deviation for each period
 overall_stats <- fin_filter %>%
-  filter(site != "Tippy Dam") %>%
   group_by(period) %>%
   summarise(
     overall_mean_count = mean(count, na.rm = TRUE),
@@ -37,17 +36,11 @@ combined_data <- fin_filter %>%
 combined <- combined_data %>%
   pivot_wider(
     names_from = period,
-    values_from = c(mean_count_site, z_value, site_mean_temp, overall_mean_count, overall_sd_count),
+    values_from = c(mean_count_site, site_mean_temp, overall_mean_count, overall_sd_count),
     names_prefix = "period_"
   ) %>% 
-    mutate(
-    z_value = ifelse(
-      z_value_period_before < 0, 
-      z_value_period_after + z_value_period_before,  # If before is negative, add
-      z_value_period_after - z_value_period_before   # If before is positive, subtract
-    )) %>% 
-  select(site, mean_count_before = mean_count_site_period_before, mean_count_after = mean_count_site_period_after, 
-  z_value_before = z_value_period_before, z_value_after = z_value_period_after, z_value, mean_temp = site_mean_temp_period_before, 
+  select(site, mean_count_before = mean_count_site_period_before, mean_count_after = mean_count_site_period_after,
+   mean_temp = site_mean_temp_period_before, 
   )
 
 important <- combined %>% filter(mean_count_before > 300)
@@ -109,12 +102,48 @@ ggplot(data = combined, aes(x = mean_temp, y = z_value, size = mean_count_before
 ggsave("E:/chapter1_data/figures/final/z-value-quadratic.png", width = 8, height = 8)
 
 ############################## Population Proportions before and after WNS #####################################
+library(tidyverse)
+library(readxl)
+library(brms)
+library(rstan)
+library(tidyr)
+library(purrr)
+library(broom)
+df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "proportions")
 
-pop_proportions <- combined %>% reframe(site, mean_temp, sum_before = sum(mean_count_before), proportion_before = (mean_count_before / sum_before),
-sum_after = sum(mean_count_after), proportion_after = (mean_count_after / sum_after), mean_count_before, mean_count_after) %>% 
+overall_stats <- df %>%
+  group_by(period) %>%
+  summarise(
+    overall_mean_count = mean(count, na.rm = TRUE),
+    overall_sd_count = sd(count, na.rm = TRUE)
+  )
+
+pop_proportions <- df %>% group_by(site, period) %>%
+  summarise(
+    mean_count_site = mean(count, na.rm = TRUE),  # Mean count for the site and period
+    site_mean_temp = first(mean_temp)  # Assuming site_mean_temp is constant per site
+  ) %>%
+  left_join(overall_stats, by = "period") %>%  
+  ungroup()
+
+combined <- pop_proportions %>%
+  pivot_wider(
+    names_from = period,
+    values_from = c(mean_count_site, site_mean_temp, overall_mean_count, overall_sd_count),
+    names_prefix = "period_"
+  ) %>% 
+  select(site, mean_count_before = mean_count_site_period_before, mean_count_after = mean_count_site_period_after,
+  mean_temp = site_mean_temp_period_before, 
+  )
+
+mine_proportions <- combined %>% filter(site != "Tippy Dam") %>% 
+reframe(site, mean_temp, sum_before = sum(mean_count_before), 
+proportion_before = (mean_count_before / sum_before), sum_after = sum(mean_count_after), 
+proportion_after = (mean_count_after / sum_after), mean_count_before, mean_count_after) %>% 
 mutate(props = (proportion_after - proportion_before), mean_temp_squared = mean_temp^2)
 
-im <- pop_proportions %>% filter(mean_count_before > 300) %>% filter(site != "Millie Mine")
+
+im <- mine_proportions %>% filter(mean_count_before > 100)
 # Fit your custom model
 model1 <- lm(props ~ mean_temp + I(mean_temp^2), data = im)
 adj_r_squared1 <- summary(model1)$adj.r.squared

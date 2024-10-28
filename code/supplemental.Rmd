@@ -1,0 +1,450 @@
+---
+title: "Supplemental Information"
+author: "Tanner M. Barnes"
+date: "`r Sys.Date()`"
+output: html_document
+---
+```{r mines_used, include = FALSE}
+library(readxl)
+library(tidyverse)
+library(broom)
+library(tidyr)
+library(purrr)
+df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx")
+
+nest <- df %>% filter(year >= decrease_year) %>% select(site, count, normalized_count, relative_year, year_from_min) %>% group_by(site) %>% nest()
+
+# STEP 2: Fit a linear regression model for each site
+nested_data <- nest %>%
+  mutate(model = map(data, ~ {
+    df <- .x
+    # Ensure 'year' and 'count' are numeric
+    df <- df %>%
+      mutate(year = as.numeric(year_from_min), 
+              count = as.numeric(count))
+    # Fit the linear model
+    lm(count ~ year, data = df)
+  }))
+
+# Step 3: Tidy the model outputs
+tidied_data <- nested_data %>%
+  mutate(tidied = map(model, tidy)) %>%
+  unnest(tidied)
+
+# Step 4: Select the slope and intercept for each site and combine them properly
+regression_results <- tidied_data %>%
+  filter(term %in% c("year", "(Intercept)")) %>%  # Keep both slope and intercept terms
+  pivot_wider(names_from = term, values_from = estimate) %>%  # Spread terms into columns
+  select(site, intercept_count = `(Intercept)`, slope_count = year)  # Select and rename the columns
+
+# Fix NA values by filling them appropriately
+regression_results <- regression_results %>%
+  group_by(site) %>%
+  summarize(
+    intercept_count = max(intercept_count, na.rm = TRUE),
+    slope_count = max(slope_count, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+regression_results <- regression_results %>% 
+mutate(slope_count = ifelse(is.na(slope_count), 0, slope_count),
+intercept_count = ifelse(is.na(intercept_count), 0, intercept_count))
+
+# Step 6: Add the slope to the original data frame
+final_data <- df %>%
+  left_join(regression_results, by = "site")
+
+# Create the trend line data using slope and intercept
+your_data <- final_data %>%
+  mutate(predicted_count = intercept_count + slope_count * relative_year)
+```
+
+```{r visualize_mines_used, include = TRUE}
+colors <- c("blue", "white", "red")
+your_data %>%
+group_by(site) %>% 
+mutate(year = as.numeric(year)) %>% 
+filter(!is.na(count)) %>% 
+  ggplot(aes(x = year, y = count, group = site)) +
+  geom_line(show.legend = FALSE) +
+  geom_line(aes(y=predicted_count, color = mean_temp), size = 1.2, show.legend = FALSE) +
+  scale_color_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Mean\nTemperature") +
+  facet_wrap(~site, scales = "free_y") +  # Facet by site with free y-axis scales
+  scale_x_continuous(
+    breaks = seq(min(your_data$year), max(your_data$year), by = 4),
+    labels = function(x) sprintf("%02d", x %% 100)
+  ) +
+  geom_vline(xintercept = 2014, color = "red", linetype = "dashed", size = 0.5) +  # Adjust size here
+  theme_dark() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  ) +
+  labs(title = "Recovering mines with recovery estimate overlayed the normalized count",
+       x = "Year",
+       y = "Normalized Population Count")
+```
+
+
+
+```{r prepare_data, include = FALSE}
+####### FIGURE WHICH MODELS ARE BEST? ###############
+library(tidyverse)
+library(readxl)
+library(brms)
+library(rstan)
+library(tidyr)
+library(purrr)
+library(broom)
+df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx")
+
+nest <- df %>% filter(winter_year >= decrease_year) %>% select(site, normalized_count, relative_year) %>% group_by(site) %>% nest()
+
+nested_data <- nest %>%
+  mutate(model = map(data, ~ {
+    df <- .x
+    # Ensure 'year' and 'count' are numeric
+    df <- df %>%
+      mutate(year = as.numeric(relative_year),
+             count = as.numeric(normalized_count))
+    # Fit the linear model
+    lm(count ~ year, data = df)
+  }))
+
+# Step 3: Tidy the model outputs
+tidied_data <- nested_data %>%
+  mutate(tidied = map(model, tidy)) %>%
+  unnest(tidied)
+
+# Step 4: Select the slope and intercept for each site and combine them properly
+regression_results <- tidied_data %>%
+  filter(term %in% c("year", "(Intercept)")) %>%  # Keep both slope and intercept terms
+  pivot_wider(names_from = term, values_from = estimate) %>%  # Spread terms into columns
+  select(site, intercept = `(Intercept)`, slope = year)  # Select and rename the columns
+
+# Fix NA values by filling them appropriately
+regression_results <- regression_results %>%
+  group_by(site) %>%
+  summarize(
+    intercept = max(intercept, na.rm = TRUE),
+    slope = max(slope, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+regression_results <- regression_results %>% 
+mutate(slope = ifelse(is.na(slope), 0, slope),
+intercept = ifelse(is.na(intercept), 0, intercept))
+
+model_data <- df %>%
+  left_join(regression_results, by = "site") %>% 
+  mutate(crash = 1 - (min_count / mean_count), 
+  log_passage = log(passage_length)) %>% 
+  select(site, slope, intercept, crash, mean_temp, decrease_year, recovery_years, min_count, 
+  last_count, mean_count, last_year, passage_length, log_passage) %>%
+  filter(site != "Tippy Dam") %>%
+  group_by(site) %>% slice(1)
+
+model_data_recover <- model_data %>% filter(slope > 0)
+```
+
+```{r model_selection, include = FALSE}
+slope_model <- brm(
+  formula = slope ~ mean_temp + offset(recovery_years),
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+summary(slope_model)
+
+slope_model1 <- brm(
+  formula = slope ~ mean_temp + I(mean_temp^2) + offset(recovery_years),
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+summary(slope_model1)
+slope_model2 <- brm(
+  formula = slope ~ mean_temp + log_passage + offset(recovery_years),
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+summary(slope_model2)
+
+no_offset <- brm(
+  formula = slope ~ mean_temp,
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+summary(no_offset)
+
+no_offset1 <- brm(
+  formula = slope ~ mean_temp + log_passage,
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+summary(no_offset1)
+
+no_offset2 <- brm(
+  formula = slope ~ mean_temp + I(mean_temp^2),
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+summary(no_offset2)
+```
+
+``` {r model_summaries, include = TRUE}
+print("model summary for slope ~ mean_temp + offset(recovery_years)")
+summary(slope_model)
+
+print("model summary for slope ~ mean_temp + I(mean_temp^2) + offset(recovery_years)")
+summary(slope_model1)
+
+print("model summary for slope ~ mean_temp + log_passage + offset(recovery_years)")
+summary(slope_model2)
+
+print("model summary for slope ~ mean_temp")
+summary(no_offset)
+
+print("model summary for slope ~ mean_temp + log_passage")
+summary(no_offset1)
+
+print(model summary for slope ~ mean_temp + I(mean_temp^2)")
+summary(no_offset2)
+```
+
+```{r model_comparison, include = TRUE}
+############################################################################################
+##################### Model Comparison ##################################################
+########################################################################################
+# LOO-CV tends to be more stable, especially in small datasets or models with influencial observations
+loo_slope_model <- loo(slope_model, moment_match = TRUE)
+loo_slope_model1 <- loo(slope_model1, moment_match = TRUE)
+loo_slope_model2 <- loo(slope_model2, moment_match = TRUE)
+loo_no_offset <- loo(no_offset, moment_match = TRUE)
+loo_no_offset1 <- loo(no_offset1, moment_match = TRUE)
+loo_no_offset2 <- loo(no_offset2, moment_match = TRUE)
+
+# Extract ELPD values from each model
+elpd_slope_model <- loo_slope_model$estimates["elpd_loo", "Estimate"]
+elpd_slope_model1 <- loo_slope_model1$estimates["elpd_loo", "Estimate"]
+elpd_slope_model2 <- loo_slope_model2$estimates["elpd_loo", "Estimate"]
+elpd_no_offset <- loo_no_offset$estimates["elpd_loo", "Estimate"]
+elpd_no_offset1 <- loo_no_offset1$estimates["elpd_loo", "Estimate"]
+elpd_no_offset2 <- loo_no_offset2$estimates["elpd_loo", "Estimate"]
+
+loo_comparison <- loo_compare(loo_slope_model, loo_slope_model1, loo_slope_model2,
+loo_no_offset, loo_no_offset1, loo_no_offset2)
+# Create a summary table with ELPD, elpd_diff, and se_diff
+comparison_table <- data.frame(
+  ELPD = c(elpd_slope_model, elpd_slope_model1, elpd_slope_model2, 
+  elpd_no_offset, elpd_no_offset1, elpd_no_offset2),
+  elpd_diff = loo_comparison[, "elpd_diff"],
+  se_diff = loo_comparison[, "se_diff"]
+)
+# Print the table
+print(comparison_table)
+```
+
+```{r check_families, include = TRUE}
+############ USE PP_CHECK() to check each of the families
+# Fit models with different families
+model_gaussian <- brm(
+  formula = slope ~ mean_temp,
+  data = model_data_recover,
+  family = gaussian(),
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
+)
+
+model_lognormal <- brm(
+  formula = slope ~ mean_temp,
+  data = model_data_recover,
+  family = lognormal(),
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
+)
+
+model_gamma <- brm(
+  formula = slope ~ mean_temp,
+  data = model_data_recover,
+  family = Gamma(link = "log"),
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
+)
+
+model_student <- brm(
+  formula = slope ~ mean_temp,
+  data = model_data_recover,
+  family = student(),
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
+)
+
+# Posterior predictive check for Gaussian model
+pp_check(model_gaussian, type = "dens_overlay") + ggtitle("Gaussian Model")
+# Posterior predictive check for Log-Normal model
+pp_check(model_lognormal, type = "dens_overlay") + ggtitle("Log-Normal Model")
+# Posterior predictive check for Gamma model
+pp_check(model_gamma, type = "dens_overlay") + ggtitle("Gamma Model")
+# Posterior predictive check for student model
+pp_check(model_student, type = "dens_overlay") + ggtitle("Student Model")
+```
+
+```{r model_assumptions, include = TRUE}
+# Step 1: Extract Residuals and fitted values
+# Extract residuals
+residuals <- residuals(slope_model)
+# Extract fitted values
+fitted_values <- fitted(slope_model)
+
+# Create a data frame with residuals and fitted values
+residuals_data <- data.frame(
+  Fitted = fitted_values[, "Estimate"],  # Fitted estimates
+  Residuals = residuals[, "Estimate"]    # Residual estimates
+)
+
+# Residuals vs Fitted plot
+ggplot(residuals_data, aes(x = Fitted, y = Residuals)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "loess", color = "red", se = FALSE) +
+  labs(title = "Residuals vs Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+
+# Histogram of residuals
+ggplot(residuals_data, aes(x = Residuals)) +
+  geom_histogram(bins = 30, fill = "lightblue", color = "black") +
+  labs(title = "Histogram of Residuals",
+       x = "Residuals",
+       y = "Frequency") +
+  theme_minimal()
+
+# Q-Q plot of residuals
+ggplot(residuals_data, aes(sample = Residuals)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  labs(title = "Q-Q Plot of Residuals") +
+  theme_minimal()
+```
+
+```{r crash_models, include = FALSE}
+null_model_crash <- brm(
+  formula = crash_mean ~ 1,
+  data = model_data_recover,
+  family = Beta(),
+  prior = prior1,
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+
+crash_model <- brm(
+  formula = crash_mean ~ mean_temp + I(mean_temp^2),
+  data = model_data_recover,
+  family = Beta(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+
+  crash_model_linear <- brm(
+  formula = crash_mean ~ mean_temp,
+  data = model_data_recover,
+  family = Beta(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+
+  crash_model1 <- brm(
+  formula = crash_mean ~ mean_temp + log_passage,
+  data = model_data_recover,
+  family = Beta(),
+  prior = prior,
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+
+  crash_model2 <- brm(
+  formula = crash_mean ~ mean_temp + log_passage + standing_water,
+  data = model_data_recover,
+  family = Beta(),
+  prior = prior,
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+```
+
+
+```{r compare_crash_models}
+loo_crash_null <- loo(null_model_crash, moment_match = TRUE)
+loo_crash_model <- loo(crash_model, moment_match = TRUE)
+loo_crash_model_linear <- loo(crash_model_linear, moment_match = TRUE)
+loo_crash_model1 <- loo(crash_model1, moment_match = TRUE)
+
+# Extract ELPD values from each model
+elpd_null_crash <- loo_crash_null$estimates["elpd_loo", "Estimate"]
+elpd_crash_model <- loo_crash_model$estimates["elpd_loo", "Estimate"]
+elpd_crash_model_linear <- loo_crash_model_linear$estimates["elpd_loo", "Estimate"]
+elpd_crash_model1 <- loo_crash_model1$estimates["elpd_loo", "Estimate"]
+
+# Get the comparison results (elpd_diff and se_diff)
+loo_comparison1 <- loo_compare(loo_crash_null, loo_crash_model, loo_crash_model_linear, loo_crash_model1)
+
+# Create a summary table with ELPD, elpd_diff, and se_diff
+comparison_table1 <- data.frame(
+  ELPD = c(elpd_null_crash, elpd_crash_model, elpd_crash_model_linear, elpd_crash_model1),
+  elpd_diff = loo_comparison1[, "elpd_diff"],
+  se_diff = loo_comparison1[, "se_diff"]
+)
+
+# Print the table
+print(comparison_table1)
+```
+
+```{r crash_model_residual_plots, include = TRUE}
+pp_check(crash_model_linear, type = "dens_overlay") + ggtitle("Posterior Check for the crash model (crash ~ mean temperature)")
+
+residuals <- residuals(crash_model_linear)
+fitted_values <- fitted(crash_model_linear)
+residuals_data <- data.frame(
+  Fitted = fitted_values[, "Estimate"],  # Fitted estimates
+  Residuals = residuals[, "Estimate"])    # Residual estimates
+
+# Residuals vs Fitted plot
+ggplot(residuals_data, aes(x = Fitted, y = Residuals)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "loess", color = "red", se = FALSE) +
+  labs(title = "Residuals vs Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+
+  # Q-Q plot of residuals
+ggplot(residuals_data, aes(sample = Residuals)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  labs(title = "Q-Q Plot of Residuals") +
+  theme_minimal()
+  ```
+
