@@ -1,0 +1,81 @@
+---
+title: "Testing figure outputs"
+author: "Tanner M. Barnes"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Get data ready for modeling.
+
+## Load Libraries
+
+```{r setup, include = FALSE}
+# This chunk will load necessary packages and data
+library(tidyverse)
+library(readxl)
+library(brms)
+library(rstan)
+library(tidyr)
+library(purrr)
+library(broom)
+
+Sys.setenv(PATH = paste("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/x86_64-w64-mingw32.static.posix/bin",
+                        "C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/usr/bin", 
+                        Sys.getenv("PATH"), 
+                        sep = ";"))
+```
+
+```{r fit_weighted_models, include = FALSE}
+  slope_model_weighted1 <- brm(
+  formula = slope_weighted ~ mean_temp + I(mean_temp^2),
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 2000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+```
+
+```{r crash_model_summary, include=TRUE}
+summary(slope_model_weighted1)
+bayesian_r2.1 <- bayes_R2(slope_model_weighted1)
+print(bayesian_r2.1)
+```
+
+```{r visualize_crash_models, include = TRUE}
+b2_crash <- bayesian_r2.1[1, "Estimate"]
+
+# Step 1: Create a finer grid of mean_temp for smoother prediction lines (without 'site')
+prediction_grid <- tibble(mean_temp = seq(min(model_data_recover$mean_temp), max(model_data_recover$mean_temp), length.out = 100))
+
+# Step 2: Generate predictions using the fitted values from the linear model
+predicted_slope_values1 <- fitted(slope_model_weighted1, newdata = prediction_grid, summary = TRUE)[, "Estimate"]
+
+# Step 3: Add the predicted values to the dataset
+prediction_grid <- prediction_grid %>%
+  mutate(predicted_crash = predicted_slope_values1)
+
+# Step 4: Plot with a straight line for the linear model
+ggplot(model_data_recover, aes(x = mean_temp, y = slope_weighted)) +
+  geom_point(aes(size = mean_count), alpha = 0.5) +  # Plot observed data
+  geom_line(data = prediction_grid, aes(x=mean_temp, y = predicted_crash), color = "darkgreen", linewidth = 1) +
+  scale_size_continuous(name = "Mean\nPopulation\nSize") + 
+  labs(title = "Mines with colder mean temperatures have lower crash rates for Myotis Bats",
+       x = "Mean Temperature (C)",
+       y = "weighted slope (slope * sqrt(last_count))") +
+annotate("text", x = max(model_data_recover$mean_temp) - 0.5, 
+         y = max(model_data_recover$crash) - 0.05, 
+         label = paste("Bayesian R² =", round(b2_crash, 4)), 
+         hjust = 3.25, vjust = 3.65, size = 4, color = "black") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 12),        # Title font size
+    axis.title.x = element_text(size = 10),      # X-axis title font size
+    axis.title.y = element_text(size = 10),      # Y-axis title font size
+    axis.text.x = element_text(size = 8),        # X-axis text font size
+    axis.text.y = element_text(size = 8),        # Y-axis text font size
+    legend.title = element_text(size = 10),      # Legend title font size
+    legend.text = element_text(size = 8),
+    panel.grid = element_blank()        # Legend text font size
+  )
+```

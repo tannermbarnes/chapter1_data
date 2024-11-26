@@ -16,14 +16,11 @@ model_df_crash <- model_df %>% filter(mean_count > 89) %>%
 mutate(new = ifelse(slope > 0, "recovering", "not recovering"), 
 crash = crash_mean)
 
-model_df_crash %>% select(site, crash_mean, mean_temp) %>% View()
 ###############################################################################################################
 ############ Hypothesis 1 crash_intensity and slope are related ###############################################
 ###############################################################################################################
 m1 <- lm(slope ~ crash_mean, model_df_recover)
 summary(m1)
-
-model_df_recover %>% select(site, slope, intercept) %>% View()
 
 colors <- c("blue", "white", "red")
 
@@ -220,6 +217,7 @@ predicted_slope_values <- fitted(slope_model3, newdata = prediction_grid_s, summ
 # Add the predicted values to the dataset
 prediction_grid_s <- prediction_grid_s %>%
   mutate(predicted_slope = predicted_slope_values)
+
 # Plot the slope model
 ggplot(model_df_recover, aes(x = mean_temp, y = slope_weighted)) +
   geom_point(aes(size = last_count), alpha = 0.5) +  # Plot observed data

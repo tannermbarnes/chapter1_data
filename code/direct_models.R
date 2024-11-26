@@ -137,7 +137,7 @@ filter(!is.na(count)) %>%
        x = "Year",
        y = "Normalized Population Count")
 
-ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/trend_line_test.png", width = 12, height=12)
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/trend_line_test1.png", width = 12, height=12)
 
 
 ###########################################################################################################
@@ -214,14 +214,13 @@ prior <- c(
 prior1 <- prior(normal(0,1), class = "Intercept")
 
 
-to_model <- to_model %>% mutate(slope_shifted = slope + abs(min(slope)) + 0.01) %>% 
-filter(slope > 0)
+model_data_recover <- to_model %>% filter(slope > 0)
 
 
 slope_model <- brm(
   formula = slope ~ mean_temp,
-  data = to_model,
-  family = gaussian(),
+  data = model_data_recover,
+  family = Gamma(link = "log"),
   chains = 4,
   iter = 4000,
   warmup = 1000,
@@ -253,7 +252,7 @@ prediction_grid_s <- prediction_grid_s %>%
 
 
 # Plot the slope model
-ggplot(to_model, aes(x = mean_temp, y = slope_count)) +
+ggplot(to_model, aes(x = mean_temp, y = slope)) +
   geom_point(alpha = 0.5) +  # Plot observed data
   geom_line(data=prediction_grid_s, aes(mean_temp, y = predicted_slope), color = "darkblue", linewidth = 1) +
   scale_size_continuous(name = "Last Survey\nPopulation Count") + 
@@ -333,9 +332,9 @@ model_data <- df %>%
   filter(site != "Tippy Dam") %>%
   group_by(site) %>% slice(1)
 
+model_data$slope_weighted <- model_data$slope * sqrt(model_data$last_count)
 model_data_recover <- model_data %>% filter(slope > 0)
-model_data_recover$weight_sqrt <- sqrt(model_data_recover$last_count)
-model_data_recover$slope_weighted <- model_data_recover$slope * model_data_recover$weight_sqrt
+
 
 
 m1 <- lm(slope ~ crash, model_data)

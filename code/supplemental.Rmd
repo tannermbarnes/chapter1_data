@@ -4,6 +4,9 @@ author: "Tanner M. Barnes"
 date: "`r Sys.Date()`"
 output: html_document
 ---
+
+### Load the data
+
 ```{r mines_used, include = FALSE}
 library(readxl)
 library(tidyverse)
@@ -59,6 +62,8 @@ your_data <- final_data %>%
   mutate(predicted_count = intercept_count + slope_count * relative_year)
 ```
 
+### Visualize the mines used and their recovery slopes
+
 ```{r visualize_mines_used, include = TRUE}
 colors <- c("blue", "white", "red")
 your_data %>%
@@ -85,7 +90,7 @@ filter(!is.na(count)) %>%
        y = "Normalized Population Count")
 ```
 
-
+## Model selection
 
 ```{r prepare_data, include = FALSE}
 ####### FIGURE WHICH MODELS ARE BEST? ###############
@@ -144,8 +149,109 @@ model_data <- df %>%
   filter(site != "Tippy Dam") %>%
   group_by(site) %>% slice(1)
 
+model_data$slope_weighted <- model_data$slope * sqrt(model_data$last_count)
+
 model_data_recover <- model_data %>% filter(slope > 0)
 ```
+
+## Crash Model Selection
+
+```{r crash_models, include = FALSE}
+null_model_crash <- brm(
+  formula = crash ~ 1,
+  data = model_data_recover,
+  family = Beta(),
+  prior = prior1,
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+
+crash_model <- brm(
+  formula = crash ~ mean_temp + I(mean_temp^2),
+  data = model_data_recover,
+  family = Beta(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+
+  crash_model_linear <- brm(
+  formula = crash ~ mean_temp,
+  data = model_data_recover,
+  family = Beta(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+
+  crash_model1 <- brm(
+  formula = crash ~ mean_temp + log_passage,
+  data = model_data_recover,
+  family = Beta(),
+  prior = prior,
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
+```
+
+### Compare crash models
+```{r compare_crash_models}
+loo_crash_null <- loo(null_model_crash, moment_match = TRUE)
+loo_crash_model <- loo(crash_model, moment_match = TRUE)
+loo_crash_model_linear <- loo(crash_model_linear, moment_match = TRUE)
+loo_crash_model1 <- loo(crash_model1, moment_match = TRUE)
+
+# Extract ELPD values from each model
+elpd_null_crash <- loo_crash_null$estimates["elpd_loo", "Estimate"]
+elpd_crash_model <- loo_crash_model$estimates["elpd_loo", "Estimate"]
+elpd_crash_model_linear <- loo_crash_model_linear$estimates["elpd_loo", "Estimate"]
+elpd_crash_model1 <- loo_crash_model1$estimates["elpd_loo", "Estimate"]
+
+# Get the comparison results (elpd_diff and se_diff)
+loo_comparison1 <- loo_compare(loo_crash_null, loo_crash_model, loo_crash_model_linear, loo_crash_model1)
+
+# Create a summary table with ELPD, elpd_diff, and se_diff
+comparison_table1 <- data.frame(
+  ELPD = c(elpd_null_crash, elpd_crash_model, elpd_crash_model_linear, elpd_crash_model1),
+  elpd_diff = loo_comparison1[, "elpd_diff"],
+  se_diff = loo_comparison1[, "se_diff"]
+)
+
+# Print the table
+print(comparison_table1)
+```
+
+### Posterior Probability Check and Fitted vs Residual plots to check model assumptions for Crash models
+
+```{r crash_model_residual_plots, include = TRUE}
+pp_check(crash_model_linear, type = "dens_overlay") + ggtitle("Posterior Check for the crash model (crash ~ mean temperature)")
+
+residuals <- residuals(crash_model_linear)
+fitted_values <- fitted(crash_model_linear)
+residuals_data <- data.frame(
+  Fitted = fitted_values[, "Estimate"],  # Fitted estimates
+  Residuals = residuals[, "Estimate"])    # Residual estimates
+
+# Residuals vs Fitted plot
+ggplot(residuals_data, aes(x = Fitted, y = Residuals)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "loess", color = "red", se = FALSE) +
+  labs(title = "Residuals vs Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+
+  # Q-Q plot of residuals
+ggplot(residuals_data, aes(sample = Residuals)) +
+  stat_qq() +
+  stat_qq_line(color = "red") +
+  labs(title = "Q-Q Plot of Residuals") +
+  theme_minimal()
+```
+
+## Slope model selection
 
 ```{r model_selection, include = FALSE}
 slope_model <- brm(
@@ -157,7 +263,6 @@ slope_model <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
-summary(slope_model)
 
 slope_model1 <- brm(
   formula = slope ~ mean_temp + I(mean_temp^2) + offset(recovery_years),
@@ -168,7 +273,7 @@ slope_model1 <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
-summary(slope_model1)
+
 slope_model2 <- brm(
   formula = slope ~ mean_temp + log_passage + offset(recovery_years),
   data = model_data_recover,
@@ -178,7 +283,6 @@ slope_model2 <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
-summary(slope_model2)
 
 no_offset <- brm(
   formula = slope ~ mean_temp,
@@ -189,7 +293,6 @@ no_offset <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
-summary(no_offset)
 
 no_offset1 <- brm(
   formula = slope ~ mean_temp + log_passage,
@@ -200,7 +303,6 @@ no_offset1 <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
-summary(no_offset1)
 
 no_offset2 <- brm(
   formula = slope ~ mean_temp + I(mean_temp^2),
@@ -210,28 +312,25 @@ no_offset2 <- brm(
   iter = 4000,
   warmup = 1000,
   control = list(adapt_delta = 0.99))
-summary(no_offset2)
 ```
+
+### Slope model summaries
 
 ``` {r model_summaries, include = TRUE}
-print("model summary for slope ~ mean_temp + offset(recovery_years)")
 summary(slope_model)
 
-print("model summary for slope ~ mean_temp + I(mean_temp^2) + offset(recovery_years)")
 summary(slope_model1)
 
-print("model summary for slope ~ mean_temp + log_passage + offset(recovery_years)")
 summary(slope_model2)
 
-print("model summary for slope ~ mean_temp")
 summary(no_offset)
 
-print("model summary for slope ~ mean_temp + log_passage")
 summary(no_offset1)
 
-print(model summary for slope ~ mean_temp + I(mean_temp^2)")
 summary(no_offset2)
 ```
+
+### Model comparison
 
 ```{r model_comparison, include = TRUE}
 ############################################################################################
@@ -266,37 +365,38 @@ comparison_table <- data.frame(
 print(comparison_table)
 ```
 
-```{r check_families, include = TRUE}
+### Check data families with posterior probability check
+
+```{r check_families, include = FALSE}
 ############ USE PP_CHECK() to check each of the families
 # Fit models with different families
 model_gaussian <- brm(
   formula = slope ~ mean_temp,
   data = model_data_recover,
   family = gaussian(),
-  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
-)
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99))
 
 model_lognormal <- brm(
   formula = slope ~ mean_temp,
   data = model_data_recover,
   family = lognormal(),
-  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
-)
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99))
 
 model_gamma <- brm(
   formula = slope ~ mean_temp,
   data = model_data_recover,
   family = Gamma(link = "log"),
-  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
-)
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99))
 
 model_student <- brm(
   formula = slope ~ mean_temp,
   data = model_data_recover,
   family = student(),
-  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99)
-)
+  chains = 4, iter = 4000, warmup = 1000, control = list(adapt_delta = 0.99))
+```
 
+
+```{r slope_model_family_likelihoods, include = TRUE}
 # Posterior predictive check for Gaussian model
 pp_check(model_gaussian, type = "dens_overlay") + ggtitle("Gaussian Model")
 # Posterior predictive check for Log-Normal model
@@ -306,6 +406,8 @@ pp_check(model_gamma, type = "dens_overlay") + ggtitle("Gamma Model")
 # Posterior predictive check for student model
 pp_check(model_student, type = "dens_overlay") + ggtitle("Student Model")
 ```
+
+### Check model assumptions for Slope models
 
 ```{r model_assumptions, include = TRUE}
 # Step 1: Extract Residuals and fitted values
@@ -345,106 +447,156 @@ ggplot(residuals_data, aes(sample = Residuals)) +
   theme_minimal()
 ```
 
-```{r crash_models, include = FALSE}
-null_model_crash <- brm(
-  formula = crash_mean ~ 1,
+
+### Test weighted slopes (slope * sqrt(last survey count))
+
+```{r fit_weighted_models, include = FALSE}
+slope_weighted_model <- brm(
+  formula = slope_weighted ~ mean_temp + offset(recovery_years),
   data = model_data_recover,
-  family = Beta(),
-  prior = prior1,
+  family = student(),
   chains = 4,
   iter = 4000,
   warmup = 1000,
-  control = list(adapt_delta = 0.99))
-
-crash_model <- brm(
-  formula = crash_mean ~ mean_temp + I(mean_temp^2),
-  data = model_data_recover,
-  family = Beta(),
-  chains = 4,
-  iter = 4000,
-  warmup = 1000,
-  control = list(adapt_delta = 0.99))
-
-  crash_model_linear <- brm(
-  formula = crash_mean ~ mean_temp,
-  data = model_data_recover,
-  family = Beta(),
-  chains = 4,
-  iter = 4000,
-  warmup = 1000,
-  control = list(adapt_delta = 0.99))
-
-  crash_model1 <- brm(
-  formula = crash_mean ~ mean_temp + log_passage,
-  data = model_data_recover,
-  family = Beta(),
-  prior = prior,
-  chains = 4,
-  iter = 4000,
-  warmup = 1000,
-  control = list(adapt_delta = 0.99))
-
-  crash_model2 <- brm(
-  formula = crash_mean ~ mean_temp + log_passage + standing_water,
-  data = model_data_recover,
-  family = Beta(),
-  prior = prior,
-  chains = 4,
-  iter = 4000,
-  warmup = 1000,
-  control = list(adapt_delta = 0.99))
-```
-
-
-```{r compare_crash_models}
-loo_crash_null <- loo(null_model_crash, moment_match = TRUE)
-loo_crash_model <- loo(crash_model, moment_match = TRUE)
-loo_crash_model_linear <- loo(crash_model_linear, moment_match = TRUE)
-loo_crash_model1 <- loo(crash_model1, moment_match = TRUE)
-
-# Extract ELPD values from each model
-elpd_null_crash <- loo_crash_null$estimates["elpd_loo", "Estimate"]
-elpd_crash_model <- loo_crash_model$estimates["elpd_loo", "Estimate"]
-elpd_crash_model_linear <- loo_crash_model_linear$estimates["elpd_loo", "Estimate"]
-elpd_crash_model1 <- loo_crash_model1$estimates["elpd_loo", "Estimate"]
-
-# Get the comparison results (elpd_diff and se_diff)
-loo_comparison1 <- loo_compare(loo_crash_null, loo_crash_model, loo_crash_model_linear, loo_crash_model1)
-
-# Create a summary table with ELPD, elpd_diff, and se_diff
-comparison_table1 <- data.frame(
-  ELPD = c(elpd_null_crash, elpd_crash_model, elpd_crash_model_linear, elpd_crash_model1),
-  elpd_diff = loo_comparison1[, "elpd_diff"],
-  se_diff = loo_comparison1[, "se_diff"]
+  control = list(adapt_delta = 0.99)
 )
 
-# Print the table
-print(comparison_table1)
+slope_weighted_model1 <- brm(
+  formula = slope_weighted ~ mean_temp + I(mean_temp^2) + offset(recovery_years),
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+
+slope_weighted_model2 <- brm(
+  formula = slope_weighted ~ mean_temp + log_passage + offset(recovery_years),
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+
+no_weighted_offset <- brm(
+  formula = slope_weighted ~ mean_temp,
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+
+no_weighted_offset1 <- brm(
+  formula = slope_weighted ~ mean_temp + log_passage,
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+
+no_weighted_offset2 <- brm(
+  formula = slope_weighted ~ mean_temp + I(mean_temp^2),
+  data = model_data_recover,
+  family = student(),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99))
 ```
 
-```{r crash_model_residual_plots, include = TRUE}
-pp_check(crash_model_linear, type = "dens_overlay") + ggtitle("Posterior Check for the crash model (crash ~ mean temperature)")
+### Weighted slope model summaries
 
-residuals <- residuals(crash_model_linear)
-fitted_values <- fitted(crash_model_linear)
-residuals_data <- data.frame(
-  Fitted = fitted_values[, "Estimate"],  # Fitted estimates
-  Residuals = residuals[, "Estimate"])    # Residual estimates
+``` {r weighted_model_summaries, include = TRUE}
+summary(slope_weighted_model)
 
-# Residuals vs Fitted plot
-ggplot(residuals_data, aes(x = Fitted, y = Residuals)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "loess", color = "red", se = FALSE) +
-  labs(title = "Residuals vs Fitted Values",
-       x = "Fitted Values",
-       y = "Residuals") +
-  theme_minimal()
+summary(slope_weighted_model1)
 
-  # Q-Q plot of residuals
-ggplot(residuals_data, aes(sample = Residuals)) +
-  stat_qq() +
-  stat_qq_line(color = "red") +
-  labs(title = "Q-Q Plot of Residuals") +
-  theme_minimal()
-  ```
+summary(slope_weighted_model2)
 
+summary(no_weighted_offset)
+
+summary(no_weighted_offset1)
+
+summary(no_weighted_offset2)
+```
+
+### Weighted slope model comparisons
+
+```{r weighted_model_comparison, include = TRUE}
+############################################################################################
+##################### Model Comparison ##################################################
+########################################################################################
+# LOO-CV tends to be more stable, especially in small datasets or models with influencial observations
+loo_slope_weighted_model <- loo(slope_weighted_model, moment_match = TRUE)
+loo_slope_weighted_model1 <- loo(slope_weighted_model1, moment_match = TRUE)
+loo_slope_weighted_model2 <- loo(slope_weighted_model2, moment_match = TRUE)
+loo_no_weighted_offset <- loo(no_weighted_offset, moment_match = TRUE)
+loo_no_weighted_offset1 <- loo(no_weighted_offset1, moment_match = TRUE)
+loo_no_weighted_offset2 <- loo(no_weighted_offset2, moment_match = TRUE)
+
+# Extract ELPD values from each model
+elpd_slope_weighted_model <- loo_slope_weighted_model$estimates["elpd_loo", "Estimate"]
+elpd_slope_weighted_model1 <- loo_slope_weighted_model1$estimates["elpd_loo", "Estimate"]
+elpd_slope_weighted_model2 <- loo_slope_weighted_model2$estimates["elpd_loo", "Estimate"]
+elpd_no_weighted_offset <- loo_no_weighted_offset$estimates["elpd_loo", "Estimate"]
+elpd_no_weighted_offset1 <- loo_no_weighted_offset1$estimates["elpd_loo", "Estimate"]
+elpd_no_weighted_offset2 <- loo_no_weighted_offset2$estimates["elpd_loo", "Estimate"]
+
+loo_comparison <- loo_compare(loo_slope_weighted_model, loo_slope_weighted_model1, loo_slope_weighted_model2,
+loo_no_weighted_offset, loo_no_weighted_offset1, loo_no_weighted_offset2)
+# Create a summary table with ELPD, elpd_diff, and se_diff
+comparison_table2 <- data.frame(
+  ELPD = c(elpd_slope_weighted_model, elpd_slope_weighted_model1, elpd_slope_weighted_model2, 
+  elpd_no_weighted_offset, elpd_no_weighted_offset1, elpd_no_weighted_offset2),
+  elpd_diff = loo_comparison[, "elpd_diff"],
+  se_diff = loo_comparison[, "se_diff"]
+)
+# Print the table
+print(comparison_table2)
+```
+
+```{r visualize_weighted_slope_models, include = TRUE}
+bayesian_r2.1 <- bayes_R2(no_weighted_offset2)
+b2_crash <- bayesian_r2.1[1, "Estimate"]
+
+# Step 1: Create a finer grid of mean_temp for smoother prediction lines (without 'site')
+prediction_grid2 <- tibble(mean_temp = seq(min(model_data_recover$mean_temp), max(model_data_recover$mean_temp), length.out = 100))
+
+# Step 2: Generate predictions using the fitted values from the linear model
+predicted_slope_values1 <- fitted(no_weighted_offset2, newdata = prediction_grid2, summary = TRUE)[, "Estimate"]
+
+# Step 3: Add the predicted values to the dataset
+prediction_grid2 <- prediction_grid2 %>%
+  mutate(predicted_crash = predicted_slope_values1)
+
+# Step 4: Plot with a straight line for the linear model
+ggplot(model_data_recover, aes(x = mean_temp, y = slope_weighted)) +
+  geom_point(aes(size = last_count), alpha = 0.5) +  # Plot observed data
+  geom_line(data = prediction_grid2, aes(x=mean_temp, y = predicted_crash), color = "black", linewidth = 1) +
+  scale_size_continuous(name = "Last\nSurvey\nCount") + 
+  labs(title = "Mines with colder mean temperatures have lower crash rates for Myotis Bats",
+       x = "Mean Temperature (C)",
+       y = "weighted slope (slope * sqrt(last_count))") +
+annotate("text", x = max(model_data_recover$mean_temp) - 0.5, 
+         y = max(model_data_recover$crash) - 0.05, 
+         label = paste("Bayesian R² =", round(b2_crash, 4)), 
+         hjust = 3.25, vjust = 3.65, size = 4, color = "black") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 12),        # Title font size
+    axis.title.x = element_text(size = 10),      # X-axis title font size
+    axis.title.y = element_text(size = 10),      # Y-axis title font size
+    axis.text.x = element_text(size = 8),        # X-axis text font size
+    axis.text.y = element_text(size = 8),        # Y-axis text font size
+    legend.title = element_text(size = 10),      # Legend title font size
+    legend.text = element_text(size = 8),
+    panel.grid = element_blank()        # Legend text font size
+  )
+```

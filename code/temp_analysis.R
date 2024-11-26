@@ -109,16 +109,18 @@ library(rstan)
 library(tidyr)
 library(purrr)
 library(broom)
-df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "proportions")
+df1 <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "proportions")
 
-overall_stats <- df %>%
+df1 %>% filter(period == "after") %>% View()
+
+overall_stats <- df1 %>%
   group_by(period) %>%
   summarise(
     overall_mean_count = mean(count, na.rm = TRUE),
     overall_sd_count = sd(count, na.rm = TRUE)
   )
 
-pop_proportions <- df %>% group_by(site, period) %>%
+pop_proportions <- df1 %>% group_by(site, period) %>%
   summarise(
     mean_count_site = mean(count, na.rm = TRUE),  # Mean count for the site and period
     site_mean_temp = first(mean_temp)  # Assuming site_mean_temp is constant per site

@@ -1,16 +1,3 @@
----
-title: "Hypothesis 1, 2, and 3"
-author: "Tanner M. Barnes"
-date: "`r Sys.Date()`"
-output: html_document
----
-
-Get data ready for modeling.
-
-## Load Libraries
-
-```{r setup, include = FALSE}
-# This chunk will load necessary packages and data
 library(tidyverse)
 library(readxl)
 library(brms)
@@ -23,20 +10,6 @@ Sys.setenv(PATH = paste("C:/Users/Tanner/OneDrive - Michigan Technological Unive
                         "C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/usr/bin", 
                         Sys.getenv("PATH"), 
                         sep = ";"))
-```
-
-Step 1: Load the data and nest it to create the recovery estimate per site. 
-
-Step 2: Fit a linear regression model for each site
-
-Step 3: Tidy the model outputs
-
-Step 4: Select the slope and intercept for each site and combine them properly
-
-Step 5: Fix the NA values by filling them appropriately
-
-Step 6: Add the slope to the original data frame 
-```{r load-data, include = TRUE}
 
 df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "model_data")
 
@@ -85,20 +58,12 @@ model_data <- df %>%
   last_count, mean_count, last_year, passage_length, log_passage) %>%
   filter(site != "Tippy Dam") %>%
   group_by(site) %>% slice(1)
-```
-
 
 # Hypothesis 1
-Show that recovery rate and rate of crash are related
-
-```{r frequentist-linear-model-1, include = TRUE}
 m1 <- lm(slope ~ crash, model_data)
 summary(m1)
-```
-
-```{r Visulization-1, include = TRUE}
 colors <- c("blue", "white", "red")
-
+# Visualize
 ggplot(model_data, aes(x=crash, y=slope)) + 
 geom_point(aes(fill = mean_temp, size = last_count), shape = 21, color = "black", stroke = 0.5) + 
 geom_smooth(method = "lm", se = FALSE, color = "black") +
@@ -113,15 +78,11 @@ theme(
   plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)) +
   annotate("text", x = Inf, y = Inf, label = "Adjusted R² = 0.3667", 
            hjust = 2.5, vjust = 2, size = 3, color = "black", fontface = "italic")
-  
-  
-```
 
-# Hypothesis 2
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/recovery_rate_population_crash.png", width = 8, height=6)
 
-### Bayesian Modeling 
-```{r Hypothesis-2-models, include = FALSE}
 
+# Hypothesis 2 Recovery Rate
 # Only include sites that are recovering
 model_data_recover <- model_data %>% filter(slope > 0)
 
@@ -141,15 +102,11 @@ slope_model <- brm(
   warmup = 1000,
   control = list(adapt_delta = 0.99)
 )
-```
 
-```{r slope_model, include = TRUE}
 summary(slope_model)
 bayesian_r2 <- bayes_R2(slope_model)
 print(bayesian_r2)
-```
 
-```{r Hypothesis_slope_models, include = TRUE}
 colors <- c("blue", "white", "red")
 b_r2_slope <- bayesian_r2[1, "Estimate"]
 bayesian_r2_ci <- quantile(bayesian_r2, probs = c(0.025, 0.975))
@@ -190,10 +147,12 @@ ggplot(model_data_ungroup, aes(x = mean_temp, y = slope)) +
     legend.text = element_text(size = 8),
     panel.grid = element_blank()
   )
-```
 
-```{r fit_crash_models, include = FALSE}
-  crash_model_linear <- brm(
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/recovery_rate_mean_temp.png", width = 8, height=6)
+
+
+# Hypothesis 2 Crash Rate
+crash_model_linear <- brm(
   formula = crash ~ mean_temp,
   data = model_data_recover,
   family = Beta(),
@@ -201,15 +160,11 @@ ggplot(model_data_ungroup, aes(x = mean_temp, y = slope)) +
   iter = 4000,
   warmup = 1000,
   control = list(adapt_delta = 0.99))
-```
 
-```{r crash_model_summary, include=TRUE}
 summary(crash_model_linear)
 bayesian_r2.1 <- bayes_R2(crash_model_linear)
 print(bayesian_r2.1)
-```
 
-```{r visualize_crash_models, include = TRUE}
 b2_crash <- bayesian_r2.1[1, "Estimate"]
 
 # Step 1: Create a finer grid of mean_temp for smoother prediction lines (without 'site')
@@ -245,10 +200,11 @@ annotate("text", x = max(model_data_recover$mean_temp) - 0.5,
     legend.text = element_text(size = 8),
     panel.grid = element_blank()        # Legend text font size
   )
-```
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/crash_rate_mean_temp.png", width = 8, height=6)
+
 
 # Hypothesis 3
-```{r hypothesis 3, include = TRUE}
 df1 <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "proportions")
 
 overall_stats <- df1 %>%
@@ -312,4 +268,5 @@ ggplot(data = im, aes(x = mean_temp, y = props)) +
     panel.grid = element_blank()  # Remove grid lines
   ) +
   scale_color_manual(values = c("positive" = "blue", "negative" = "red"))  # Custom color scale
-```
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/proportion_bats_important.png", width = 8, height = 6)
