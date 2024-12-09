@@ -5,6 +5,7 @@ library(rstan)
 library(tidyr)
 library(purrr)
 library(broom)
+library(lmtest)
 
 Sys.setenv(PATH = paste("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/x86_64-w64-mingw32.static.posix/bin",
                         "C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/usr/bin", 
@@ -81,6 +82,17 @@ theme(
 
 ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/recovery_rate_population_crash.png", width = 8, height=6)
 
+# Hypothesis 1 comparison to null and model assumptions
+m0 <- lm(slope ~ 1, data = model_data)
+AIC(m0, m1) # lower AIC (more negative) indicates a better fit
+anova(m0, m1) # p-value is signficant suggesting full model is a better fit
+png("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/h1_mod_assumptions.png", width = 800, height = 800)
+par(mfrow = c(2,2))
+plot(m1)
+dev.off()
+# fitted vs residuals indicate variables don't have a constant variance
+shapiro.test(residuals(m1)) # p-value indicates residuals or normally distributed
+dwtest(m1)
 
 # Hypothesis 2 Recovery Rate
 # Only include sites that are recovering
@@ -203,6 +215,103 @@ annotate("text", x = max(model_data_recover$mean_temp) - 0.5,
 
 ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/crash_rate_mean_temp.png", width = 8, height=6)
 
+# Hypothesis 2 combined plots
+# Combine datasets for predictions
+combined_prediction <- prediction_grid %>%
+  rename(predicted_crash = predicted_crash) %>%
+  mutate(predicted_slope = prediction_grid_s$predicted_slope)
+
+# Combined plot
+ggplot() +
+  # Recovery Rate (Left Y-Axis)
+  geom_point(data = model_data_ungroup, aes(x = mean_temp, y = slope), alpha = 0.5, color = "blue") +
+  geom_line(data = combined_prediction, aes(x = mean_temp, y = predicted_slope), color = "darkblue", linewidth = 1) +
+  # Crash Rate (Right Y-Axis)
+  geom_point(data = model_data_recover, aes(x = mean_temp, y = crash), alpha = 0.5, color = "darkgreen") +
+  geom_line(data = combined_prediction, aes(x = mean_temp, y = predicted_crash), color = "green", linewidth = 1) +
+  # Add Secondary Axis
+  scale_y_continuous(
+    name = "Recovery Rate (Slope)",
+    sec.axis = sec_axis(~ ., name = "Crash Rate (1 - (minimum count / maximum count))")
+  ) +
+  labs(
+    title = "Recovery and Crash Rates in Relation to Mean Temperature",
+    x = "Mean Temperature (°C)"
+  ) +
+  annotate("text", x = Inf, y = Inf, label = paste("Recovery Bayesian R² =", round(b_r2_slope, 4)), 
+           hjust = 2.75, vjust = 1.5, size = 4, color = "blue") +
+  annotate("text", x = max(model_data_recover$mean_temp) - 0.5, 
+           y = max(model_data_recover$crash) - 0.05, 
+           label = paste("Crash Bayesian R² =", round(b2_crash, 4)), 
+           hjust = 3.25, vjust = 3.75, size = 4, color = "darkgreen") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 12),
+    axis.title.x = element_text(size = 10),
+    axis.title.y.left = element_text(size = 10, color = "darkblue"),
+    axis.title.y.right = element_text(size = 10, color = "darkgreen"),
+    axis.text.x = element_text(size = 8),
+    axis.text.y.left = element_text(size = 8, color = "darkblue"),
+    axis.text.y.right = element_text(size = 8, color = "darkgreen"),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    panel.grid = element_blank()
+  )
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/combined_hypothesis2.png", width = 8, height=6)
+
+#######################################################################################################
+# Adjust code #
+# Determine the maximum values
+max_slope <- 0.3  # Desired maximum for recovery rate y-axis
+max_crash <- max(model_data_recover$crash, na.rm = TRUE)
+
+# Calculate scaling factor
+scale_factor <- max_slope / max_crash
+
+# Apply scaling to crash data and predictions
+model_data_recover <- model_data_recover %>%
+  mutate(scaled_crash = crash * scale_factor)
+
+combined_prediction <- combined_prediction %>%
+  mutate(scaled_predicted_crash = predicted_crash * scale_factor)
+
+# Modified plot with rescaled crash rate
+ggplot() +
+  # Recovery Rate (Left Y-Axis)
+  geom_point(data = model_data_ungroup, aes(x = mean_temp, y = slope), alpha = 0.5, color = "blue") +
+  geom_line(data = combined_prediction, aes(x = mean_temp, y = predicted_slope), color = "darkblue", linewidth = 1) +
+  # Scaled Crash Rate (Left Y-Axis)
+  geom_point(data = model_data_recover, aes(x = mean_temp, y = scaled_crash), alpha = 0.5, color = "darkgreen") +
+  geom_line(data = combined_prediction, aes(x = mean_temp, y = scaled_predicted_crash), color = "green", linewidth = 1) +
+  # Set Left Y-Axis Limits
+  scale_y_continuous(
+    name = "Recovery Rate (Slope) / Scaled Crash Rate",
+    limits = c(0, 0.3)
+  ) +
+  labs(
+    title = "Recovery and Crash Rates in Relation to Mean Temperature",
+    x = "Mean Temperature (°C)"
+  ) +
+  # Adjusted Annotations
+  annotate("text", x = max(model_data_ungroup$mean_temp) - 0.5, y = 0.28, 
+           label = paste("Recovery Bayesian R² =", round(b_r2_slope, 4)), 
+           hjust = 1, vjust = 1, size = 4, color = "blue") +
+  annotate("text", x = max(model_data_ungroup$mean_temp) - 0.5, y = 0.25, 
+           label = paste("Crash Bayesian R² =", round(b2_crash, 4)), 
+           hjust = 1, vjust = 1, size = 4, color = "darkgreen") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 12),
+    axis.title.x = element_text(size = 10),
+    axis.title.y = element_text(size = 10),
+    axis.text.x = element_text(size = 8),
+    axis.text.y = element_text(size = 8),
+    legend.position = "none",  # Hide legend if not needed
+    panel.grid = element_blank()
+  )
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/combined_hypothesis2_adjusted.png", width = 8, height=6)
 
 # Hypothesis 3
 df1 <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "proportions")

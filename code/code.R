@@ -1,28 +1,30 @@
-#install.packages("tidyverse")
 library(tidyverse)
-#install.packages("readxl")
 library(readxl)
-#install.packages("lubridate")
-#library(lubridate)
-dat <- read_excel("E:/chapter1_data/data.xlsx", sheet = "Sheet2")
+dat <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx")
 
-dat %>% names()
+dat %>% 
+  subset(site == "Mead Adit of Carp Lake Mine") %>% 
+  ggplot(aes(x = year, y = count)) +
+  geom_line() +
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(size = 24),         # Increase axis tick labels size
+    axis.title = element_text(size = 24),        # Increase axis title size
+    plot.title = element_text(size = 24),        # Increase plot title size
+    legend.text = element_text(size = 24),       # Increase legend text size
+    legend.title = element_text(size = 24),      # Increase legend title size
+    plot.title.position = "plot"                  # Position title at the top of the plot
+  ) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 8)) +
+  labs(title = "Mead Mine Bat Counts Over Time")  # Add plot title
 
-dat$tempdif <- round(dat$temperaturedifferencec)
 
-#dat %>% ggplot(aes(x=tempdif)) + geom_bar()
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/mead_mine.png", width = 12, height=12)
 
-cols.num <- c("2003", "2008", "2010", "2011", "2012", "2014", "2015", "2018", "2021", "2022", "2023", "2024")
-dat[cols.num] <- sapply(dat[cols.num],as.numeric)
-str(dat)
-
-#pivot data longer so one line per year
-dat1 <- dat %>% pivot_longer(cols=c("1980", "1993", "1996", "1997", "1998", "1999", "2000", "2001", "2002", "2003", "2004", 
-"2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", 
-"2019","2020", "2021", "2022", "2023", "2024"), names_to = "year", values_to = "count")
 
 # For each mine identified I want to have a line graph with the year on the x-axis and counts of bats on the y
-adventure_mine <- subset(dat1, NameofHibernaculum == "Adventure Mine")
+adventure_mine <- subset(dat, site == "Adventure Mine")
 adventure_mine1 <- adventure_mine %>% select(hibe = NameofHibernaculum, low = lowestinternaltempc, high = highestinternaltempc, 
 diff = temperaturedifferencec, ore = ore, year = year, count = count) %>% group_by(year)
 

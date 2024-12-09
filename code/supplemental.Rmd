@@ -157,6 +157,7 @@ model_data_recover <- model_data %>% filter(slope > 0)
 ## Crash Model Selection
 
 ```{r crash_models, include = FALSE}
+# Crash model selection
 null_model_crash <- brm(
   formula = crash ~ 1,
   data = model_data_recover,
