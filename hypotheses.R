@@ -6,6 +6,7 @@ library(tidyr)
 library(purrr)
 library(broom)
 library(lmtest)
+library(grid)  # For unit()
 
 Sys.setenv(PATH = paste("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/x86_64-w64-mingw32.static.posix/bin",
                         "C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/usr/bin", 
@@ -14,6 +15,9 @@ Sys.setenv(PATH = paste("C:/Users/Tanner/OneDrive - Michigan Technological Unive
 
 df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "model_data")
 
+# groups <- df %>% group_by(site) %>% slice(1)
+# head(groups)
+# mean(groups$num_measurements)
 nest <- df %>% filter(year >= decrease_year) %>% select(site, normalized_count, relative_year) %>% group_by(site) %>% nest()
 
 nested_data <- nest %>%
@@ -62,25 +66,48 @@ model_data <- df %>%
 
 # Hypothesis 1
 m1 <- lm(slope ~ crash, model_data)
+null <- lm(slope ~ 1, model_data)
 summary(m1)
+AIC(m1)
+AIC(null)
+anova(null, m1)
 colors <- c("blue", "white", "red")
-# Visualize
-ggplot(model_data, aes(x=crash, y=slope)) + 
-geom_point(aes(fill = mean_temp, size = last_count), shape = 21, color = "black", stroke = 0.5) + 
-geom_smooth(method = "lm", se = FALSE, color = "black") +
-scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Mean\nTemperature") +
-scale_size_continuous(name = "Last Survey\nPopulation Count") + 
-labs(title = "The recovery rate and the population crash are related",
-x = "Population Crash (1 - (minimum / mean before WNS))",
-y = "Slope (Recovery Rate)") + 
-theme_bw() +
-theme(
-  panel.grid = element_blank(),
-  plot.title = element_text(size = 10, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8)) +
-  annotate("text", x = Inf, y = Inf, label = "Adjusted R² = 0.3667", 
-           hjust = 2.5, vjust = 2, size = 3, color = "black", fontface = "italic")
+# Visualize with updated theme and annotation position
+plot <- ggplot(model_data, aes(x = crash, y = slope)) + 
+  geom_point(shape = 20, color = "black", stroke = 0.5) + 
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Mean\nTemperature", guide = "none") +  # Remove color legend
+  scale_size_continuous(name = "Last Survey\nPopulation Count", guide = "none") +  # Remove size legend
+  labs(x = expression(Population~Crash~Severity~(1 - frac(minimum~count,maximum~count))),
+       y = expression(paste("Recovery Rate (", beta, " Estimate)"))) + 
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8, family = "Times New Roman"),
+    axis.ticks.length = unit(-0.1, "inches"),  # Move tick marks inside
+    axis.ticks = element_line(),  # Ensure tick marks are visible
+    axis.ticks.top = element_line(),  # Add tick marks to the top
+    axis.ticks.right = element_line(),  # Add tick marks to the right
+    axis.text.x = element_text(margin = margin(t = 12), family = "Times New Roman"),  # Use Times New Roman for axis text
+    axis.text.y = element_text(margin = margin(r = 12), family = "Times New Roman"),  # Use Times New Roman for axis text
+    axis.line = element_line(color = "black"),  # Ensure axis lines are visible
+    axis.title.x = element_text(margin = margin(t = 12), family = "Times New Roman"), # Axis title font
+    axis.title.y = element_text(margin = margin(r = 12), family = "Times New Roman"),  # Axis title font
+    axis.text = element_text(size = 12, family = "Times New Roman"),  # Increase axis text size and set font
+    axis.title = element_text(size = 12, family = "Times New Roman")  # Increase axis title size and set font
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)  # Remove numbers on the top axis
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)  # Remove numbers on the right axis
+  ) +
+  annotate("text", x = Inf, y = -Inf, label = "Adjusted R² = 0.3667", 
+           hjust = 3.75, vjust = -12, angle = 333, size = 3.5, color = "black", fontface = "italic", family = "Times New Roman")
 
-ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/recovery_rate_population_crash.png", width = 8, height=6)
+# Save the plot using ggsave
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/recovery_rate_population_crash.png", 
+       plot = plot, width = 8, height = 6, dpi = 300)
 
 # Hypothesis 1 comparison to null and model assumptions
 m0 <- lm(slope ~ 1, data = model_data)
@@ -125,43 +152,60 @@ bayesian_r2_ci <- quantile(bayesian_r2, probs = c(0.025, 0.975))
 
 model_data_ungroup <- model_data_recover %>% ungroup()
 
-# Create a grid of mean_temp
+# Create a grid of mean_temp for predictions
 prediction_grid_s <- model_data_ungroup %>%
-  select(mean_temp, recovery_years) %>%  # Ensure only relevant columns are selected
+  select(mean_temp) %>%  # Ensure only relevant columns are selected
   tidyr::expand(mean_temp = seq(min(mean_temp, na.rm = TRUE), max(mean_temp, na.rm = TRUE), length.out = 100)) %>%
   mutate(recovery_years = median(model_data_ungroup$recovery_years, na.rm = TRUE))
 
-# Generate predictions using the fitted values from the model
-predicted_slope_values <- fitted(slope_model, newdata = prediction_grid_s, summary = TRUE)[, "Estimate"]
+fitted_values <- fitted(slope_model, newdata = prediction_grid_s, summary = TRUE)
+# Extract the estimated values and standard errors
+predicted_slope_values <- fitted_values[, "Estimate"]
+se_values <- fitted_values[, "Est.Error"]
 
-# Add the predicted values to the dataset
+# Add the predicted values and standard error to the prediction grid
 prediction_grid_s <- prediction_grid_s %>%
-  mutate(predicted_slope = predicted_slope_values)
+  mutate(predicted_slope = predicted_slope_values,
+         se_slope = se_values,
+         upper = predicted_slope + 1.96 * se_slope,  # Upper bound of 95% credible interval
+         lower = predicted_slope - 1.96 * se_slope)  # Lower bound of 95% credible interval
 
-  # Plot the slope model
-ggplot(model_data_ungroup, aes(x = mean_temp, y = slope)) +
-  geom_point(alpha = 0.5) +  # Plot observed data
-  geom_line(data=prediction_grid_s, aes(mean_temp, y = predicted_slope), color = "darkblue", linewidth = 1) +
-  scale_size_continuous(name = "Last Survey\nPopulation Count") + 
-  labs(title = "Mines with colder mean temperatures have higher recovery rates for Myotis bats",
-       x = "Mean Temperature (C)",
-       y = "Recovery Rate (Slope)") +
-  annotate("text", x = Inf, y = Inf, label = paste("Bayesian R² =", round(b_r2_slope, 4)), 
-           hjust = 2.75, vjust = 1.5, size = 4, color = "black") +
+library(extrafont)
+
+# Plot the slope model
+plot1 <- ggplot(model_data_ungroup, aes(x = mean_temp, y = slope)) + 
+  geom_point(shape = 20, color = "black", stroke = 0.5) + 
+  geom_line(data = prediction_grid_s, aes(x = mean_temp, y = predicted_slope), color = "black", linewidth = 1) +
+  labs(x = "Mean Temperature (\u00B0C)",
+       y = expression(paste("Recovery Rate (", beta, " Estimate)"))) + 
+  annotate("text", x = 6, y = 0.04, label = paste("Bayesian R² =", round(b_r2_slope, 4)), 
+           hjust = 1, vjust = 0, size = 4, angle = 328, color = "black", fontface = "italic", family = "Times New Roman") +
   theme_bw() +
   theme(
-    plot.title = element_text(size = 12),        # Title font size
-    axis.title.x = element_text(size = 10),      # X-axis title font size
-    axis.title.y = element_text(size = 10),      # Y-axis title font size
-    axis.text.x = element_text(size = 8),        # X-axis text font size
-    axis.text.y = element_text(size = 8),        # Y-axis text font size
-    legend.title = element_text(size = 10),      # Legend title font size
-    legend.text = element_text(size = 8),
-    panel.grid = element_blank()
+    panel.grid = element_blank(),
+    axis.ticks.length = unit(-0.1, "inches"),  # Move tick marks inside
+    axis.ticks = element_line(),  # Ensure tick marks are visible
+    axis.ticks.x = element_line(),  # Add tick marks to the bottom axis
+    axis.ticks.y = element_line(),  # Add tick marks to the left axis
+    axis.text.x = element_text(margin = margin(t = 12), family = "Times New Roman"),  # Use Times New Roman for axis text
+    axis.text.y = element_text(margin = margin(r = 12), family = "Times New Roman"),  # Use Times New Roman for axis text
+    axis.line = element_line(color = "black"),  # Ensure axis lines are visible
+    axis.title.x = element_text(margin = margin(t = 12), family = "Times New Roman"), # Axis title font
+    axis.title.y = element_text(margin = margin(r = 12), family = "Times New Roman"),  # Axis title font
+    axis.text = element_text(size = 12, family = "Times New Roman"),  # Increase axis text size and set font
+    axis.title = element_text(size = 12, family = "Times New Roman")  # Increase axis title size and set font
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL),  # Remove numbers on the top axis
+    limits = c(2, 10)
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL),  # Remove numbers on the right axis
+    limits = c(0, 0.12)
   )
 
-ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/recovery_rate_mean_temp.png", width = 8, height=6)
-
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/recovery_rate_mean_temp.png", 
+       plot = plot1, width = 8, height = 6, dpi = 300)
 
 # Hypothesis 2 Crash Rate
 crash_model_linear <- brm(
@@ -190,30 +234,40 @@ prediction_grid <- prediction_grid %>%
   mutate(predicted_crash = predicted_slope_values1)
 
 # Step 4: Plot with a straight line for the linear model
-ggplot(model_data_recover, aes(x = mean_temp, y = crash)) +
-  geom_point(aes(size = mean_count), alpha = 0.5) +  # Plot observed data
-  geom_line(data = prediction_grid, aes(x=mean_temp, y = predicted_crash), color = "darkgreen", linewidth = 1) +
+plot2 <- ggplot(model_data_recover, aes(x = mean_temp, y = crash)) +
+  geom_point(shape = 20, color = "black", stroke = 0.5) + 
+  geom_line(data = prediction_grid, aes(x=mean_temp, y = predicted_crash), color = "black", linewidth = 1) +
   scale_size_continuous(name = "Mean\nPopulation\nSize") + 
-  labs(title = "Mines with colder mean temperatures have lower crash rates for Myotis Bats",
-       x = "Mean Temperature (C)",
-       y = "Crash Rate (1 - (minimum count / maximum count))") +
-annotate("text", x = max(model_data_recover$mean_temp) - 0.5, 
-         y = max(model_data_recover$crash) - 0.05, 
-         label = paste("Bayesian R² =", round(b2_crash, 4)), 
-         hjust = 3.25, vjust = 3.75, size = 4, color = "black") +
+  labs(x = "Mean Temperature (\u00B0C)",
+       y = expression(Population~Crash~Severity~(1 - frac(minimum~count,maximum~count)))) +
+annotate("text", x = 4.5, 
+         y = 0.85, 
+         label = paste("Bayesian R² =", round(b2_crash, 4)), angle = 17,
+         hjust = 1, vjust = 1.5, size = 4, color = "black", fontface = "italic", family = "Times New Roman") +
   theme_bw() +
   theme(
-    plot.title = element_text(size = 12),        # Title font size
-    axis.title.x = element_text(size = 10),      # X-axis title font size
-    axis.title.y = element_text(size = 10),      # Y-axis title font size
-    axis.text.x = element_text(size = 8),        # X-axis text font size
-    axis.text.y = element_text(size = 8),        # Y-axis text font size
-    legend.title = element_text(size = 10),      # Legend title font size
-    legend.text = element_text(size = 8),
+    axis.ticks.length = unit(-0.1, "inches"),
+    axis.ticks = element_line(),
+    axis.ticks.x = element_line(),
+    axis.ticks.y = element_line(),
+    axis.title.x = element_text(margin = margin(t = 12), family = "Times New Roman"),
+    axis.title.y = element_text(margin = margin(r = 12), family = "Times New Roman"), 
+    axis.text.x = element_text(margin = margin(t = 12), family = "Times New Roman"), 
+    axis.text.y = element_text(margin = margin(r = 12), family = "Times New Roman"), 
+    axis.line = element_line(color = "black"),
+    legend.title = element_text(size = 12),      # Legend title font size
+    legend.text = element_text(size = 12),
     panel.grid = element_blank()        # Legend text font size
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
   )
 
-ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/crash_rate_mean_temp.png", width = 8, height=6)
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/crash_rate_mean_temp.png", 
+       plot = plot2, width = 8, height = 6, dpi = 300)
 
 # Hypothesis 2 combined plots
 # Combine datasets for predictions
@@ -348,34 +402,58 @@ proportion_after = (mean_count_after / sum_after), mean_count_before, mean_count
 mutate(props = (proportion_after - proportion_before), mean_temp_squared = mean_temp^2)
 
 
-im <- mine_proportions %>% filter(mean_count_before > 100)
-# Fit your custom model
-model1 <- lm(props ~ mean_temp + I(mean_temp^2), data = im)
-adj_r_squared1 <- summary(model1)$adj.r.squared
-adj_r_squared_text1 <- paste0("Adjusted R² = ", round(adj_r_squared1, 4))
-summary(model1)
-# Create the plot using the custom model
-ggplot(data = im, aes(x = mean_temp, y = props)) +
-  geom_point(aes(color = ifelse(props > 0, "positive", "negative")), alpha = 0.7) +  # Color points by positive/negative values
-  # Add a line using the custom model fitted values
-  stat_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE, color = "black", size = 1.2) +
-  labs(
-    title = "Proportionally more bats in cold sites after WNS",
-    x = "Mean Temperature", 
-    y = "Proportion of bats (After WNS - Before WNS)", 
-    size = "Mean Count\n(After WNS)",
-    color = "Proportions\n(After WNS -\nBefore WNS)"  # Legend title for color
-  ) + 
-  annotate("text", x = Inf, y = Inf, label = adj_r_squared_text1, 
-           hjust = 1.1, vjust = 1.5, size = 5, color = "black") +
-  theme_bw() +  # Base theme
-  theme(
-    plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),  # Centered and bold title
-    axis.title = element_text(size = 12),  # Larger axis titles
-    legend.title = element_text(size = 10),  # Larger legend title
-    legend.text = element_text(size = 8),  # Larger legend text
-    panel.grid = element_blank()  # Remove grid lines
-  ) +
-  scale_color_manual(values = c("positive" = "blue", "negative" = "red"))  # Custom color scale
+im <- mine_proportions
 
-ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/proportion_bats_important.png", width = 8, height = 6)
+im10 <- mine_proportions %>% filter(proportion_before > 0.05 | proportion_after > 0.05)
+# Fit your custom model
+
+model1 <- lm(props ~ mean_temp + I(mean_temp^2), data = im10)
+modelx <- lm(props ~ mean_temp, data = im10)
+anova(modelx, model1)
+AIC(modelx)
+AIC(model1)
+adj_r_squared1 <- summary(modelx)$adj.r.squared
+adj_r_squared_text1 <- paste0("Adjusted R² = ", round(adj_r_squared1, 4))
+summary(modelx)
+summary(model1)
+anova(modelx, model1)
+# Create the plot using the custom model
+plot3 <- ggplot(data = im10, aes(x = mean_temp, y = props)) +
+  geom_point(aes(shape = ifelse(props > 0, "positive", "negative")), alpha = 0.7, size = 3) +
+  # Add a line using the custom model fitted values
+  stat_smooth(method = "lm", formula = y ~ x, se = TRUE, color = "black", linewidth = 1) +
+  labs(
+    x = "Mean Temperature (\u00B0C)", 
+    y = "Proportion of bats (After WNS - Before WNS)", 
+    shape = "Proportions\n(After WNS -\nBefore WNS)"
+  ) +
+  annotate("text", x = 4.75, y = 0.10, label = adj_r_squared_text1, 
+           hjust = 0, vjust = 0, angle = 335, size = 4, color = "black", family = "Times New Roman") +
+  theme_bw() +
+  theme(
+    axis.ticks.length = unit(-0.1, "inches"),
+    axis.ticks = element_line(),
+    axis.ticks.x = element_line(),
+    axis.ticks.y = element_line(),
+    axis.title.x = element_text(margin = margin(t = 12), family = "Times New Roman"),
+    axis.title.y = element_text(margin = margin(r = 12), family = "Times New Roman"), 
+    axis.text.x = element_text(margin = margin(t = 12), family = "Times New Roman"), 
+    axis.text.y = element_text(margin = margin(r = 12), family = "Times New Roman"), 
+    axis.line = element_line(color = "black"),
+    legend.title = element_text(size = 12, family = "Times New Roman"),      # Legend title font size
+    legend.text = element_text(size = 12, family = "Times New Roman"),
+    panel.grid = element_blank(),        # Legend text font size
+    legend.position = c(0.9, 0.85)
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_shape_manual(values = c("positive" = 16, "negative" = 1))  # Custom color scale
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/proportion_bats_important.png",
+       plot = plot3, width = 8, height = 6, dpi = 300)
+
+

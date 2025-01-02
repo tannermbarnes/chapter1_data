@@ -180,7 +180,7 @@ loo_comparison1 <- loo_compare(loo_crash_null, loo_crash_model, loo_crash_model_
 
 # Create a summary table with ELPD, elpd_diff, and se_diff
 comparison_table1 <- data.frame(
-  ELPD = c(elpd_null_crash, elpd_crash_model, elpd_crash_model_linear, elpd_crash_model1),
+  ELPD = c(elpd_crash_model_linear, elpd_null_crash, elpd_crash_model, , elpd_crash_model1),
   elpd_diff = loo_comparison1[, "elpd_diff"],
   se_diff = loo_comparison1[, "se_diff"]
 )
@@ -292,18 +292,21 @@ elpd_no_offset2 <- loo_no_offset2$estimates["elpd_loo", "Estimate"]
 elpd_null_offset <- loo_null_slope_offset$estimates["elpd_loo", "Estimate"]
 
 loo_comparison <- loo_compare(loo_slope_model, loo_slope_model1, loo_slope_model2,
-loo_no_offset, loo_no_offset1, loo_no_offset2, loo_null_slope, loo_null_slope_offset)
+                               loo_no_offset, loo_no_offset1, loo_no_offset2, loo_null_slope, loo_null_slope_offset)
+
+
 # Create a summary table with ELPD, elpd_diff, and se_diff
 comparison_table <- data.frame(
-  ELPD = c(elpd_slope_model, elpd_slope_model1, elpd_slope_model2, 
-  elpd_no_offset, elpd_no_offset1, elpd_no_offset2, elpd_null_slope, elpd_null_offset),
+  ELPD = c(elpd_no_offset, elpd_no_offset2, elpd_no_offset1, elpd_null_slope, elpd_null_offset, 
+            elpd_slope_model2, elpd_slope_model, elpd_slope_model1
+            ),
   elpd_diff = loo_comparison[, "elpd_diff"],
   se_diff = loo_comparison[, "se_diff"]
 )
 # Print the table
 print(comparison_table)
 
-# Hypothesis 3
+# Hypothesis 3 ####################################################################################################################################################
 df1 <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "proportions")
 
 overall_stats <- df1 %>%
@@ -338,14 +341,14 @@ proportion_after = (mean_count_after / sum_after), mean_count_before, mean_count
 mutate(props = (proportion_after - proportion_before), mean_temp_squared = mean_temp^2)
 
 
-im <- mine_proportions %>% filter(mean_count_before > 100)
+im <- mine_proportions %>% filter(proportion_before > 0.05 | proportion_after > 0.05)
 # Fit model
 null_model <- lm(props ~ 1, data = im)
 model <- lm(props ~ mean_temp, data = im)
 model1 <- lm(props ~ mean_temp + I(mean_temp^2), data = im)
-adj_r_squared1 <- summary(model1)$adj.r.squared
+adj_r_squared1 <- summary(model)$adj.r.squared
 adj_r_squared_text1 <- paste0("Adjusted R² = ", round(adj_r_squared1, 4))
-summary(model1)
+summary(model)
 # Adjusted R-squared for all models
 adj_r_squared_null <- summary(null_model)$adj.r.squared
 adj_r_squared_model <- summary(model)$adj.r.squared
@@ -364,3 +367,111 @@ library(MuMIn)
 AICc(null_model)
 AICc(model)
 AICc(model1)
+
+library(extrafont)
+font_import()  # Import fonts (may take a few minutes)
+loadfonts(device = "win")  # Load fonts for Windows
+
+im05 <- mine_proportions %>% filter(proportion_before > 0.05 | proportion_after > 0.05)
+model2 <- lm(props ~ mean_temp + I(mean_temp^2), data = im05)
+adj_r_squared1 <- summary(model2)$adj.r.squared
+adj_r_squared_text1 <- paste0("Adjusted R² = ", round(adj_r_squared1, 4))
+
+# Create the plot using the custom model
+plot3 <- ggplot(data = im05, aes(x = mean_temp, y = props)) +
+  geom_point(aes(shape = ifelse(props > 0, "positive", "negative")), alpha = 0.7, size = 3) +
+  stat_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE, color = "black", linewidth = 1) +
+  labs(
+    x = "Mean Temperature (\u00B0C)", 
+    y = "Proportion of bats (After WNS - Before WNS)", 
+    shape = "Proportions\n(After WNS -\nBefore WNS)"
+  ) +
+  annotate("text", x = Inf, y = Inf, label = adj_r_squared_text1, 
+           hjust = 1.1, vjust = 1.90, size = 4, color = "black", family = "Times New Roman") +
+  theme_bw() +
+  theme(
+    axis.ticks.length = unit(-0.1, "inches"),
+    axis.ticks = element_line(),
+    axis.ticks.x = element_line(),
+    axis.ticks.y = element_line(),
+    axis.title.x = element_text(margin = margin(t = 12), family = "Times New Roman"),
+    axis.title.y = element_text(margin = margin(r = 12), family = "Times New Roman"), 
+    axis.text.x = element_text(margin = margin(t = 12), family = "Times New Roman"), 
+    axis.text.y = element_text(margin = margin(r = 12), family = "Times New Roman"), 
+    axis.line = element_line(color = "black"),
+    legend.title = element_text(size = 12, family = "Times New Roman"),      # Legend title font size
+    legend.text = element_text(size = 12, family = "Times New Roman"),
+    panel.grid = element_blank()        # Legend text font size
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL),
+    limits = c(2, 10)
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_shape_manual(values = c("positive" = 16, "negative" = 1))
+
+plot3
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/proportion_bats_important.png",
+       plot = plot3, width = 8, height = 6, dpi = 300)
+
+breaks <- seq(0, max(mine_proportions$mean_temp), by = 1)
+
+df_binned <- mine_proportions %>% 
+mutate(bin = cut(mean_temp, breaks = breaks, include.lowest = TRUE, right = FALSE))
+
+df_binned_summary <- df_binned %>%
+  group_by(bin) %>%
+  summarise(
+    count_before = sum(proportion_before, na.rm = TRUE),  # Sum the counts for "before"
+    count_after = sum(proportion_after, na.rm = TRUE)     # Sum the counts for "after"
+  )
+
+df_binned_summary <- df_binned_summary %>%
+  mutate(bin_range = as.character(bin))
+print(df_binned_summary)
+
+df_long <- df_binned_summary %>%
+  pivot_longer(cols = c(count_before, count_after), 
+               names_to = "time", 
+               values_to = "count")
+
+
+plot4 <- ggplot(df_long, aes(x = bin_range, y = count, fill = time)) +
+  geom_bar(stat = "identity", position = "dodge") +  # Use position dodge to separate the bars
+  scale_fill_manual(values = c("count_before" = "blue", "count_after" = "red")) +  # Set custom colors
+  labs(x = "Temperature Range (\u00B0C)", 
+       y = "Count of Bats", 
+       fill = "Time Period")
+
+
+  
+prop_long <- mine_proportions %>% 
+pivot_longer(cols = starts_with("proportion"), 
+names_to = "time", 
+values_to = "proportion")
+
+
+plot4 <- ggplot(prop_long, aes(x = bin, y = cumulative_proportion, fill = time)) + 
+  geom_bar(stat = "identity", position = "stack", color = "black", width = 0.5) +  # Stacked bars for cumulative proportions
+  scale_fill_manual(values = c("proportion_before" = "blue", "proportion_after" = "red"), 
+                    labels = c("Before WNS", "After WNS")) +
+  labs(x = "Mean Temperature (\u00B0C)", 
+       y = "Cumulative Proportion of Bats", 
+       fill = "Time") +
+  theme_bw() +
+  theme(
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    panel.grid = element_blank()
+  )
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/proportion_bar.png",
+       plot = plot4, width = 8, height = 6, dpi = 300)
+
+View(prop_long)

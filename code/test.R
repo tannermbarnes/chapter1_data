@@ -432,3 +432,103 @@ summary(crash_2)
 
 crash_3 <- glm(crash_intensity ~ mean_temp + log_passage + standing_water, weights = mean_count, family = gaussian, data = slice)
 summary(crash_3)
+
+
+
+Sys.setenv(PATH = paste("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/x86_64-w64-mingw32.static.posix/bin",
+                        "C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/rtools44/usr/bin", 
+                        Sys.getenv("PATH"), 
+                        sep = ";"))
+
+df <- read_excel("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/actual_data.xlsx", sheet = "model_data")
+
+# groups <- df %>% group_by(site) %>% slice(1)
+# head(groups)
+# mean(groups$num_measurements)
+nest <- df %>% filter(year >= decrease_year) %>% select(site, normalized_to_0, relative_year) %>% group_by(site) %>% nest()
+
+nested_data <- nest %>%
+  mutate(model = map(data, ~ {
+    df <- .x
+    # Ensure 'year' and 'count' are numeric
+    df <- df %>%
+      mutate(year = as.numeric(relative_year),
+             count = as.numeric(normalized_to_0))
+    # Fit the linear model
+    lm(count ~ year, data = df)
+  }))
+
+# Step 3: Tidy the model outputs
+tidied_data <- nested_data %>%
+  mutate(tidied = map(model, tidy)) %>%
+  unnest(tidied)
+
+# Step 4: Select the slope and intercept for each site and combine them properly
+regression_results <- tidied_data %>%
+  filter(term %in% c("year", "(Intercept)")) %>%  # Keep both slope and intercept terms
+  pivot_wider(names_from = term, values_from = estimate) %>%  # Spread terms into columns
+  select(site, intercept = `(Intercept)`, slope = year)  # Select and rename the columns
+
+# Fix NA values by filling them appropriately
+regression_results <- regression_results %>%
+  group_by(site) %>%
+  summarize(
+    intercept = max(intercept, na.rm = TRUE),
+    slope = max(slope, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+regression_results <- regression_results %>% 
+mutate(slope = ifelse(is.na(slope), 0, slope),
+intercept = ifelse(is.na(intercept), 0, intercept))
+
+model_data_test <- df %>%
+  left_join(regression_results, by = "site") %>% 
+  mutate(crash = 1 - (min_count / mean_count), 
+  log_passage = log(passage_length)) %>% 
+  select(site, slope, intercept, crash, mean_temp, decrease_year, recovery_years, min_count, 
+  last_count, mean_count, last_year, passage_length, log_passage) %>%
+  filter(site != "Tippy Dam") %>%
+  group_by(site) %>% slice(1)
+
+
+# Hypothesis 1
+m1 <- lm(slope ~ crash, model_data)
+summary(m1)
+colors <- c("blue", "white", "red")
+# Visualize with updated theme and annotation position
+test <- ggplot(model_data_test, aes(x = crash, y = slope)) + 
+  geom_point(shape = 20, color = "black", stroke = 0.5) + 
+  geom_smooth(method = "lm", se = TRUE, color = "black") +
+  scale_fill_gradientn(colors = colors, values = scales::rescale(c(0, 0.5, 1)), name = "Mean\nTemperature", guide = "none") +  # Remove color legend
+  scale_size_continuous(name = "Last Survey\nPopulation Count", guide = "none") +  # Remove size legend
+  labs(x = expression(Population~Crash~Severity~(1 - frac(minimum~count,maximum~count))),
+       y = expression(paste("Recovery Rate (", beta, " Estimate)"))) + 
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5, vjust = 1, lineheight = 0.8, family = "Times New Roman"),
+    axis.ticks.length = unit(-0.1, "inches"),  # Move tick marks inside
+    axis.ticks = element_line(),  # Ensure tick marks are visible
+    axis.ticks.top = element_line(),  # Add tick marks to the top
+    axis.ticks.right = element_line(),  # Add tick marks to the right
+    axis.text.x = element_text(margin = margin(t = 12), family = "Times New Roman"),  # Use Times New Roman for axis text
+    axis.text.y = element_text(margin = margin(r = 12), family = "Times New Roman"),  # Use Times New Roman for axis text
+    axis.line = element_line(color = "black"),  # Ensure axis lines are visible
+    axis.title.x = element_text(margin = margin(t = 12), family = "Times New Roman"), # Axis title font
+    axis.title.y = element_text(margin = margin(r = 12), family = "Times New Roman"),  # Axis title font
+    axis.text = element_text(size = 12, family = "Times New Roman"),  # Increase axis text size and set font
+    axis.title = element_text(size = 12, family = "Times New Roman")  # Increase axis title size and set font
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)  # Remove numbers on the top axis
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)  # Remove numbers on the right axis
+  ) +
+  annotate("text", x = Inf, y = -Inf, label = "Adjusted R² = 0.3667", 
+           hjust = 3.75, vjust = -12, angle = 333, size = 3.5, color = "black", fontface = "italic", family = "Times New Roman")
+
+# Save the plot using ggsave
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/test.png", 
+       plot = test, width = 8, height = 6, dpi = 300)

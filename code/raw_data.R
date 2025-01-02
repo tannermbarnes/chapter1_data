@@ -12,6 +12,7 @@ library(dplyr)
 library(lubridate)
 library(stringr)
 library(tidyr)
+library(readxl)
 
 # Because the dates are in different formats, this function will be able to get them all in the correct format
 convert_excel_dates <-
@@ -126,7 +127,8 @@ result <- separate_temps %>%
                 max = max(maximum_internal_ta, na.rm = TRUE),
                 mean_temp = mean(c(temp1, temp2), na.rm = TRUE),
                 median_temp = median(c(temp1, temp2), na.rm = TRUE), 
-                mode_temp = calculate_mode(c(temp1, temp2))) %>% 
+                mode_temp = calculate_mode(c(temp1, temp2)), 
+                num_measurements = sum(!is.na(temp1) | !is.na(temp2))) %>% 
     mutate(temp_diff = (max-min))
 
 
