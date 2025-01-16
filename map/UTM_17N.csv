@@ -1,0 +1,2 @@
+site,zone,easting,northing,site_numeric,bin,recovery_status,slope,levels,shafts,crash,min,max,temp_diff,ore,temp_diff_sqrt,temp_diff_log,bin_numeric,levels_numeric,shafts_numeric
+Rockport Quarry North Tunnel,17T,312615,5008382,36,1,recovering,0.007772021,NA,NA,0.984693878,2,5.777777778,3.777777778,Concrete,1.943650632,1.329135947,1,NA,NA

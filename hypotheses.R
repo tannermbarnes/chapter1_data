@@ -589,7 +589,7 @@ plot3 <- ggplot(data = im10, aes(x = mean_temp, y = props)) +
 ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/proportion_bats_important.png",
        plot = plot3, width = 8, height = 6, dpi = 300)
 
- 
+
 # Hypothesis 3: Bayesian #########################################################################################################
 hypothesis3_simple <- brm(
   formula = props ~ mean_temp,
@@ -864,7 +864,7 @@ h3 <- ggplot(im10, aes(x = mean_temp, y = props)) +
   geom_line(aes(x = mean_temp, y = fitted_values[, "Estimate"], color = mean_temp), linewidth = 1) +  # Fitted values line
   geom_ribbon(aes(x = mean_temp, ymin = fitted_values[, "Q2.5"], ymax = fitted_values[, "Q97.5"]), fill = "gray", alpha = 0.2) +  # CI ribbon
   labs(x = "Mean Temperature (\u00B0C)", y = "Proportion of Bats (After WNS - Before WNS)") +
-    annotate("text", x = 4.65, y = 0.09, label = "Bayesian R² = 0.6536", 
+    annotate("text", x = 4.65, y = 0.09, label = "Bayesian R² = 0.1819", 
            hjust = 0, vjust = 0, angle = 332, size = 4, color = "white", fontface = "bold", family = "Times New Roman") +
   theme_bw() +
   theme(
@@ -925,3 +925,191 @@ print(combined_plot)
 # Optionally save the combined plot to a file
 ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/test.png", 
 plot = combined_plot, width = 12, height = 12, dpi = 300)
+
+
+####################################################################################################################
+# Switch Black and White
+h1 <- ggplot(model_data, aes(x = crash, y = slope)) +
+  geom_point(aes(fill = mean_temp), shape = 21, alpha = 0.7, size = 4, stroke = 0.5) +  # Raw data points
+  geom_line(aes(x = crash, y = fitted_values1[, "Estimate"]), color = "black", linewidth = 1) +  # Fitted values line
+  geom_ribbon(aes(x = crash, ymin = fitted_values1[, "Q2.5"], ymax = fitted_values1[, "Q97.5"]), fill = "gray", alpha = 0.2) +  # CI ribbon
+  labs(x = expression(Population~Crash~Severity~(1 - frac(minimum~count,maximum~count))), 
+       y = expression(paste("Recovery Rate (", beta, " Estimate)"))) +
+  annotate("text", x = 0.6, y = 0.071, label = paste("Bayesian R² = 0.3730"), 
+           hjust = 0, vjust = 0, angle = 330, size = 4, color = "black", fontface = "bold", family = "Times New Roman") +
+  theme_bw() +
+  theme(
+    panel.background = element_rect(fill = "white"), 
+    plot.background = element_rect(fill = "white"),
+    axis.ticks.length = unit(-0.1, "inches"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.x = element_line(color = "black"),
+    axis.ticks.y = element_line(color = "black"),
+    axis.title.x = element_text(margin = margin(t = 8), family = "Times New Roman", size = 14, color = "black"),
+    axis.title.y = element_text(margin = margin(r = 8), family = "Times New Roman", size = 14, color = "black"), 
+    axis.text.x = element_text(margin = margin(t = 8), family = "Times New Roman", size = 14, color = "black"), 
+    axis.text.y = element_text(margin = margin(r = 8), family = "Times New Roman", size = 14, color = "black"), 
+    axis.line = element_line(color = "black"),
+    legend.title = element_text(color = "black", size = 14, family = "Times New Roman"),      # Legend title font size
+    legend.position = c(0.85, 0.84),
+    legend.text = element_text(color = "black", size = 14, family = "Times New Roman"),
+    panel.grid = element_blank(),
+    legend.background = element_rect(fill = "white", color= "white"),
+    legend.key = element_rect(fill = "white", color = "white")
+  ) +
+  scale_x_continuous(
+   sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_y_continuous(
+   sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_fill_gradientn(colors = colors) +
+  guides(fill = guide_legend(title = "Mean\nTemperature"), color = guide_legend(title = "Mean\nTemperature"))
+
+
+# Plot the slope model
+h2a <- ggplot(model_data_ungroup, aes(x = mean_temp, y = slope)) + 
+  geom_point(aes(fill = mean_temp), shape = 21, stroke = 0.5, size = 4) + 
+  geom_line(data = prediction_grid_s, aes(x = mean_temp, y = predicted_slope, color = mean_temp), linewidth = 1) +
+  labs(x = "Mean Temperature (\u00B0C)",
+       y = expression(paste("Recovery Rate (", beta, " Estimate)"))) +
+  annotate("text", x = 5.7, y = 0.044, label = paste("Bayesian R² =", round(b_r2_slope, 4)), 
+           hjust = 1, vjust = 0, size = 4, angle = 312, color = "black", fontface = "bold", family = "Times New Roman") +
+  theme_bw() +
+  theme(
+    panel.grid = element_blank(),
+    panel.background = element_rect(fill = "white"),
+    plot.background = element_rect(fill = "white"),
+    axis.ticks.length = unit(-0.1, "inches"),  # Move tick marks inside
+    axis.ticks = element_line(color = "black"),  # Ensure tick marks are visible
+    axis.ticks.x = element_line(),  # Add tick marks to the bottom axis
+    axis.ticks.y = element_line(),  # Add tick marks to the left axis
+    axis.text.x = element_text(margin = margin(t = 8), family = "Times New Roman", size = 14, color = "black"),  # Use Times New Roman for axis text
+    axis.text.y = element_text(margin = margin(r = 8), family = "Times New Roman", size = 14, color = "black"),  # Use Times New Roman for axis text
+    axis.line = element_line(color = "black"),  # Ensure axis lines are visible
+    axis.title.x = element_text(margin = margin(t = 8), family = "Times New Roman", size = 14, color = "black"), # Axis title font
+    axis.title.y = element_text(margin = margin(r = 8), family = "Times New Roman", size = 14, color = "black"),  # Axis title font
+    axis.text = element_text(size = 12, family = "Times New Roman"),  # Increase axis text size and set font
+    axis.title = element_text(size = 12, family = "Times New Roman"),  # Increase axis title size and set font
+    legend.position = c(0.85, 0.84), 
+    legend.background = element_rect(fill = "white", color = "white"),
+    legend.key = element_rect(fill = "white", color = "white"),
+    legend.title = element_text(size = 14, family = "Times New Roman", color = "black"),
+    legend.text = element_text(size = 14, family = "Times New Roman", color = "black"),
+    legend.key.size = unit(0.5, "cm")
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL),  # Remove numbers on the top axis
+    limits = c(2, 10)
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL),  # Remove numbers on the right axis
+    limits = c(0, 0.12)
+  ) + 
+  scale_color_gradientn(colors = colors) +
+  scale_fill_gradientn(colors = colors) +
+  guides(fill = guide_legend(title = "Mean\nTemperature"), color = guide_legend(title = "Mean\nTemperature"))
+
+
+# Step 4: Plot with a straight line for the linear model
+h2b <- ggplot(model_data_recover, aes(x = mean_temp, y = crash)) +
+  geom_point(aes(fill = mean_temp), shape = 21, color = "black", stroke = 0.5, size = 4) +
+  geom_line(data = prediction_grid2, aes(x=mean_temp, y = predicted_crash, color = mean_temp), linewidth = 1) +
+  #geom_ribbon(aes(x = mean_temp, ymin = predicted_slope_values1[, "Q2.5"], ymax = predicted_slope_values1[, "Q97.5"]), fill = "gray", alpha = 0.2) +  # CI ribbon
+  scale_size_continuous(name = "Mean\nPopulation\nSize") +
+  labs(x = "Mean Temperature (\u00B0C)",
+       y = expression(Population~Crash~Severity~(1 - frac(minimum~count,maximum~count)))) +
+annotate("text", x = 5.7, 
+         y = 0.885, 
+         label = paste("Bayesian R² =", round(b2_crash, 4)), angle = 21,
+         hjust = 1, vjust = 1.5, size = 4, color = "black", fontface = "bold", family = "Times New Roman") +
+  theme_bw() +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    plot.background = element_rect(fill = "white"),
+    axis.ticks.length = unit(-0.1, "inches"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.x = element_line(),
+    axis.ticks.y = element_line(),
+    axis.title.x = element_text(margin = margin(t = 8), family = "Times New Roman", color = "black", size = 14),
+    axis.title.y = element_text(margin = margin(r = 8), family = "Times New Roman", color = "black", size = 14), 
+    axis.text.x = element_text(margin = margin(t = 8), family = "Times New Roman", color = "black", size = 14), 
+    axis.text.y = element_text(margin = margin(r = 8), family = "Times New Roman", color = "black", size = 14), 
+    axis.line = element_line(color = "black"),
+    legend.title = element_text(size = 14, family = "Times New Roman", color = "black"),      # Legend title font size
+    legend.position = c(0.84, 0.16), 
+    legend.text = element_text(size = 14, family = "Times New Roman", color = "black"),
+    legend.key.size = unit(0.5, "cm"),
+    legend.background = element_rect(fill = "white", color = "white"),
+    legend.key = element_rect(fill = "white", color = "white"),
+    panel.grid = element_blank()        # Legend text font size
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_color_gradientn(colors = colors) +
+  scale_fill_gradientn(colors = colors) +
+  guides(fill = guide_legend(title = "Mean\nTemperature"), color = guide_legend(title = "Mean\nTemperature"))
+
+
+h3 <- ggplot(im10, aes(x = mean_temp, y = props)) +
+  geom_point(aes(fill = mean_temp), shape = 21, alpha = 0.7, stroke = 0.5, size = 4) +  # Raw data points
+  geom_line(aes(x = mean_temp, y = fitted_values[, "Estimate"], color = mean_temp), linewidth = 1) +  # Fitted values line
+  geom_ribbon(aes(x = mean_temp, ymin = fitted_values[, "Q2.5"], ymax = fitted_values[, "Q97.5"]), fill = "gray", alpha = 0.2) +  # CI ribbon
+  labs(x = "Mean Temperature (\u00B0C)", y = "Proportion of Bats (After WNS - Before WNS)") +
+    annotate("text", x = 4.75, y = 0.0745, label = "Bayesian R² = 0.3325", 
+           hjust = 0, vjust = 0, angle = 332, size = 4, color = "black", fontface = "bold", family = "Times New Roman") +
+  theme_bw() +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    plot.background = element_rect(fill = "white"),
+    axis.ticks.length = unit(-0.1, "inches"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.x = element_line(),
+    axis.ticks.y = element_line(),
+    axis.title.x = element_text(margin = margin(t = 8), family = "Times New Roman", color = "black", size = 14),
+    axis.title.y = element_text(margin = margin(r = 8), family = "Times New Roman", color = "black", size = 14), 
+    axis.text.x = element_text(margin = margin(t = 8), family = "Times New Roman", color = "black", size = 14), 
+    axis.text.y = element_text(margin = margin(r = 8), family = "Times New Roman", color = "black", size = 14), 
+    axis.line = element_line(color = "black"),
+    legend.title = element_text(size = 14, family = "Times New Roman", color = "black"),      # Legend title font size
+    legend.text = element_text(size = 14, family = "Times New Roman", color = "black"),
+    panel.grid = element_blank(),        # Legend text font size
+    legend.position = c(0.85, 0.8),
+    legend.key.size = unit(0.5, "cm"),
+    legend.background = element_rect(fill = "white", color = "white"),
+    legend.key = element_rect(fill = "white", color = "white")
+  ) +
+  scale_x_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_y_continuous(
+    sec.axis = sec_axis(~ ., labels = NULL)
+  ) +
+  scale_color_gradientn(colors = colors) +
+  scale_fill_gradientn(colors = colors) +
+  guides(fill = guide_legend(title = "Mean\nTemperature"), color = guide_legend(title = "Mean\nTemperature"))
+
+combined_plot <- h1 + h2b + h2a + h3 +
+  plot_layout(ncol = 2) +  # Arrange plots in two columns
+  plot_annotation(
+    theme = theme(
+      plot.background = element_blank(),  # Remove background color from plot
+      plot.margin = margin(0, 0, 0, 0),   # No extra margin around the plots
+      panel.spacing = unit(0, "cm"),      # Remove space between plots
+      panel.grid.major = element_blank(), # Remove gridlines
+      panel.grid.minor = element_blank(), # Remove minor gridlines
+      axis.ticks = element_line(color = "white"),  # Adjust the axis tick color
+      axis.line = element_line(color = "white")    # Adjust axis line color
+    )
+  )
+
+# Optionally save the combined plot to a file
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/combined_plot.png", 
+plot = combined_plot, width = 12, height = 12, dpi = 300)
+
+ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter1/figures/proportion_bats_01.png", 
+plot = h3, width = 12, height = 12, dpi = 300)

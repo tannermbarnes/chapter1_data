@@ -180,7 +180,7 @@ loo_comparison1 <- loo_compare(loo_crash_null, loo_crash_model, loo_crash_model_
 
 # Create a summary table with ELPD, elpd_diff, and se_diff
 comparison_table1 <- data.frame(
-  ELPD = c(elpd_crash_model_linear, elpd_null_crash, elpd_crash_model, , elpd_crash_model1),
+  ELPD = c(elpd_crash_model_linear, elpd_null_crash, elpd_crash_model, elpd_crash_model1),
   elpd_diff = loo_comparison1[, "elpd_diff"],
   se_diff = loo_comparison1[, "se_diff"]
 )
@@ -475,3 +475,67 @@ ggsave("C:/Users/Tanner/OneDrive - Michigan Technological University/PhD/Chapter
        plot = plot4, width = 8, height = 6, dpi = 300)
 
 View(prop_long)
+
+# Hypothesis 3: Bayesian #########################################################################################################
+hypothesis3_simple <- brm(
+  formula = props ~ mean_temp,
+  data = im05,
+  family = gaussian(),
+  prior = c(
+    prior(normal(0, 10), class = "b"),
+    prior(normal(0, 10), class = "Intercept")
+  ),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+
+hypothesis3_quadratic <- brm(
+  formula = props ~ mean_temp + I(mean_temp^2),
+  data = im05,
+  family = gaussian(),
+  prior = c(
+    prior(normal(0, 10), class = "b"),
+    prior(normal(0, 10), class = "Intercept")
+  ),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99, max_treedepth = 15)
+)
+
+hypothesis3_null <- brm(
+  formula = props ~ 1,
+  data = im05,
+  family = gaussian(),
+  prior = c(
+    prior(normal(0, 10), class = "Intercept")
+  ),
+  chains = 4,
+  iter = 4000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.99)
+)
+
+simple <- brms::loo(hypothesis3_simple, moment_match = TRUE)
+quadratic <- brms::loo(hypothesis3_quadratic, moment_match = TRUE)
+null <- brms::loo(hypothesis3_null, moment_match = TRUE)
+
+# Extract ELPD values from each model
+elpd_simple <- simple$estimates["elpd_loo", "Estimate"]
+elpd_quadratic <- quadratic$estimates["elpd_loo", "Estimate"]
+elpd_null <- null$estimates["elpd_loo", "Estimate"]
+
+loo_comparison <- loo_compare(simple, quadratic, null)
+
+
+# Create a summary table with ELPD, elpd_diff, and se_diff
+comparison_table2 <- data.frame(
+  ELPD = c(elpd_simple, elpd_quadratic, elpd_null
+            ),
+  elpd_diff = loo_comparison[, "elpd_diff"],
+  se_diff = loo_comparison[, "se_diff"]
+)
+# Print the table
+print(comparison_table2)
